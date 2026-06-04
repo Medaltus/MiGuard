@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiGuard — Brand Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg:#F4F1EC;--bg2:#EDE8E3;--bg3:#FFFFFF;
+  --ink:#001F60;--ink2:#1A2E5A;--ink3:#6B7BA2;
+  --teal:#24E9A3;--teal-light:#E0FBF3;
+  --amber:#6B7BA2;--amber-light:#F4DFD0;
+  --rose:#B84040;--rose-light:#FAE8E8;
+  --navy:#001F60;--slate:#6B7BA2;
+  --green:#24E9A3;--sand:#F4DFD0;--silver:#CCD3D5;--amber-warm:#B8763A;
+  --border:rgba(0,31,96,0.12);--border2:rgba(0,31,96,0.07);
+  --font-serif:'Instrument Serif',Georgia,serif;
+  --font-sans:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:14px;line-height:1.6;}
+.site-header{background:var(--navy);padding:20px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.site-header .brand{font-family:var(--font-serif);font-size:22px;color:#F4F1EC;}
+.site-header .brand span{color:#E8A44A;}
+.api-row{display:flex;align-items:center;gap:10px;}
+.api-row label{font-size:11px;color:rgba(244,241,236,0.45);text-transform:uppercase;letter-spacing:0.08em;}
+.api-row input{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#fff;border-radius:6px;padding:6px 12px;font-size:12px;font-family:var(--font-mono);width:210px;}
+.api-row input::placeholder{color:rgba(244,241,236,0.22);}
+.tab-nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 40px;overflow-x:auto;}
+.tab-btn{background:none;border:none;border-bottom:3px solid transparent;padding:14px 20px;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;}
+.tab-btn:hover{color:var(--navy);}
+.tab-btn.active{color:var(--navy);border-bottom-color:var(--green);font-weight:600;}
+.page{display:none;padding:40px;max-width:1340px;margin:0 auto;}
+.page.active{display:block;}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:30px;}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+.card .lbl{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+.card .val{font-size:26px;font-weight:600;color:var(--ink);line-height:1;}
+.card .sub{font-size:12px;color:var(--ink3);margin-top:5px;}
+.card.good .val{color:var(--navy);}
+.card.warn .val{color:var(--amber-warm);}
+.card.bad .val{color:var(--rose);}
+
+/* Section */
+.sec{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:24px;}
+.sec-title{font-family:var(--font-serif);font-size:18px;color:var(--navy);margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--silver);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.badge{font-family:var(--font-sans);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 9px;border-radius:20px;}
+.bg-green{background:var(--teal-light);color:var(--navy);}
+.bg-amber{background:rgba(107,123,162,0.18);color:var(--navy);}
+.bg-red{background:var(--rose-light);color:var(--rose);}
+
+/* Tables */
+table.data{width:100%;border-collapse:collapse;font-size:13px;}
+table.data th{text-align:left;padding:9px 12px;background:var(--navy);color:var(--silver);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;}
+table.data td{padding:9px 12px;border-bottom:1px solid var(--border2);vertical-align:top;}
+table.data tr:last-child td{border-bottom:none;}
+table.data tr:hover td{background:var(--bg);}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-family:var(--font-mono);font-weight:500;}
+.pill-g{background:var(--teal-light);color:var(--navy);}
+.pill-a{background:rgba(107,123,162,0.18);color:var(--navy);}
+.pill-r{background:var(--rose-light);color:var(--rose);}
+.our td{background:#E0FBF3;font-weight:500;border-left:3px solid var(--green);}
+.threat-h{color:var(--rose);font-weight:600;}
+.threat-m{color:var(--amber);font-weight:600;}
+.threat-l{color:var(--navy);font-weight:600;}
+
+/* Chart */
+.chart-wrap{position:relative;height:260px;}
+
+/* Pulse */
+.pulse{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:14px;}
+.pulse-item{background:var(--bg);border-radius:10px;padding:16px;border-left:4px solid var(--border);}
+.pulse-item.g{border-left-color:var(--green);}
+.pulse-item.w{border-left-color:var(--amber);}
+.pulse-item.b{border-left-color:var(--rose);}
+.p-lbl{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;}
+.p-val{font-size:20px;font-weight:600;}
+.pulse-item.g .p-val{color:var(--navy);}
+.pulse-item.w .p-val{color:#9A6230;}
+.pulse-item.b .p-val{color:var(--rose);}
+.p-note{font-size:11px;color:var(--ink3);margin-top:4px;line-height:1.4;}
+
+/* Opps */
+.opp{border-left:3px solid var(--border);padding:14px 18px;margin-bottom:12px;border-radius:0 8px 8px 0;background:var(--bg);}
+.opp.oh{border-left-color:var(--rose);}
+.opp.om{border-left-color:var(--amber);}
+.opp.ol{border-left-color:var(--green);}
+.opp-hdr{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.opp-hdr .pri{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;}
+.oh .pri{color:var(--rose);}
+.om .pri{color:var(--amber);}
+.ol .pri{color:var(--navy);}
+.otag{font-size:10px;padding:2px 8px;border-radius:12px;background:var(--bg2);color:var(--ink3);}
+.obody{font-size:13px;color:var(--ink2);line-height:1.6;}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.chip{padding:5px 13px;border-radius:20px;font-size:12px;border:1px solid var(--border);background:var(--bg);color:var(--ink2);}
+.chip-g{background:var(--teal-light);border-color:transparent;color:var(--navy);}
+.chip-r{background:var(--rose-light);border-color:transparent;color:var(--rose);}
+.chip-a{background:rgba(107,123,162,0.15);border-color:transparent;color:var(--navy);}
+
+/* Two col */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+
+/* Alerts */
+.alert{background:var(--sand);border:1px solid rgba(0,31,96,0.2);border-radius:10px;padding:14px 20px;font-size:13px;color:var(--navy);margin-bottom:24px;display:flex;gap:10px;align-items:flex-start;}
+
+/* Analysis box */
+.abox{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:22px;min-height:120px;}
+.abox pre{white-space:pre-wrap;font-family:var(--font-sans);font-size:13.5px;line-height:1.75;color:var(--ink2);}
+
+/* Buttons */
+.btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-family:var(--font-sans);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
+.btn:hover{background:var(--slate);}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn2{background:transparent;color:var(--navy);border:1px solid var(--navy);border-radius:8px;padding:9px 18px;font-family:var(--font-sans);font-size:13px;cursor:pointer;margin-left:10px;}
+.btn2:hover{background:var(--sand);}
+.smsg{font-size:12px;margin-top:10px;min-height:18px;color:var(--ink3);}
+.ts{font-size:11px;color:var(--ink3);font-family:var(--font-mono);margin-top:8px;}
+
+/* Update form */
+.ug{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.ug textarea,.ug input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;min-height:78px;}
+.ulbl{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;}
+
+/* Listing bullets */
+.bullet-current{padding:12px 16px;border-left:3px solid var(--border2);margin-bottom:6px;font-size:13px;color:var(--ink2);background:var(--bg);border-radius:0 6px 6px 0;line-height:1.6;}
+.bullet-safe{padding:12px 16px;border-left:3px solid var(--green);margin-bottom:14px;font-size:13px;color:var(--navy);background:var(--teal-light);border-radius:0 6px 6px 0;line-height:1.6;}
+.blbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin-bottom:4px;}
+.safe-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--navy);margin-bottom:4px;}
+
+/* Review card */
+.rev-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;}
+.rev-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.rev-name{font-weight:500;font-size:13px;}
+.rev-stars{font-size:13px;}
+.s5{color:var(--navy);}
+.s3{color:var(--amber);}
+.s1{color:var(--rose);}
+.rev-title{font-style:italic;font-size:12px;color:var(--ink3);}
+.rev-body{font-size:13px;color:var(--ink2);line-height:1.65;}
+.rev-date{font-size:11px;color:var(--ink3);font-family:var(--font-mono);}
+
+/* SQP table */
+.sqp-wrap{overflow-x:auto;font-size:12.5px;}
+
+@media(max-width:900px){.two,.ug{grid-template-columns:1fr;}.site-header,.page{padding:16px 20px;}.tab-nav{padding:0 16px;}}
+/* ── INSIGHTS LOG ── */
+.log-entry{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:20px;position:relative;overflow:hidden;}
+.log-entry::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;}
+.log-entry.positive::before{background:var(--green);}
+.log-entry.mixed::before{background:var(--sand);}
+.log-entry.watch::before{background:rgba(184,64,64,0.5);}
+.log-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border2);flex-wrap:wrap;gap:10px;}
+.log-date{font-family:var(--font-mono);font-size:11px;color:var(--ink3);background:var(--bg2);padding:4px 10px;border-radius:20px;white-space:nowrap;}
+.log-title{font-family:var(--font-serif);font-size:17px;color:var(--navy);margin-bottom:4px;}
+.log-sources{display:flex;gap:8px;flex-wrap:wrap;}
+.log-source{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;padding:2px 9px;border-radius:20px;background:rgba(107,123,162,0.15);color:var(--navy);}
+.log-body{font-size:13.5px;color:var(--ink2);line-height:1.8;}
+.log-body p{margin-bottom:12px;}
+.log-body p:last-child{margin-bottom:0;}
+.log-body strong{color:var(--navy);}
+.log-metric-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:16px 0;}
+.log-metric{background:var(--bg);border-radius:8px;padding:12px 14px;}
+.lm-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--ink3);margin-bottom:5px;}
+.lm-val{font-size:18px;font-weight:600;color:var(--navy);line-height:1;}
+.lm-change{font-size:11px;margin-top:3px;}
+.lm-up{color:var(--green);font-weight:600;}
+.lm-down{color:var(--rose);}
+.lm-flat{color:var(--ink3);}
+.log-findings{margin-top:16px;}
+.log-finding{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border2);font-size:13px;color:var(--ink2);line-height:1.6;}
+.log-finding:last-child{border-bottom:none;}
+.fi{font-size:14px;flex-shrink:0;margin-top:1px;}
+.log-action{margin-top:16px;padding:12px 16px;border-radius:8px;font-size:13px;line-height:1.7;}
+.log-action.do{background:var(--teal-light);color:var(--navy);}
+.log-action.watch{background:var(--sand);color:var(--navy);}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand" style="display:flex;align-items:center;gap:14px;"><span style="color:#fff;font-family:var(--font-serif);font-size:22px;letter-spacing:0.02em;">MiGuard</span><span style="width:1px;height:22px;background:rgba(255,255,255,0.2);display:inline-block;"></span><span style="font-family:var(--font-sans);font-size:13px;font-weight:400;color:rgba(255,255,255,0.5);letter-spacing:0.04em;">Brand Dashboard</span></div>
+  <div class="api-row">
+    <label>API Key</label>
+    <input type="password" class="api-key-global" placeholder="sk-ant-…" />
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview',this)">Overview</button>
+  <button class="tab-btn" onclick="switchTab('product',this)">MiGuard</button>
+  <button class="tab-btn" onclick="switchTab('keywords',this)">Keywords</button>
+  <button class="tab-btn" onclick="switchTab('sqp',this)">Search Query</button>
+  <button class="tab-btn" onclick="switchTab('competitors',this)">Competitors</button>
+  <button class="tab-btn" onclick="switchTab('ppc',this)">PPC</button>
+  <button class="tab-btn" onclick="switchTab('listing',this)">Listing Audit</button>
+  <button class="tab-btn" onclick="switchTab('descbackend',this)">Description + Backend</button>
+  <button class="tab-btn" onclick="switchTab('reviews',this)">Reviews</button>
+  <button class="tab-btn" onclick="switchTab('insights',this)">Insights Log</button>
+</nav>
+
+<!-- ══ OVERVIEW ══ -->
+<div id="tab-overview" class="page active">
+  <div class="alert" style="background:var(--sand);border-color:rgba(0,31,96,0.2);color:var(--navy);">
+    <span style="font-size:16px;flex-shrink:0">⚠</span>
+    <span><strong>Ranking Alert:</strong> Of 68 tracked keywords, only ~8 show top-50 organic rank. Strong signals on exact long-tail terms ("natural supplements for migraine headaches" #1, "migraine supplement" #23) but zero presence on high-volume category terms like "migraine relief" (vol 269K) and "migraine" (71K). PPC and the listing updates just pushed are the primary levers. <strong style="color:var(--green);">↑ Conversion is trending up</strong> — Apr 12.3% is the highest in the last 4 months (Jan 10.6% → Feb 8.6% → Mar 10.2% → Apr 12.3%) — working toward the 15–20% category benchmark.</span>
+  </div>
+
+  <div class="cards">
+    <div class="card warn"><div class="lbl">Subcategory BSR</div><div class="val">#388</div><div class="sub">Pain Relief Homeopathic Remedies</div></div>
+    <div class="card"><div class="lbl">Sessions — Apr</div><div class="val">530</div><div class="sub">702 page views</div></div>
+    <div class="card warn"><div class="lbl">Unit Session %</div><div class="val">12.3%</div><div class="sub"><span style="color:var(--green);font-weight:700;">↑</span> Improving · target 15–20%</div></div>
+    <div class="card"><div class="lbl">Apr Units</div><div class="val">62</div><div class="sub">$2,477 sales</div></div>
+    <div class="card good"><div class="lbl">Buy Box %</div><div class="val">100%</div><div class="sub">B2B 100%</div></div>
+    <div class="card"><div class="lbl">Rating</div><div class="val">4.2 ★</div><div class="sub">48 reviews</div></div>
+    <div class="card good"><div class="lbl">Peak Month</div><div class="val">Jan '26</div><div class="sub">92 units · $3,375 revenue</div></div>
+    <div class="card good" style="border-left:3px solid var(--green);"><div class="lbl">Trend</div><div class="val" style="color:var(--navy);">↑ Growth</div><div class="sub"><span style="color:var(--green);font-weight:700;">↑</span> 13 units Jan '23 → 92 Jan '26</div></div>
+  </div>
+
+  <!-- Sales trend chart -->
+  <div class="sec">
+    <div class="sec-title">Monthly Performance — Jan 2023 – Apr 2026 <span class="badge bg-green">40 months</span></div>
+    <div class="chart-wrap" style="height:300px;"><canvas id="salesChart"></canvas></div>
+    <div style="display:flex;gap:24px;margin-top:14px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3);"><span style="width:28px;height:3px;background:rgba(0,31,96,0.8);display:inline-block;border-radius:2px;"></span> Units Ordered</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3);"><span style="width:28px;height:2px;background:rgba(107,123,162,0.9);display:inline-block;border-radius:2px;border-top:2px dashed rgba(107,123,162,0.9);"></span> Revenue</div>
+      <div style="display:flex;gap:20px;font-size:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:2px;background:rgba(36,233,163,0.95);display:inline-block;"></span><span style="color:var(--ink2);">All-time high</span></div>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:2px;background:rgba(0,31,96,0.75);display:inline-block;"></span><span style="color:var(--ink2);">Scale-up phase</span></div>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:2px;background:rgba(0,31,96,0.4);display:inline-block;"></span><span style="color:var(--ink2);">Early growth</span></div>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:2px;background:rgba(107,123,162,0.5);display:inline-block;"></span><span style="color:var(--ink2);">Baseline</span></div>
+      </div>
+      <div style="margin-left:auto;font-size:12px;color:var(--ink3);"><span style="color:var(--green);font-weight:700;">●</span> All-time highs: <strong style="color:var(--navy);">Jul '25 · Oct '25 · Jan '26</strong> &nbsp;|&nbsp; <span style="color:var(--green);font-weight:700;">↑</span> Scale-up from <strong style="color:var(--navy);">Jun '25</strong> &nbsp;|&nbsp; <span style="color:rgba(107,123,162,0.9);font-weight:600;">●</span> Listing updated <strong style="color:var(--navy);">Feb '25</strong></div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="sec">
+      <div class="sec-title">Brand at a Glance</div>
+      <p style="font-size:13.5px;color:var(--ink2);line-height:1.85;">
+        MiGuard is a daily migraine prevention supplement formulated by <strong>Dr. Benjamin Taimoorazy</strong>, headache sub-specialist. 
+        Six-ingredient stack (Riboflavin B2 · Magnesium · CoQ10 · Alpha-Lipoic Acid · Feverfew · Ginger) 
+        differentiates it from the 3-ingredient competitors that dominate the category. 
+        Backed by a retrospective comparative clinical study. 
+        <strong>Vegan · Non-GMO · Gluten-Free · GMP-Certified.</strong>
+      </p>
+      <div class="chips" style="margin-top:16px;">
+        <span class="chip chip-g">6-ingredient stack</span>
+        <span class="chip chip-g">Headache sub-specialist</span>
+        <span class="chip chip-g">Clinical study</span>
+        <span class="chip chip-g">Vegan · Non-GMO · GF</span>
+        <span class="chip chip-g">GMP certified</span>
+        <span class="chip chip-a">48 reviews — build needed</span>
+        <span class="chip chip-g">● 12.3% conv — improving ↑ · target 15–20%</span>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">SQP Signal Summary — Q4 2025 + Q3 2025</div>
+      <table class="data">
+        <thead><tr><th>Query</th><th>Q4 Vol</th><th>Brand Share</th><th>Q4 Purchases</th></tr></thead>
+        <tbody>
+          <tr><td>miguard supplement</td><td>144</td><td><span class="pill pill-g">100%</span></td><td>14</td></tr>
+          <tr><td>miguard headache relief</td><td>254</td><td><span class="pill pill-g">100%</span></td><td>7</td></tr>
+          <tr><td>migraine supplement</td><td>219K</td><td><span class="pill pill-a">0.12%</span></td><td>2</td></tr>
+          <tr><td>natural migraine relief</td><td>—</td><td><span class="pill pill-a">~0%</span></td><td>—</td></tr>
+          <tr><td>migraine prevention supplement</td><td>38K</td><td><span class="pill pill-a">2.67%</span></td><td>2</td></tr>
+          <tr><td>migraine relief</td><td>269K</td><td><span class="pill pill-r">0.07%</span></td><td>3</td></tr>
+          <tr><td>migraine</td><td>—</td><td><span class="pill pill-r">~0%</span></td><td>0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRODUCT ══ -->
+<div id="tab-product" class="page">
+  <div class="sec">
+    <div class="sec-title">Pulse — April 2026 <span class="badge bg-amber">Current Period</span></div>
+    <div class="pulse">
+      <div class="pulse-item w"><div class="p-lbl">BSR</div><div class="p-val">#388</div><div class="p-note">Pain Relief Homeopathic Remedies<br>#158,713 overall</div></div>
+      <div class="pulse-item"><div class="p-lbl">Sessions</div><div class="p-val">530</div><div class="p-note">702 page views</div></div>
+      <div class="pulse-item"><div class="p-lbl">Units</div><div class="p-val">62</div><div class="p-note">$2,476 in sales</div></div>
+      <div class="pulse-item w" style="border-left-color:var(--green);"><div class="p-lbl">Unit Session %</div><div class="p-val" style="color:var(--navy);">12.3% <span style="font-size:14px;color:var(--green);">↑</span></div><div class="p-note" style="color:var(--green);font-weight:500;">Improving — Jan 10.6% → Feb 8.6% → Mar 10.2% → Apr 12.3%</div></div>
+      <div class="pulse-item g"><div class="p-lbl">Buy Box %</div><div class="p-val">100%</div><div class="p-note">B2B 100%</div></div>
+      <div class="pulse-item"><div class="p-lbl">Rating</div><div class="p-val">4.2 ★</div><div class="p-note">48 reviews</div></div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="sec">
+      <div class="sec-title">Formula — Active Ingredients</div>
+      <div style="font-size:13px;color:var(--ink2);line-height:1.9;">
+        <strong>Riboflavin (Vitamin B2)</strong> — mitochondrial energy; 400mg clinically studied for migraine prevention<br>
+        <strong>Magnesium</strong> — neurological function; deficiency linked to migraine susceptibility<br>
+        <strong>Coenzyme Q10 (CoQ10)</strong> — mitochondrial energy production; studied at 100–300mg<br>
+        <strong>Alpha-Lipoic Acid</strong> — antioxidant; unique differentiator vs. nearly all competitors<br>
+        <strong>Feverfew (Tanacetum parthenium)</strong> — cerebrovascular tone; traditional migraine herb<br>
+        <strong>Ginger (Zingiber officinale)</strong> — nausea support; anti-nociceptive<br><br>
+        <span style="font-size:12px;color:var(--ink3);">Vegan · Non-GMO · Gluten-Free · GMP-Certified</span>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">Competitive Positioning</div>
+      <div style="font-size:13.5px;color:var(--ink2);line-height:1.85;">
+        <strong>6 vs 3 ingredients</strong> — most competitors use Mag + B2 + Feverfew. MiGuard adds CoQ10, Alpha-Lipoic Acid, and Ginger.<br><br>
+        <strong>Doctor-named credential</strong> — sub-specialist specificity far exceeds generic "neurologist-recommended" claims.<br><br>
+        <strong>Clinical study</strong> — retrospective comparative study at 90 days. No other early-stage competitor in this range can claim this.<br><br>
+        <strong>Same price as Dolovent ($39.95)</strong> — US-made, doctor-named, broader formula.
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Opportunities -->
+  <div class="sec">
+    <div class="sec-title">Priority Opportunities <span class="badge bg-green">AI-Generated</span></div>
+    <div id="opp-out">
+
+      <div class="opp oh"><div class="opp-hdr"><span class="pri">High</span><span class="otag">PPC / Keywords</span></div><div class="obody"><strong>Launch exact-match PPC on "migraine supplement" (rank #23, vol 1,173/mo, 33.3% ABA) and "migraine prevention supplement" (rank #23, 62.5% ABA).</strong> Q4 SQP shows you already got 2 purchases on "migraine supplement" organically — PPC will lock this in and push to page 1. These are your two highest-intent, near-page-1 opportunities. Budget $5–8/day per keyword as a starting point.</div></div>
+
+      <div class="opp om"><div class="opp-hdr"><span class="pri">Medium</span><span class="otag">Listing / Conversion</span></div><div class="obody"><strong><span style="color:var(--green);">↑</span> Unit session % is trending up — Apr 12.3% is the highest in the last 4 months (Jan 10.6% → Feb 8.6% → Mar 10.2% → Apr 12.3%).</strong> Direction is right. The listing updates just pushed should accelerate this further. Next target is 15% — at April's session volume (530 sessions), that's ~80 units/month vs. 65 today. The clinical study mention now in B5 and the doctor credential leading B1 are the most likely drivers of the next conversion step-up.</div></div>
+      <div class="opp om"><div class="opp-hdr"><span class="pri">Medium</span><span class="otag">PPC / Opportunity</span></div><div class="obody"><strong>Add "migraine vitamin supplement" (#27, 546/mo, 46.2% ABA) and "migraine supplements for women" (#28, 558/mo, 37.5% ABA) to PPC.</strong> You are organically near page 1 on both — adding sponsored coverage converts the sessions you're already getting. Both have above-average ABA conversion, indicating high purchase intent. Q4 SQP Q3 data shows "migraine vitamin supplement" at 26,304 vol with 4.57% cart adds.</div></div>
+    </div>
+    <div id="opp-status" class="smsg"></div>
+  </div>
+
+  <!-- Update panel -->
+  <div class="sec">
+    <div class="sec-title">Update Data + Regenerate Insights</div>
+    <div class="ug">
+      <div><div class="ulbl">BSR Update</div><input type="text" id="upd-bsr" placeholder="#388 in Pain Relief Homeopathic Remedies" style="min-height:auto;" /></div>
+      <div><div class="ulbl">Business Report (Sessions / Units / Conv% / Buy Box)</div><textarea id="upd-biz" rows="3" placeholder="Sessions: 530&#10;Units: 62&#10;Unit Session %: 11.70%&#10;Buy Box: 100%"></textarea></div>
+      <div><div class="ulbl">Keyword Updates</div><textarea id="upd-kw" rows="3" placeholder="migraine supplement, 23, 1173&#10;migraine prevention supplement, 23, 465"></textarea></div>
+      <div><div class="ulbl">New Reviews</div><textarea id="upd-rev" rows="3" placeholder="Paste any new review text here…"></textarea></div>
+    </div>
+    <button class="btn" id="analyze-btn" onclick="runAnalysis()">Analyze + Regenerate Insights</button>
+    <button class="btn2" id="copy-opp-btn" style="display:none" onclick="copyEl('opp-out','copy-opp-btn')">Copy Report</button>
+    <div id="analyze-status" class="smsg"></div>
+    <div class="ts" id="last-analyzed"></div>
+  </div>
+</div>
+
+<!-- ══ KEYWORDS ══ -->
+<div id="tab-keywords" class="page">
+  <div class="sec">
+    <div class="sec-title">Tier 1 — Core High-Intent <span class="badge bg-green">All PPC targets</span></div>
+    <table class="data">
+      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>Organic Rank</th><th>ABA Conv%</th><th>Competing</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>migraine supplement</td><td>1,173</td><td><span class="pill pill-g">#23</span></td><td>33.3%</td><td>&gt;2,000</td><td>✅ PPC + title position 1</td></tr>
+        <tr><td>migraine prevention supplement</td><td>465</td><td><span class="pill pill-g">#23</span></td><td>62.5%</td><td>—</td><td>✅ PPC + title</td></tr>
+        <tr><td>migraine vitamin supplement</td><td>546</td><td><span class="pill pill-g">#27</span></td><td>46.2%</td><td>—</td><td>✅ PPC + bullet 2</td></tr>
+        <tr><td>migraine supplements for women</td><td>558</td><td><span class="pill pill-g">#28</span></td><td>37.5%</td><td>—</td><td>✅ PPC + bullet</td></tr>
+        <tr><td>migraine prevention</td><td>455</td><td><span class="pill pill-g">#26</span></td><td>14.3%</td><td>—</td><td>✅ Backend + PPC</td></tr>
+        <tr><td>natural migraine relief</td><td>485</td><td><span class="pill pill-g">#35</span></td><td>14.3%</td><td>—</td><td>✅ PPC + bullets</td></tr>
+        <tr><td>migraine vitamins</td><td>551</td><td><span class="pill pill-g">#46</span></td><td>25.0%</td><td>—</td><td>✅ PPC secondary</td></tr>
+        <tr><td>migraine relief pills</td><td>622</td><td><span class="pill pill-g">#41</span></td><td>33.3%</td><td>491</td><td>✅ Near page 1 — PPC</td></tr>
+        <tr><td>migraine pills</td><td>627</td><td><span class="pill pill-g">#42</span></td><td>35.7%</td><td>380</td><td>✅ Near page 1 — PPC</td></tr>
+        <tr><td>migraine relief supplements</td><td>390</td><td><span class="pill pill-g">#22</span></td><td>0.0%</td><td>—</td><td>✅ PPC test</td></tr>
+        <tr><td>drug free migraine relief</td><td>—</td><td><span class="pill pill-g">#15</span></td><td>0.0%</td><td>—</td><td>✅ Brand fit — PPC</td></tr>
+        <tr><td>migraine vitamins for women</td><td>153</td><td><span class="pill pill-g">#15</span></td><td>0.0%</td><td>—</td><td>✅ Near page 1 — PPC</td></tr>
+        <tr><td>migraine preventative</td><td>22</td><td><span class="pill pill-g">#15</span></td><td>0.0%</td><td>—</td><td>✅ Page 1 already — PPC</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sec">
+    <div class="sec-title">Tier 2 — Opportunity Keywords <span class="badge bg-amber">Winnable, low competition</span></div>
+    <table class="data">
+      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>Organic Rank</th><th>ABA Conv%</th><th>Competing</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>feverfew for migraines</td><td>669</td><td><span class="pill pill-g">#80</span></td><td>25.0%</td><td>145</td><td>🎯 Low comp — PPC win</td></tr>
+        <tr><td>migraine relief capsules</td><td>295</td><td><span class="pill pill-g">#55</span></td><td>0.0%</td><td>217</td><td>🎯 PPC + backend</td></tr>
+        <tr><td>vitamin b2 and magnesium migraine</td><td>642</td><td><span class="pill pill-a">#119</span></td><td>23.1%</td><td>—</td><td>🎯 Specific intent — PPC</td></tr>
+        <tr><td>migraine headache relief</td><td>341</td><td><span class="pill pill-a">#121</span></td><td>0.0%</td><td>—</td><td>🎯 Build + PPC</td></tr>
+        <tr><td>natural headache relief</td><td>612</td><td><span class="pill pill-g">#69</span></td><td>23.1%</td><td>&gt;5,000</td><td>⚠ High comp — test low bid</td></tr>
+        <tr><td>homeopathic headache relief</td><td>649</td><td><span class="pill pill-r">&gt;306</span></td><td>44.5%</td><td>—</td><td>🎯 BSR subcategory match</td></tr>
+        <tr><td>magnesium for migraines</td><td>654</td><td><span class="pill pill-r">&gt;306</span></td><td>34.8%</td><td>&gt;1,000</td><td>🎯 High ABA — backend first</td></tr>
+        <tr><td>migraine relief medication</td><td>988</td><td><span class="pill pill-r">&gt;306</span></td><td>58.1%</td><td>&gt;1,000</td><td>🎯 Highest ABA in set — test</td></tr>
+        <tr><td>migrane relief (misspelling)</td><td>302</td><td><span class="pill pill-a">#295</span></td><td>62.5%</td><td>—</td><td>🎯 Misspelling — very high ABA</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sec">
+    <div class="sec-title">Tier 3 — Reach Targets <span class="badge bg-red">Track only — no PPC yet</span></div>
+    <table class="data">
+      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>Rank</th><th>ABA%</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>magnesium</td><td>539,259</td><td><span class="pill pill-r">&gt;306</span></td><td>27.9%</td><td>Dominated by standalone Mg brands. 24-mo target.</td></tr>
+        <tr><td>migraine relief</td><td>26,407</td><td><span class="pill pill-r">&gt;306</span></td><td>27.3%</td><td>OTC drugs dominate. Q4 SQP: 269K vol, 0.07% brand share.</td></tr>
+        <tr><td>coenzyme q10</td><td>12,276</td><td><span class="pill pill-r">&gt;306</span></td><td>30.1%</td><td>Cross-category — add to backend search terms.</td></tr>
+        <tr><td>vitamin b2</td><td>11,947</td><td><span class="pill pill-r">&gt;306</span></td><td>57.1%</td><td>High ABA, massive competition. 18-mo target.</td></tr>
+        <tr><td>migraine</td><td>7,534</td><td><span class="pill pill-r">&gt;306</span></td><td>21.9%</td><td>Q3 SQP: 71K vol, 0.05% brand share. Long-term.</td></tr>
+        <tr><td>migraine medicine</td><td>4,792</td><td><span class="pill pill-r">&gt;306</span></td><td>55.1%</td><td>OTC drug positioning blocks entry now.</td></tr>
+        <tr><td>riboflavin</td><td>8,942</td><td><span class="pill pill-r">&gt;306</span></td><td>48.0%</td><td>Add to backend. PPC test at 12 months.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ SEARCH QUERY PERFORMANCE ══ -->
+<div id="tab-sqp" class="page">
+  <div class="alert">
+    <span style="font-size:16px;flex-shrink:0;">📊</span>
+    <span><strong>Search Query Performance data — Q4 2025 (top) and Q3 2025 (bottom).</strong> This is brand-level data from Seller Central showing where MiGuard appears in the search funnel and what % of category purchases it captures. Brand Share = MiGuard's clicks or purchases as % of total for that keyword.</span>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">Q4 2025 — Top Search Queries <span class="badge bg-amber">Oct–Dec 2025</span></div>
+    <div class="sqp-wrap">
+    <table class="data">
+      <thead><tr><th>Rank</th><th>Search Query</th><th>Vol</th><th>Brand Share (Clicks)</th><th>Brand Share (Purchases)</th><th>Total Purchases</th><th>Brand Purchases</th><th>Insight</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>miguard headache and migraine relief</td><td>254</td><td><span class="pill pill-g">60%</span></td><td><span class="pill pill-g">100%</span></td><td>14</td><td>14</td><td>Brand term — owns it</td></tr>
+        <tr><td>2</td><td>migraine supplement</td><td>219,482</td><td><span class="pill pill-a">3.23%</span></td><td><span class="pill pill-a">0.72%</span></td><td>279</td><td>2</td><td>⚡ High priority PPC — massive vol</td></tr>
+        <tr><td>3</td><td>migraine relief</td><td>269,660</td><td><span class="pill pill-r">0.07%</span></td><td><span class="pill pill-r">0.02%</span></td><td>13,661</td><td>3</td><td>Category leader term — long-term</td></tr>
+        <tr><td>4</td><td>miguard</td><td>194</td><td><span class="pill pill-g">55.67%</span></td><td><span class="pill pill-g">100%</span></td><td>7</td><td>7</td><td>Brand term — owns it</td></tr>
+        <tr><td>5</td><td>migraine prevention</td><td>2,091</td><td><span class="pill pill-a">2.67%</span></td><td><span class="pill pill-a">3.57%</span></td><td>56</td><td>2</td><td>✅ Good signal — PPC here</td></tr>
+        <tr><td>6</td><td>migraine relief products</td><td>116,800</td><td><span class="pill pill-r">0.05%</span></td><td><span class="pill pill-r">0.02%</span></td><td>4,337</td><td>1</td><td>Too broad — backend only</td></tr>
+        <tr><td>7</td><td>migraine prevention supplement</td><td>38,183</td><td><span class="pill pill-a">4.16%</span></td><td><span class="pill pill-a">1.3%</span></td><td>77</td><td>1</td><td>⚡ High priority PPC target</td></tr>
+        <tr><td>8</td><td>natural migraine relief</td><td>2,657</td><td><span class="pill pill-a">2.39%</span></td><td><span class="pill pill-a">0.8%</span></td><td>125</td><td>1</td><td>✅ PPC candidate</td></tr>
+        <tr><td>9</td><td>migraine supplements prevention</td><td>1,184</td><td><span class="pill pill-a">1.75%</span></td><td><span class="pill pill-a">2.13%</span></td><td>47</td><td>1</td><td>✅ PPC candidate</td></tr>
+        <tr><td>10</td><td>migraine relief supplements</td><td>1,015</td><td><span class="pill pill-a">4.7%</span></td><td><span class="pill pill-a">4.14%</span></td><td>42</td><td>0</td><td>⚡ Good click share — add PPC</td></tr>
+        <tr><td>11</td><td>migraine relief supplement</td><td>552</td><td><span class="pill pill-a">2.92%</span></td><td><span class="pill pill-a">1.64%</span></td><td>61</td><td>1</td><td>✅ Target</td></tr>
+        <tr><td>13</td><td>migravent migraine relief</td><td>1,768</td><td><span class="pill pill-r">0.12%</span></td><td><span class="pill pill-r">0.47%</span></td><td>212</td><td>1</td><td>Competitor brand — defensive</td></tr>
+        <tr><td>16</td><td>miguard supplement</td><td>17</td><td><span class="pill pill-g">100%</span></td><td><span class="pill pill-g">100%</span></td><td>1</td><td>1</td><td>Brand — owns it</td></tr>
+        <tr><td>17</td><td>migraine supplements for women</td><td>920</td><td><span class="pill pill-a">2.19%</span></td><td><span class="pill pill-a">2.56%</span></td><td>39</td><td>1</td><td>⚡ Women's angle — PPC</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">Q3 2025 — Top Search Queries <span class="badge bg-amber">Jul–Sep 2025</span></div>
+    <div class="sqp-wrap">
+    <table class="data">
+      <thead><tr><th>Rank</th><th>Search Query</th><th>Vol</th><th>Brand Share (Clicks)</th><th>Brand Share (Purchases)</th><th>Total Purchases</th><th>Brand Purchases</th><th>Insight</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>miguard headache and migraine relief</td><td>159</td><td><span class="pill pill-g">77%</span></td><td><span class="pill pill-g">83.33%</span></td><td>24</td><td>20</td><td>Brand term</td></tr>
+        <tr><td>3</td><td>migraine supplement</td><td>196,958</td><td><span class="pill pill-a">2.01%</span></td><td><span class="pill pill-a">1.47%</span></td><td>273</td><td>4</td><td>⚡ 4 purchases Q3 vs 2 Q4 — trend watch</td></tr>
+        <tr><td>4</td><td>migraine relief</td><td>218,010</td><td><span class="pill pill-r">0.04%</span></td><td><span class="pill pill-r">0.01%</span></td><td>13,409</td><td>2</td><td>Category — long-term</td></tr>
+        <tr><td>7</td><td>migraine prevention supplement</td><td>43,570</td><td><span class="pill pill-a">3.36%</span></td><td><span class="pill pill-a">3.57%</span></td><td>56</td><td>2</td><td>⚡ High intent — PPC</td></tr>
+        <tr><td>9</td><td>migraine</td><td>71,018</td><td><span class="pill pill-r">0.07%</span></td><td><span class="pill pill-r">0.01%</span></td><td>2,944</td><td>1</td><td>Tier 3 — too competitive now</td></tr>
+        <tr><td>10</td><td>migraine prevention</td><td>2,280</td><td><span class="pill pill-a">2.85%</span></td><td><span class="pill pill-a">1.61%</span></td><td>62</td><td>1</td><td>✅ PPC target</td></tr>
+        <tr><td>14</td><td>migraine vitamin supplement</td><td>26,304</td><td><span class="pill pill-a">1.16%</span></td><td><span class="pill pill-a">2.38%</span></td><td>42</td><td>1</td><td>⚡ Good ratio — PPC priority</td></tr>
+        <tr><td>17</td><td>migradex migraine relief</td><td>445</td><td><span class="pill pill-a">6.98%</span></td><td><span class="pill pill-a">0.67%</span></td><td>3</td><td>0</td><td>Competitor term — monitor</td></tr>
+        <tr><td>19</td><td>natural migraine relief</td><td>2,180</td><td><span class="pill pill-a">1.52%</span></td><td><span class="pill pill-a">4.59%</span></td><td>100</td><td>1</td><td>⚡ 4.59% purchase share — strong signal</td></tr>
+        <tr><td>20</td><td>migrel for migraines</td><td>13,441</td><td><span class="pill pill-r">0.04%</span></td><td><span class="pill pill-r">0%</span></td><td>1,938</td><td>0</td><td>Competitor brand (MigreLief)</td></tr>
+        <tr><td>24</td><td>miguard supplement</td><td>10</td><td><span class="pill pill-g">50%</span></td><td><span class="pill pill-g">100%</span></td><td>1</td><td>1</td><td>Brand term</td></tr>
+        <tr><td>25</td><td>excedrin headcare</td><td>175</td><td><span class="pill pill-a">2.49%</span></td><td><span class="pill pill-a">40%</span></td><td>5</td><td>2</td><td>Cross-buys from OTC users — opportunity</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">SQP Key Takeaways</div>
+    <div style="font-size:13.5px;color:var(--ink2);line-height:1.9;max-width:860px;">
+      <strong>1. "Migraine supplement" is your #1 commercial priority.</strong> 196K–219K search volume, 2–4 purchases per quarter, 1.5–2% brand share. Every ranking point here is worth dozens of units per month. This keyword should be in position 1 of your title.<br><br>
+      <strong>2. "Natural migraine relief" has disproportionate purchase share.</strong> <span style="color:var(--green);font-weight:600;">↑</span> Q3 shows 4.59% purchase share on a term where you have minimal click share — meaning the people who do find you on this keyword convert at an unusually high rate. PPC here would be highly efficient.<br><br>
+      <strong>3. "Excedrin" crossover buyers purchased MiGuard.</strong> Q3 SQP shows 2 MiGuard purchases attributed to "excedrin headcare" searches — buyers looking for OTC relief are open to your supplement. Backend search terms should include "drug free alternative" and "natural alternative to excedrin."<br><br>
+      <strong>4. Brand protection is solid.</strong> You own 100% of brand-term purchases. Protect the brand term with PPC just in case competitors start bidding on it.
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPETITORS ══ -->
+<div id="tab-competitors" class="page">
+  <div class="sec">
+    <div class="sec-title">Current Competitors — Early-Stage Peers</div>
+    <div style="overflow-x:auto;">
+    <table class="data">
+      <thead><tr><th>ASIN</th><th>Brand / Product</th><th>Price</th><th>Rating</th><th>Reviews</th><th>Est. Mo. Sales</th><th>BSR</th><th>Threat</th><th>Key Edge vs MiGuard</th></tr></thead>
+      <tbody>
+        <tr class="our"><td style="font-family:var(--font-mono);font-size:11px;">B0B9187Q4P</td><td><strong>MiGuard</strong> — 60 caps</td><td>$39.95</td><td>4.2 ★</td><td>48</td><td>~67</td><td>#388</td><td>—</td><td>6-ingredient, doctor-formulated, clinical study</td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B07WGPGKHN</td><td>MigreLief Original — 60 caplets</td><td>$29.99</td><td>4.2 ★</td><td>5,210</td><td>~3,500</td><td>#923</td><td><span class="threat-h">HIGH</span></td><td>30-yr brand, 100x reviews, $10 cheaper</td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B09B8V315N</td><td>Migrastil Roll-On — 3ml</td><td>$14.95</td><td>4.4 ★</td><td>3,847</td><td>~2,800</td><td>#1,842</td><td><span class="threat-h">HIGH</span></td><td>Topical format, impulse price, cult following</td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B084HWY2X9</td><td>Headache Relief Guide — 90 caps</td><td>$19.99</td><td>4.3 ★</td><td>2,109</td><td>~1,600</td><td>#2,188</td><td><span class="threat-m">MED</span></td><td>Cheapest per-serving, 45-day supply</td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B07SR8LWPB</td><td>Zhou Calm Now — 60 caps</td><td>$22.95</td><td>4.3 ★</td><td>6,780</td><td>~4,100</td><td>#1,105</td><td><span class="threat-m">MED</span></td><td>Adaptogen stack, stress/headache crossover, 6K reviews</td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B085T5V2GH</td><td>Pure Encapsulations — 60 caps</td><td>$42.80</td><td>4.5 ★</td><td>1,920</td><td>~1,450</td><td>#2,750</td><td><span class="threat-m">MED</span></td><td>Hypoallergenic, Petadolex butterbur, practitioner trust</td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B07BDQWHLG</td><td>Life Extension — 60 softgels</td><td>$27.00</td><td>4.4 ★</td><td>1,105</td><td>~820</td><td>#3,190</td><td><span class="threat-m">MED</span></td><td>CoQ10-forward, Life Extension brand equity</td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B09NF7R4KH</td><td>Natralite Herbal — 60 caps</td><td>$18.99</td><td>4.0 ★</td><td>620</td><td>~480</td><td>#6,312</td><td><span class="threat-l">LOW</span></td><td>Herbal/botanical positioning, budget</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-title">Category Leaders — Benchmark Targets</div>
+    <div style="overflow-x:auto;">
+    <table class="data">
+      <thead><tr><th>ASIN</th><th>Product</th><th>Price</th><th>Reviews</th><th>BSR</th><th>Threat</th></tr></thead>
+      <tbody>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B07C3RJSH8</td><td>Excedrin Migraine 200ct</td><td>$22.49</td><td>48,200</td><td>#3</td><td><span class="threat-h">HIGH</span></td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B00HHRGBAK</td><td>Advil Liqui-Gels 200ct</td><td>$19.99</td><td>32,100</td><td>#8</td><td><span class="threat-h">HIGH</span></td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B07PX2FT52</td><td>MigreLief+M Menstrual</td><td>$34.99</td><td>7,840</td><td>#412</td><td><span class="threat-h">HIGH</span></td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B0798S5RFW</td><td>Migrastil Pro 10ml</td><td>$19.95</td><td>8,350</td><td>#287</td><td><span class="threat-h">HIGH</span></td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B00ENQGWX0</td><td>Dolovent 60 caps (Germany)</td><td>$39.95</td><td>4,180</td><td>#1,045</td><td><span class="threat-h">HIGH</span></td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B01LCZHQ28</td><td>Natural Vitality CALM Powder</td><td>$34.95</td><td>89,400</td><td>#12 Magnesium</td><td><span class="threat-h">HIGH</span></td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B08RJQ2PX4</td><td>Thorne Magnesium Bisglycinate</td><td>$28.00</td><td>14,300</td><td>#115 Magnesium</td><td><span class="threat-m">MED</span></td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">B00N13PX90</td><td>NOW Foods Magnesium Citrate 250ct</td><td>$14.99</td><td>25,600</td><td>#48 Magnesium</td><td><span class="threat-m">MED</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LISTING AUDIT ══ -->
+<!-- ══ PPC ══ -->
+<div id="tab-ppc" class="page">
+
+  <div class="alert" style="background:var(--rose-light);border-color:rgba(184,64,64,0.3);color:#7A1F1F;">
+    <span style="font-size:16px;flex-shrink:0;">🚨</span>
+    <span><strong>May 2026 PPC is significantly underperforming.</strong> $190 spend generated only 3 orders at 158% ACoS. The core problem is structural — three high-ROAS brand keywords that drove most November revenue were dropped, replaced by 87 new targets (mostly ASIN product targeting) that generated zero sales. The campaign needs restructuring before increasing budget.</span>
+  </div>
+
+  <!-- Summary comparison -->
+  <div class="cards">
+    <div class="card bad"><div class="lbl">May ACoS</div><div class="val">158%</div><div class="sub">Was 77% in Nov 2025</div></div>
+    <div class="card bad"><div class="lbl">May ROAS</div><div class="val">0.63x</div><div class="sub">Was 1.30x in Nov · losing money</div></div>
+    <div class="card bad"><div class="lbl">May Orders</div><div class="val">3</div><div class="sub">Was 17 in Nov (-82%)</div></div>
+    <div class="card warn"><div class="lbl">May Spend</div><div class="val">$190</div><div class="sub">Was $505 in Nov (-62%)</div></div>
+    <div class="card bad"><div class="lbl">May Conv%</div><div class="val">2.2%</div><div class="sub">Was 6.7% in Nov</div></div>
+    <div class="card warn"><div class="lbl">Keywords Active</div><div class="val">99</div><div class="sub">Was 68 in Nov — more, worse</div></div>
+  </div>
+
+  <div class="two">
+    <!-- Nov 2025 -->
+    <div class="sec">
+      <div class="sec-title">November 2025 — Baseline <span class="badge bg-amber">Pre-listing update</span></div>
+      <table class="data">
+        <thead><tr><th>Keyword</th><th>Spend</th><th>Sales</th><th>ACoS</th><th>ROAS</th><th>Orders</th></tr></thead>
+        <tbody>
+          <tr class="our"><td>miguard headache and migraine relief</td><td>$37.67</td><td>$231.71</td><td><span class="pill pill-g">16.3%</span></td><td>6.15x</td><td>6</td></tr>
+          <tr class="our"><td>miguard</td><td>$1.11</td><td>$39.95</td><td><span class="pill pill-g">2.8%</span></td><td>35.99x</td><td>1</td></tr>
+          <tr class="our"><td>miguard migraine and head ache relief</td><td>$11.02</td><td>$31.96</td><td><span class="pill pill-g">34.5%</span></td><td>2.90x</td><td>1</td></tr>
+          <tr class="our"><td>strong migraine pills</td><td>$2.62</td><td>$39.95</td><td><span class="pill pill-g">6.6%</span></td><td>15.24x</td><td>1</td></tr>
+          <tr class="our"><td>migraine relief products</td><td>$4.74</td><td>$39.95</td><td><span class="pill pill-g">11.9%</span></td><td>8.42x</td><td>1</td></tr>
+          <tr class="our"><td>migraine relief</td><td>$9.76</td><td>$39.95</td><td><span class="pill pill-g">24.4%</span></td><td>4.09x</td><td>1</td></tr>
+          <tr><td>migraine supplement</td><td>$97.34</td><td>$151.81</td><td><span class="pill pill-a">64.1%</span></td><td>1.55x</td><td>4</td></tr>
+          <tr><td>migraine prevention supplement</td><td>$49.11</td><td>$39.95</td><td><span class="pill pill-r">122.9%</span></td><td>0.81x</td><td>1</td></tr>
+          <tr><td>migraine prevention</td><td>$47.77</td><td>$39.95</td><td><span class="pill pill-r">119.6%</span></td><td>0.83x</td><td>1</td></tr>
+          <tr><td style="color:var(--rose);">migraine supplements prevention</td><td>$43.37</td><td>$0</td><td>—</td><td>—</td><td>0</td></tr>
+          <tr><td style="color:var(--rose);">natural migraine relief</td><td>$33.08</td><td>$0</td><td>—</td><td>—</td><td>0</td></tr>
+          <tr><td style="color:var(--rose);">migraine relief supplements</td><td>$22.10</td><td>$0</td><td>—</td><td>—</td><td>0</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;font-size:12px;color:var(--ink3);">Highlighted rows = keywords that were dropped by May 2026</div>
+    </div>
+
+    <!-- May 2026 -->
+    <div class="sec">
+      <div class="sec-title">May 2026 — Current <span class="badge bg-red">Needs restructure</span></div>
+      <table class="data">
+        <thead><tr><th>Keyword</th><th>Spend</th><th>Sales</th><th>ACoS</th><th>Orders</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr class="our"><td>miguard headache and migraine relief</td><td>$24.30</td><td>$39.95</td><td><span class="pill pill-a">60.8%</span></td><td>1</td><td>✅ Keep</td></tr>
+          <tr class="our"><td>beta blocker for headaches</td><td>$1.76</td><td>$39.95</td><td><span class="pill pill-g">4.4%</span></td><td>1</td><td>✅ Scale</td></tr>
+          <tr class="our"><td>migraine care</td><td>$0.97</td><td>$39.95</td><td><span class="pill pill-g">2.4%</span></td><td>1</td><td>✅ Scale</td></tr>
+          <tr><td style="color:var(--rose);">migraine supplement</td><td>$21.64</td><td>$0</td><td>—</td><td>0</td><td>⚡ Exact only</td></tr>
+          <tr><td style="color:var(--rose);">migraine relief products</td><td>$6.63</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
+          <tr><td style="color:var(--rose);">migraine relief</td><td>$4.85</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
+          <tr><td style="color:var(--rose);">b000uy2bui (ASIN target)</td><td>$4.64</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
+          <tr><td style="color:var(--rose);">b0013ovxwq (ASIN target)</td><td>$3.05</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
+          <tr><td style="color:var(--rose);">migraine relief supplements</td><td>$3.96</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
+          <tr><td colspan="5" style="font-size:11px;color:var(--ink3);font-style:italic;">+ 18 more ASIN targets (b0...) — all $0 sales</td><td>🔴 All pause</td></tr>
+          <tr><td colspan="5" style="font-size:11px;color:var(--ink3);font-style:italic;">+ 70 single-click keywords — all $0 sales</td><td>🔴 Review</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;font-size:12px;color:var(--ink3);">Highlighted rows = only converters</div>
+    </div>
+  </div>
+
+  <!-- Root cause -->
+  <div class="sec">
+    <div class="sec-title">Root Cause Analysis</div>
+    <div class="two">
+      <div>
+        <div style="font-weight:600;color:var(--rose);margin-bottom:12px;font-size:13px;">What went wrong in May</div>
+        <div class="opp oh" style="margin-bottom:10px;">
+          <div class="opp-hdr"><span class="pri">Critical</span><span class="otag">Campaign Structure</span></div>
+          <div class="obody"><strong>"miguard" brand exact-match was dropped.</strong> In November this keyword had a 35.99x ROAS on just $1.11 of spend. Losing your brand term is the single most preventable mistake in PPC — it's your highest-intent, lowest-cost traffic. It was not in May at all.</div>
+        </div>
+        <div class="opp oh" style="margin-bottom:10px;">
+          <div class="opp-hdr"><span class="pri">Critical</span><span class="otag">Wasted Spend</span></div>
+          <div class="obody"><strong>22+ ASIN product-targeting campaigns generated $0 in sales on ~$35 combined spend.</strong> ASIN targeting works when you're targeting directly comparable products whose buyers would switch. The ASINs targeted here (MigreLief competitors etc.) are not a good match for MiGuard's natural/supplement positioning at $39.95 against $29.99 OTC alternatives.</div>
+        </div>
+        <div class="opp om">
+          <div class="opp-hdr"><span class="pri">Medium</span><span class="otag">Budget</span></div>
+          <div class="obody"><strong>Budget was cut 62% ($505 → $190) while keyword count expanded 45% (68 → 99).</strong> Less budget spread across more keywords means no keyword got enough impressions to find its conversion floor. The fragmentation made the data unreadable and the campaign unoptimizable.</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:600;color:var(--navy);margin-bottom:12px;font-size:13px;">Restructure priority list</div>
+        <table class="data" style="font-size:12.5px;">
+          <thead><tr><th>Action</th><th>Keyword</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill pill-r">Restore</span></td><td>miguard (exact)</td><td>35.99x ROAS in Nov — must protect brand</td></tr>
+            <tr><td><span class="pill pill-r">Restore</span></td><td>miguard headache and migraine relief</td><td>Best volume converter both months</td></tr>
+            <tr><td><span class="pill pill-r">Restore</span></td><td>strong migraine pills</td><td>15.24x ROAS in Nov — dropped with no reason</td></tr>
+            <tr><td><span class="pill pill-g">Scale</span></td><td>beta blocker for headaches</td><td>4.4% ACoS in May — increase bid + budget</td></tr>
+            <tr><td><span class="pill pill-g">Scale</span></td><td>migraine care</td><td>2.4% ACoS in May — increase bid + budget</td></tr>
+            <tr><td><span class="pill pill-a">Fix</span></td><td>migraine supplement</td><td>Switch to exact-match only, bid $1.20 max</td></tr>
+            <tr><td><span class="pill pill-a">Add</span></td><td>migraine prevention supplement</td><td>Rank #25, 62.5% ABA, low comp (490)</td></tr>
+            <tr><td><span class="pill pill-a">Add</span></td><td>feverfew for migraines</td><td>Rank #75, 43.5% ABA, only 132 competing</td></tr>
+            <tr><td><span class="pill pill-r">Pause all</span></td><td>All b0... ASIN targets</td><td>22 keywords, $35+ spend, $0 sales</td></tr>
+            <tr><td><span class="pill pill-r">Pause</span></td><td>migraine relief (broad)</span></td><td>OTC drugs dominate, 0 conversions May</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;padding:12px 14px;background:var(--teal-light);border-radius:8px;font-size:12.5px;color:var(--navy);line-height:1.7;">
+          <strong>Target ACoS: 60–70%</strong> at $39.95 price point. At a ~50% margin that means breaking even on first purchase — acceptable given LTV from repeat buyers and review velocity. Once conv% recovers to 6%+ on the restructured campaign, tighten to 50%.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nov vs May signal keywords -->
+  <div class="sec">
+    <div class="sec-title">Keywords Dropped Nov → May That Had Proven ROAS</div>
+    <div class="alert" style="background:var(--sand);">
+      <span style="font-size:15px;flex-shrink:0;">📌</span>
+      <span>These keywords were active and converting in November but were absent from May entirely. They should be restored before any other campaign work.</span>
+    </div>
+    <table class="data">
+      <thead><tr><th>Keyword</th><th>Nov Spend</th><th>Nov Sales</th><th>Nov ACoS</th><th>Nov ROAS</th><th>Nov Orders</th><th>May Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>miguard</strong></td><td>$1.11</td><td>$39.95</td><td><span class="pill pill-g">2.8%</span></td><td>35.99x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
+        <tr><td><strong>miguard migraine and head ache relief</strong></td><td>$11.02</td><td>$31.96</td><td><span class="pill pill-g">34.5%</span></td><td>2.90x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
+        <tr><td><strong>strong migraine pills</strong></td><td>$2.62</td><td>$39.95</td><td><span class="pill pill-g">6.6%</span></td><td>15.24x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
+        <tr><td><strong>migraine relief products</strong></td><td>$4.74</td><td>$39.95</td><td><span class="pill pill-g">11.9%</span></td><td>8.42x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
+        <tr><td><strong>migraine relief</strong></td><td>$9.76</td><td>$39.95</td><td><span class="pill pill-g">24.4%</span></td><td>4.09x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div id="tab-listing" class="page">
+
+  <div class="alert" style="background:var(--teal-light);border-color:rgba(0,31,96,0.2);color:var(--navy);">
+    <span style="font-size:16px;flex-shrink:0;">✅</span>
+    <span><strong>Listing updated May 2026.</strong> Title, all 5 bullets, product description, and backend keywords are live. This tab shows the current live listing with keyword coverage and ranking notes for ongoing monitoring.</span>
+  </div>
+
+  <!-- KEYWORD COVERAGE TABLE -->
+  <div class="sec">
+    <div class="sec-title">Keyword Ranking Coverage — Live Listing <span class="badge bg-green">18 keywords confirmed</span></div>
+    <table class="data">
+      <thead><tr><th>Keyword</th><th>Rank</th><th>Search Vol</th><th>Impact</th><th>Where in Listing</th><th>Monitor</th></tr></thead>
+      <tbody>
+        <tr><td>natural remedies for migraines</td><td><span class="pill pill-g">#1</span></td><td>87/mo</td><td style="color:var(--ink2);font-size:12px;">Low</td><td>Bullet 1</td><td>Hold</td></tr>
+        <tr><td>headache and migraine relief supplements</td><td><span class="pill pill-g">#1</span></td><td>~0</td><td style="color:var(--ink2);font-size:12px;">Low</td><td>Title</td><td>Hold</td></tr>
+        <tr><td>natural supplements for migraine headaches</td><td><span class="pill pill-g">#1</span></td><td>850/mo</td><td style="color:var(--ink2);font-size:12px;">Low</td><td>Title</td><td>Hold</td></tr>
+        <tr><td>migraine prevent</td><td><span class="pill pill-g">#3</span></td><td>434/mo</td><td style="color:var(--amber);font-size:12px;">Low-Med</td><td>Bullet 1 ("prevention")</td><td>Hold</td></tr>
+        <tr><td>drug free migraine relief</td><td><span class="pill pill-g">#15</span></td><td>~0</td><td style="color:var(--ink2);font-size:12px;">Low</td><td>Bullet 4</td><td>Hold</td></tr>
+        <tr><td>migraine vitamins for women</td><td><span class="pill pill-g">#15</span></td><td>153/mo</td><td style="color:var(--ink2);font-size:12px;">Low</td><td>Backend keywords</td><td>Hold</td></tr>
+        <tr><td>migraine preventative</td><td><span class="pill pill-g">#15</span></td><td>22/mo</td><td style="color:var(--ink2);font-size:12px;">Very low</td><td>Bullet 1 ("prevention")</td><td>Hold</td></tr>
+        <tr><td>supplements for migraine relief</td><td><span class="pill pill-g">#17</span></td><td>~0</td><td style="color:var(--ink2);font-size:12px;">Low</td><td>Bullet 2</td><td>Hold</td></tr>
+        <tr><td>migraine relief supplements</td><td><span class="pill pill-g">#22</span></td><td>390/mo</td><td style="color:var(--ink2);font-size:12px;">Med</td><td>Bullet 3</td><td>Monitor</td></tr>
+        <tr><td><strong>migraine supplement</strong></td><td><span class="pill pill-g">#23</span></td><td><strong>1,173/mo</strong></td><td style="color:var(--rose);font-size:12px;font-weight:600;">High</td><td>Title position 1</td><td><span style="color:var(--green);font-weight:600;">↑ Watch</span></td></tr>
+        <tr><td>migraine prevention supplement</td><td><span class="pill pill-g">#23</span></td><td>465/mo</td><td style="color:var(--ink2);font-size:12px;">Med</td><td>Bullet 1</td><td>Monitor</td></tr>
+        <tr><td>migraine vitamin supplement</td><td><span class="pill pill-g">#27</span></td><td>546/mo</td><td style="color:var(--ink2);font-size:12px;">Med</td><td>Bullet 2 header</td><td>Monitor</td></tr>
+        <tr><td>migraine supplements for women</td><td><span class="pill pill-g">#28</span></td><td>558/mo</td><td style="color:var(--ink2);font-size:12px;">Med</td><td>Bullet 3</td><td><span style="color:var(--green);font-weight:600;">↑ Watch</span></td></tr>
+        <tr><td>migraine prevention</td><td><span class="pill pill-g">#26</span></td><td>455/mo</td><td style="color:var(--ink2);font-size:12px;">Med</td><td>Bullets 1 + 2</td><td>Monitor</td></tr>
+        <tr><td>natural migraine relief</td><td><span class="pill pill-g">#35</span></td><td>485/mo</td><td style="color:var(--ink2);font-size:12px;">Med</td><td>Bullets 2 + 5</td><td>Monitor</td></tr>
+        <tr><td>migraine vitamins</td><td><span class="pill pill-g">#46</span></td><td>551/mo</td><td style="color:var(--ink2);font-size:12px;">Med</td><td>Bullet 5 header</td><td>Monitor</td></tr>
+        <tr><td>feverfew for migraines</td><td><span class="pill pill-g">#80</span></td><td>669/mo</td><td style="color:var(--ink2);font-size:12px;">Med</td><td>Bullet 2</td><td>Monitor</td></tr>
+        <tr><td>migraine headache relief</td><td><span class="pill pill-a">#121</span></td><td>341/mo</td><td style="color:var(--ink2);font-size:12px;">Med</td><td>Bullet 5</td><td><span style="color:var(--green);font-weight:600;">↑ Watch</span></td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;padding:12px 16px;background:var(--teal-light);border-radius:8px;font-size:13px;color:var(--navy);line-height:1.7;">
+      <strong style="color:var(--green);">↑ What to watch:</strong> Check Helium 10 Keyword Tracker weekly for movement on "migraine supplement" (currently #23), "migraine supplements for women" (#28), and "migraine headache relief" (#121). These are the three terms most likely to improve now that they're in the live title and bullets. Any jump above #10 on "migraine supplement" is meaningful.
+    </div>
+  </div>
+
+  <!-- LIVE TITLE -->
+  <div class="sec">
+    <div class="sec-title">Title — Live <span class="badge bg-green">188 chars</span></div>
+    <div class="bullet-safe" style="font-family:var(--font-mono);font-size:13px;">MiGuard Migraine Supplement – Headache and Migraine Relief Supplements, Drug Free Migraine Prevention, Natural Supplements for Migraine Headaches, Reduce Frequency &amp; Severity (60 Capsules)</div>
+    <div class="chips" style="margin-top:12px;">
+      <span class="chip chip-g">✓ "migraine supplement" — position 1 · 1,173/mo</span>
+      <span class="chip chip-g">✓ "headache and migraine relief supplements" — rank #1</span>
+      <span class="chip chip-g">✓ "drug free migraine prevention" — rank #1</span>
+      <span class="chip chip-g">✓ "natural supplements for migraine headaches" — rank #1</span>
+      <span class="chip chip-g">✓ Brand name · 188 chars</span>
+    </div>
+  </div>
+
+  <!-- LIVE BULLETS -->
+  <div class="sec">
+    <div class="sec-title">Bullet 1 — Doctor Credential + Clinical Study</div>
+    <div class="bullet-safe" style="font-family:var(--font-mono);font-size:13px;">DOCTOR-FORMULATED MIGRAINE SUPPLEMENT: Created by headache sub-specialist Dr. Benjamin Taimoorazy, MiGuard is a clinically studied migraine prevention supplement using all-natural ingredients researched for their role in head comfort. This natural headache and migraine relief supplement may help reduce frequency and severity — with results reported as early as 4 weeks. Drug-free, non-habit forming, and natural remedies for migraines in one daily capsule.</div>
+    <div class="chips" style="margin-top:12px;">
+      <span class="chip chip-g">✓ "migraine supplement" · "migraine prevention supplement" · "natural remedies for migraines"</span>
+      <span class="chip chip-g">✓ Doctor sub-specialist credential</span>
+      <span class="chip chip-g">✓ "clinically studied" — compliant</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">Bullet 2 — 6-Ingredient Formula</div>
+    <div class="bullet-safe" style="font-family:var(--font-mono);font-size:13px;">6-INGREDIENT MIGRAINE VITAMIN SUPPLEMENT: Supplements for migraine relief rarely go beyond 3 ingredients. MiGuard combines Magnesium, Riboflavin (Vitamin B2), Coenzyme Q10, Alpha-Lipoic Acid, Feverfew for migraines — studied for cerebrovascular support — and Ginger for nausea comfort. These nutrients address the mitochondrial energy deficits associated with migraine frequency and severity, making MiGuard one of the most comprehensive natural migraine relief supplements available.</div>
+    <div class="chips" style="margin-top:12px;">
+      <span class="chip chip-g">✓ "migraine vitamin supplement" · "supplements for migraine relief" · "feverfew for migraines"</span>
+      <span class="chip chip-g">✓ Alpha-Lipoic Acid + Ginger differentiators visible</span>
+      <span class="chip chip-g">✓ "natural migraine relief supplements"</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">Bullet 3 — Additional Benefits + Women's Angle</div>
+    <div class="bullet-safe" style="font-family:var(--font-mono);font-size:13px;">BEYOND MIGRAINE RELIEF — WHOLE-BRAIN SUPPORT: MiGuard migraine supplements also support energy levels, brain function, and restful sleep. Especially effective as migraine supplements for women dealing with hormonal or stress-related triggers. For best results, take consistently for at least 4–6 months. Most users report meaningful improvement in migraine frequency and severity within 4–8 weeks.</div>
+    <div class="chips" style="margin-top:12px;">
+      <span class="chip chip-g">✓ "migraine supplements for women" — rank #28 · 558/mo</span>
+      <span class="chip chip-g">✓ 4–8 week expectation-setting addresses main review objection</span>
+      <span class="chip chip-g">✓ "supports restful sleep" — compliant</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">Bullet 4 — Drug-Free</div>
+    <div class="bullet-safe" style="font-family:var(--font-mono);font-size:13px;">100% DRUG-FREE MIGRAINE RELIEF: MiGuard is a safe, all-natural migraine supplement that is completely drug-free and non-habit forming — you can stop at any time without dependency. For those seeking drug free migraine relief as a natural alternative to OTC medication, MiGuard delivers a clean, researched formula you can take every day with confidence. No prescription needed.</div>
+    <div class="chips" style="margin-top:12px;">
+      <span class="chip chip-g">✓ "drug free migraine relief" — rank #15</span>
+      <span class="chip chip-g">✓ "without dependency" — compliant</span>
+      <span class="chip chip-g">✓ Captures OTC crossover buyer intent</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">Bullet 5 — Clean Label + Clinical Study</div>
+    <div class="bullet-safe" style="font-family:var(--font-mono);font-size:13px;">VEGAN, NON-GMO MIGRAINE VITAMINS — CLINICALLY STUDIED: MiGuard natural migraine relief supplements are vegan, non-GMO, and gluten-free — suitable for every diet and lifestyle. Manufactured in a GMP-certified facility. In a retrospective comparative clinical study, participants using MiGuard reported improvement in migraine headache relief frequency after 90 days. A studied nutritional blend for daily use.</div>
+    <div class="chips" style="margin-top:12px;">
+      <span class="chip chip-g">✓ "migraine vitamins" · "natural migraine relief supplements"</span>
+      <span class="chip chip-g">✓ "migraine headache relief" — rank #121 · 341/mo</span>
+      <span class="chip chip-g">✓ Clinical study surfaced in bullets for first time</span>
+    </div>
+  </div>
+
+  <!-- COMPLIANCE REFERENCE -->
+  <div class="sec">
+    <div class="sec-title">Compliance Reference</div>
+    <div class="two">
+      <div>
+        <div style="font-weight:600;color:var(--navy);margin-bottom:10px;">✅ Approved language in live listing</div>
+        <ul style="list-style:none;font-size:13px;line-height:2.1;color:var(--ink2);">
+          <li>✅ "clinically studied ingredients"</li>
+          <li>✅ "in a retrospective comparative clinical study…"</li>
+          <li>✅ "may help reduce frequency and severity"</li>
+          <li>✅ "supports head comfort"</li>
+          <li>✅ "doctor-formulated"</li>
+          <li>✅ "drug-free" / "non-habit forming"</li>
+          <li>✅ "without dependency"</li>
+          <li>✅ "natural alternative to OTC medication"</li>
+          <li>✅ "results as early as 4 weeks" (non-guaranteed)</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-weight:600;color:var(--rose);margin-bottom:10px;">🚫 Never use in any future updates</div>
+        <ul style="list-style:none;font-size:13px;line-height:2.1;color:var(--ink2);">
+          <li>🚫 "scientifically proven to relieve"</li>
+          <li>🚫 "without side effects" (absolute)</li>
+          <li>🚫 "treats" / "cures" migraines</li>
+          <li>🚫 "anti-inflammatory"</li>
+          <li>🚫 "heals" / "healing"</li>
+          <li>🚫 "pain relief" as supplement claim</li>
+          <li>🚫 "eliminates migraines"</li>
+          <li>🚫 Unsubstantiated % statistics</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL AI AUDIT -->
+  <div class="sec">
+    <div class="sec-title">Full AI Listing Audit</div>
+    <p style="font-size:13px;color:var(--ink3);margin-bottom:16px;">Generate a fresh scored audit against the current live listing to identify any remaining opportunities.</p>
+    <button class="btn" id="full-audit-btn" onclick="runFullAudit()">Generate Full Listing Audit Report</button>
+    <button class="btn2" id="copy-audit-btn" style="display:none" onclick="copyEl('audit-output','copy-audit-btn')">Copy Report</button>
+    <div id="audit-status" class="smsg"></div>
+    <div id="audit-output" class="abox" style="margin-top:16px;display:none;"></div>
+  </div>
+</div>
+
+<div id="tab-descbackend" class="page">
+
+  <div class="alert" style="background:var(--teal-light);border-color:rgba(0,31,96,0.2);color:var(--navy);">
+    <span style="font-size:16px;flex-shrink:0;">✅</span>
+    <span><strong>Description and backend keywords updated May 2026.</strong> Factual error (B12→B2) corrected, all compliance language updated, clinical study added to description, and backend keywords rebuilt within Amazon's 250-byte limit. This tab shows the live content for reference.</span>
+  </div>
+
+  <!-- LIVE DESCRIPTION -->
+  <div class="sec">
+    <div class="sec-title">Product Description — Live <span class="badge bg-green">Updated May 2026</span></div>
+    <div style="font-size:13.5px;color:var(--ink2);line-height:1.9;padding:20px 24px;background:var(--bg);border:1px solid var(--silver);border-radius:10px;margin-bottom:16px;">
+      <strong style="color:var(--navy);">Support Your Daily Migraine Prevention Routine</strong><br><br>
+      MiGuard is a doctor-formulated daily supplement designed to support head comfort and help reduce migraine frequency and severity. Created by headache sub-specialist Dr. Benjamin Taimoorazy, the formula combines six clinically studied ingredients into a single daily capsule — providing a comprehensive nutritional foundation for those seeking a drug-free, natural approach to migraine support.<br><br>
+      In a retrospective comparative clinical study, participants using MiGuard reported improvement in headache frequency after 90 days. Most users begin to notice meaningful results within 4–8 weeks of consistent daily use.<br><br>
+      <strong style="color:var(--navy);">Key Ingredients:</strong><br><br>
+      <strong>Riboflavin (Vitamin B2):</strong> Supports mitochondrial energy production in nerve cells. Studied at 400mg for its role in head comfort support.<br><br>
+      <strong>Magnesium:</strong> Supports healthy nerve membrane function and neurological stability. Magnesium deficiency has been associated with increased sensitivity in migraine sufferers.<br><br>
+      <strong>Coenzyme Q10 (CoQ10):</strong> Supports cellular energy production and may help maintain healthy CGRP levels, a protein studied for its role in head sensitivity and comfort.<br><br>
+      <strong>Alpha-Lipoic Acid (ALA):</strong> A powerful antioxidant and coenzyme in energy metabolism. Supports healthy mitochondrial function and helps address oxidative stress in neurological tissue.<br><br>
+      <strong>Feverfew (Tanacetum parthenium):</strong> A traditional botanical studied for its role in supporting cerebrovascular tone and healthy platelet activity.<br><br>
+      <strong>Ginger (Zingiber officinale):</strong> Studied for its role in supporting nausea comfort and healthy CGRP signaling.<br><br>
+      <strong>Dosage:</strong> Take 2 capsules daily, preferably with food. For best results, take consistently for at least 4–6 months. Most users report meaningful improvement within 4–8 weeks.<br><br>
+      MiGuard is proudly <strong>vegan, drug-free, non-GMO, gluten-free,</strong> and <strong>non-habit forming.</strong> Manufactured in a GMP-certified facility.
+    </div>
+    <div class="chips">
+      <span class="chip chip-g">✓ Riboflavin (B2) — corrected from prior B12 error</span>
+      <span class="chip chip-g">✓ Clinical study included</span>
+      <span class="chip chip-g">✓ All 6 ingredients explained</span>
+      <span class="chip chip-g">✓ Compliance-cleared language throughout</span>
+      <span class="chip chip-g">✓ CGRP + mitochondrial language preserved — scientific credibility without drug claims</span>
+    </div>
+    <div style="margin-top:16px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--navy);opacity:0.6;margin-bottom:8px;">HTML — Copy for Seller Central</div>
+      <div style="background:var(--bg);border:1px solid var(--silver);border-radius:8px;padding:14px;font-family:var(--font-mono);font-size:11px;color:var(--ink2);line-height:1.7;white-space:pre-wrap;overflow-x:auto;" id="desc-html">&lt;p&gt;&lt;b&gt;Support Your Daily Migraine Prevention Routine&lt;/b&gt;&lt;/p&gt;
+&lt;p&gt;MiGuard is a doctor-formulated daily supplement designed to support head comfort and help reduce migraine frequency and severity. Created by headache sub-specialist Dr. Benjamin Taimoorazy, the formula combines six clinically studied ingredients into a single daily capsule — providing a comprehensive nutritional foundation for those seeking a drug-free, natural approach to migraine support.&lt;/p&gt;
+&lt;p&gt;In a retrospective comparative clinical study, participants using MiGuard reported improvement in headache frequency after 90 days. Most users begin to notice meaningful results within 4–8 weeks of consistent daily use.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;Key Ingredients:&lt;/b&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Riboflavin (Vitamin B2):&lt;/b&gt; Supports mitochondrial energy production in nerve cells. Studied at 400mg for its role in head comfort support.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Magnesium:&lt;/b&gt; Supports healthy nerve membrane function and neurological stability. Magnesium deficiency has been associated with increased sensitivity in migraine sufferers.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Coenzyme Q10 (CoQ10):&lt;/b&gt; Supports cellular energy production and may help maintain healthy CGRP levels, a protein studied for its role in head sensitivity and comfort.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Alpha-Lipoic Acid (ALA):&lt;/b&gt; A powerful antioxidant and coenzyme in energy metabolism. Supports healthy mitochondrial function and helps address oxidative stress in neurological tissue.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Feverfew (Tanacetum parthenium):&lt;/b&gt; A traditional botanical studied for its role in supporting cerebrovascular tone and healthy platelet activity.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Ginger (Zingiber officinale):&lt;/b&gt; Studied for its role in supporting nausea comfort and healthy CGRP signaling.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;b&gt;Dosage:&lt;/b&gt; Take 2 capsules daily, preferably with food. For best results, take consistently for at least 4–6 months. Most users report meaningful improvement within 4–8 weeks.&lt;/p&gt;
+&lt;p&gt;MiGuard is proudly &lt;b&gt;vegan, drug-free, non-GMO, gluten-free,&lt;/b&gt; and &lt;b&gt;non-habit forming.&lt;/b&gt; Manufactured in a GMP-certified facility.&lt;/p&gt;</div>
+      <button class="btn2" style="margin-top:10px;margin-left:0;" onclick="copyEl('desc-html','copy-desc-btn')" id="copy-desc-btn">Copy HTML</button>
+    </div>
+  </div>
+
+  <!-- LIVE BACKEND KEYWORDS -->
+  <div class="sec">
+    <div class="sec-title">Backend Search Terms — Live <span class="badge bg-green">236 of 250 bytes · 10 terms</span></div>
+    <p style="font-size:13px;color:var(--ink2);margin-bottom:20px;line-height:1.7;">These 10 terms extend your indexing coverage beyond what's already captured in your title and bullets. Each targets a real buyer intent, organic ranking signal, or high-ABA keyword that isn't explicitly in the live listing copy. Amazon indexes title and bullets automatically — the backend is for everything else.</p>
+    <table class="data" style="margin-bottom:20px;">
+      <thead><tr><th>Backend Term</th><th>Search Vol</th><th>Organic Rank</th><th>ABA Conv%</th><th>Why It Extends Coverage</th></tr></thead>
+      <tbody>
+        <tr><td><strong>migraine relief pills</strong></td><td>622/mo</td><td><span class="pill pill-g">#41</span></td><td>33.3%</td><td>High-volume near-page-1 term — buyers searching "pills" not captured by "capsules" in copy</td></tr>
+        <tr><td><strong>migraine pills</strong></td><td>627/mo</td><td><span class="pill pill-g">#42</span></td><td>35.7%</td><td>Different buyer phrasing from "supplement" — adds indexing breadth at same rank range</td></tr>
+        <tr><td><strong>vitamin b2 magnesium migraine</strong></td><td>642/mo</td><td><span class="pill pill-a">#119</span></td><td>23.1%</td><td>Ingredient-specific search — buyers researching the exact formula stack; high purchase intent</td></tr>
+        <tr><td><strong>magnesium for migraines</strong></td><td>654/mo</td><td>—</td><td>34.8%</td><td>High ABA ingredient term — captures magnesium-focused buyers not reached by broader terms</td></tr>
+        <tr><td><strong>homeopathic headache relief</strong></td><td>649/mo</td><td>—</td><td>44.5%</td><td>Matches BSR subcategory (Pain Relief Homeopathic Remedies) — strong category alignment</td></tr>
+        <tr><td><strong>migraine relief capsules</strong></td><td>295/mo</td><td><span class="pill pill-g">#55</span></td><td>0%</td><td>Format-specific search — "capsules" phrasing separate from "supplement" or "pills"</td></tr>
+        <tr><td><strong>natural headache relief</strong></td><td>612/mo</td><td>—</td><td>23.1%</td><td>Broad natural remedy intent not covered in bullets — crossover with OTC-avoiding buyer</td></tr>
+        <tr><td><strong>migraine vitamins for women</strong></td><td>153/mo</td><td><span class="pill pill-g">#15</span></td><td>0%</td><td>Near page 1 already — reinforces this signal with backend coverage</td></tr>
+        <tr><td><strong>drug free headache relief</strong></td><td>—</td><td>—</td><td>—</td><td>Extends "drug free" positioning to headache (not just migraine) buyers</td></tr>
+        <tr><td><strong>migrane relief</strong></td><td>302/mo</td><td><span class="pill pill-a">#295</span></td><td>62.5%</td><td>High-ABA misspelling — buyers who use this phrasing convert at an unusually high rate</td></tr>
+      </tbody>
+    </table>
+    <div style="padding:14px 18px;background:var(--teal-light);border-radius:8px;font-size:13px;color:var(--navy);margin-bottom:16px;line-height:1.7;">
+      <strong style="color:var(--green);">↑ Coverage optimization:</strong> Your title and bullets already index all primary ranking terms — "migraine supplement," "migraine prevention supplement," "natural supplements for migraine headaches," "feverfew for migraines," and 14 others. These 10 backend terms add unique signal in the <strong>format, ingredient, format-variant, and misspelling</strong> buckets that wouldn't otherwise be captured. 236 of 250 bytes used — 14 bytes of headroom if a high-value term emerges from future keyword research.
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--navy);opacity:0.6;margin-bottom:8px;">Live Backend String — copy for Seller Central Search Terms field</div>
+      <div style="background:var(--bg);border:1px solid var(--silver);border-radius:8px;padding:14px;font-family:var(--font-mono);font-size:13px;color:var(--navy);line-height:1.5;" id="backend-string">migraine relief pills migraine pills vitamin b2 magnesium migraine magnesium for migraines homeopathic headache relief migraine relief capsules natural headache relief migraine vitamins for women drug free headache relief migrane relief</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+        <button class="btn2" style="margin-left:0;" onclick="copyEl('backend-string','copy-backend-btn')" id="copy-backend-btn">Copy</button>
+        <span style="font-size:12px;color:var(--navy);opacity:0.7;">236 bytes · 10 terms · space-separated, no commas, no brand names</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══ REVIEWS ══ -->
+<div id="tab-reviews" class="page">
+
+  <!-- VOC Summary from actual reviews -->
+  <div class="two">
+    <div class="sec">
+      <div class="sec-title">Positive VOC Themes <span class="badge bg-green">From 32 reviews</span></div>
+      <div class="chips">
+        <span class="chip chip-g">Natural / all-natural ingredients</span>
+        <span class="chip chip-g">Reduced migraine frequency</span>
+        <span class="chip chip-g">Reduced severity</span>
+        <span class="chip chip-g">Doctor formulated</span>
+        <span class="chip chip-g">Drug-free alternative</span>
+        <span class="chip chip-g">Easy to swallow</span>
+        <span class="chip chip-g">No side effects noted</span>
+        <span class="chip chip-g">Vegan / gluten-free mentioned positively</span>
+        <span class="chip chip-g">Energy improvement noted</span>
+        <span class="chip chip-g">Brain fog reduction</span>
+        <span class="chip chip-g">Better than other supplements</span>
+      </div>
+      <div style="margin-top:16px;font-size:13px;color:var(--ink2);line-height:1.75;">
+        <strong>Mirror language for bullets:</strong> "game-changer" · "life-changing" · "significant reduction in frequency and intensity" · "went from getting migraines 3 times a week down to 1 or less" · "natural ingredients give me peace of mind" · "backed by scientific research"
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">Objections + Unmet Needs <span class="badge bg-red">3-star reviews</span></div>
+      <div class="chips">
+        <span class="chip chip-r">Didn't work for me (some users)</span>
+        <span class="chip chip-r">Bright yellow urine (B2 — surprised buyers)</span>
+        <span class="chip chip-a">Took 2 weeks, saw nothing (expectation gap)</span>
+        <span class="chip chip-a">Not sure if I have the right "deficiency"</span>
+        <span class="chip chip-a">Needs 4–6 weeks — patience required</span>
+      </div>
+      <div style="margin-top:16px;font-size:13px;color:var(--ink2);line-height:1.75;">
+        <strong>Address proactively in Bullet 3:</strong> Riboflavin B2 causes bright yellow urine — this is normal, harmless, and actually a sign the formula is being absorbed. Mention it explicitly so buyers aren't surprised and don't leave 3-star reviews about it.<br><br>
+        <strong>Address expectations:</strong> "Not a quick fix — designed for daily preventive use over 4–8 weeks" should appear in at least one bullet or the description.
+      </div>
+    </div>
+  </div>
+
+  <!-- Flag -->
+  <div class="alert" style="background:var(--amber-light);border-color:rgba(192,120,50,0.3);color:#8A5520;">
+    <span style="font-size:16px;flex-shrink:0;">📌</span>
+    <span><strong>VOC Note:</strong> Review #24 uses the phrase "scientifically proven to be effective against migraines" and review #13 says "without any side effects." Both are buyer language that resonates — but neither should be mirrored directly in listing copy. Use "clinically studied" and "non-habit forming" as the compliant equivalents.</span>
+  </div>
+
+  <!-- Star distribution -->
+  <div class="sec">
+    <div class="sec-title">Star Distribution — 48 Reviews</div>
+    <div class="chart-wrap" style="height:180px;"><canvas id="starChart"></canvas></div>
+  </div>
+
+  <!-- Review cards — selected highlights -->
+  <div class="sec">
+    <div class="sec-title">Selected Reviews — Key VOC</div>
+
+    <div class="rev-card">
+      <div class="rev-hdr"><span class="rev-name">quadclops</span><span class="rev-stars s5">★★★★★</span><span class="rev-date">2023-08-23</span></div>
+      <div class="rev-title">"The Best"</div>
+      <div class="rev-body">In 4 weeks I have seen improvement in frequency and in severity. I was getting at least 1 migraine per week and now I have only had 2 in 4 weeks. The 2 I had were very mild, not needing me to take anything for them.</div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-hdr"><span class="rev-name">Adnan</span><span class="rev-stars s5">★★★★★</span><span class="rev-date">2023-08-22</span></div>
+      <div class="rev-title">"Absolutely love this product"</div>
+      <div class="rev-body">6 weeks into my Miguard journey and I am astounded. I've gone from getting migraines 3 times a week down to 1 or less per week.</div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-hdr"><span class="rev-name">Angie</span><span class="rev-stars s5">★★★★★</span><span class="rev-date">2023-08-24</span></div>
+      <div class="rev-title">"Highly recommend"</div>
+      <div class="rev-body">I used to get [migraines] weekly, sometimes more often. Now I rarely get them and the severity has reduced as well. I also noticed an improvement in my energy levels and overall mood.</div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-hdr"><span class="rev-name">Annabelle Suleiman</span><span class="rev-stars s5">★★★★★</span><span class="rev-date">2023-08-24</span></div>
+      <div class="rev-title">"Exactly as described"</div>
+      <div class="rev-body">Helps curb brain fog in general. I noticed I was not waking up as groggy in the morning. <strong>Mirror this in Bullet 3 — brain fog and morning grogginess are unmet need signals.</strong></div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-hdr"><span class="rev-name">blondesetter</span><span class="rev-stars s3">★★★☆☆</span><span class="rev-date">2024-03-19</span></div>
+      <div class="rev-title">"I didn't care for these"</div>
+      <div class="rev-body">I didn't have any relief from a normal headache. But what I didn't care for was <strong>how bright my urine turned. It was concerning.</strong> → Add to Bullet 3 or description: "Note: Riboflavin B2 causes bright yellow urine — completely normal and a sign the vitamin is being absorbed."</div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-hdr"><span class="rev-name">Jacob</span><span class="rev-stars s3">★★★☆☆</span><span class="rev-date">2023-11-03</span></div>
+      <div class="rev-title">"They didn't do anything for me"</div>
+      <div class="rev-body">"I can't tell if I just don't suffer from the vitamin deficiency needed for this product to be effective or what." → This buyer self-diagnosed a root issue you can address: add targeting language in bullets about who this product is best for ("especially beneficial for those with low magnesium or B2 levels").</div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-hdr"><span class="rev-name">virginia</span><span class="rev-stars" style="color:var(--rose);">★☆☆☆☆</span><span class="rev-date">2023-08-29</span></div>
+      <div class="rev-title">"No change"</div>
+      <div class="rev-body">Took for 1 month as directed, saw no change. Did not experience side effects. Worth a try. → 1-star review that did NOT report side effects — actually useful. Expectation-setting about 4–8 weeks would have helped here.</div>
+    </div>
+  </div>
+
+  <!-- Review analysis CTA -->
+  <div class="sec">
+    <div class="sec-title">Add More Reviews for AI Analysis</div>
+    <div class="ulbl" style="margin-bottom:6px;">Paste additional review data (competitor reviews especially valuable)</div>
+    <textarea id="review-input" rows="8" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;" placeholder="Product | Review # | Reviewer Name | Star Rating | Review Title | Date | Review Text | Purchase Type"></textarea>
+    <button class="btn" id="review-btn" onclick="runReviewAnalysis()" style="margin-top:12px;">Analyze + Extract VOC Themes</button>
+    <div id="review-status" class="smsg"></div>
+    <div id="review-output" class="abox" style="margin-top:16px;display:none;"></div>
+  </div>
+</div>
+
+<!-- ══ INSIGHTS LOG ══ -->
+<div id="tab-insights" class="page">
+
+  <div class="alert" style="background:var(--teal-light);border-color:rgba(0,31,96,0.2);color:var(--navy);">
+    <span style="font-size:16px;flex-shrink:0;">📋</span>
+    <span><strong>Running insights log.</strong> Each entry records what data was reviewed, what the numbers showed, and what to watch or action next. Newest entries at the top. Add a new entry whenever you pull fresh reports.</span>
+  </div>
+
+  <!-- ADD NEW ENTRY BUTTON -->
+  <div class="log-add-btn" onclick="toggleLogForm()">
+    <div style="font-size:22px;">+</div>
+    <p>Add new insight entry</p>
+  </div>
+
+  <!-- QUICK ADD FORM -->
+  <div class="log-form" id="log-form">
+    <div class="sec-title" style="font-family:var(--font-serif);font-size:18px;color:var(--navy);margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--silver);">New Insight Entry</div>
+    <div class="ug">
+      <div>
+        <div class="ulbl">Date</div>
+        <input type="text" id="log-input-date" placeholder="e.g. June 1, 2026" style="min-height:auto;font-size:13px;" />
+      </div>
+      <div>
+        <div class="ulbl">Title</div>
+        <input type="text" id="log-input-title" placeholder="e.g. May Business Report + Q1 SQP Review" style="min-height:auto;font-size:13px;" />
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div class="ulbl">Data Sources (comma separated)</div>
+      <input type="text" id="log-input-sources" placeholder="e.g. May Business Report, Q1 2026 SQP, Helium 10 KW Tracker" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);min-height:auto;" />
+    </div>
+    <div style="margin-bottom:14px;">
+      <div class="ulbl">Key Metrics (one per line: Label | Value | Change)</div>
+      <textarea id="log-input-metrics" rows="4" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;" placeholder="Sessions | 557 | +5.1%&#10;Units | 58 | -6.5%&#10;Conv% | 10.41% | -1.29pp&#10;Revenue | $2,317 | -6.5%"></textarea>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div class="ulbl">Findings (one per line — prefix with ✅ 📈 ⚠ or 🔴)</div>
+      <textarea id="log-input-findings" rows="5" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;" placeholder="📈 Sessions grew +5.1% — traffic improving&#10;⚠ Conv% dropped to 10.41% — listing changes mid-month blending&#10;✅ Brand term purchases grew Q4→Q1: 14→20 on miguard search&#10;⚠ migraine supplement: only 3 purchases Q1 at 0.9% share"></textarea>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div class="ulbl">Action / Watch (what to do or monitor next)</div>
+      <textarea id="log-input-action" rows="3" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;" placeholder="Watch June conv% — if still below 11% the listing copy needs revision&#10;Pull fresh KW tracker in 30 days to check migraine supplement rank movement"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn" onclick="addLogEntry()">Save Entry</button>
+      <button class="btn2" style="margin-left:0;" onclick="toggleLogForm()">Cancel</button>
+      <span id="log-save-status" class="smsg" style="margin-top:0;margin-left:4px;"></span>
+    </div>
+  </div>
+
+  <!-- LOG ENTRIES CONTAINER -->
+  <div id="log-entries">
+
+    <!-- ENTRY 6 — June 1 2026: 7-Month ACoS/TACOS Pattern Analysis -->
+    <div class="log-entry mixed">
+      <div class="log-header">
+        <div>
+          <div class="log-title">7-Month PPC Pattern — ACoS, TACOS & Net Profit Relationship</div>
+          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">Medaltus P&amp;L Screenshot</span>
+            <span class="log-source">Dec 25–Apr 26 Ads Reports</span>
+            <span class="log-source">Nov 25 + May 26 Ads Reports</span>
+          </div>
+        </div>
+        <span class="log-date">June 1, 2026</span>
+      </div>
+
+      <div class="log-metric-row">
+        <div class="log-metric">
+          <div class="lm-lbl">Best Net Profit Month</div>
+          <div class="lm-val">$922</div>
+          <div class="lm-change lm-flat">Apr '26 · ACoS 57% · TACOS 8%</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Most Units Sold</div>
+          <div class="lm-val">92</div>
+          <div class="lm-change lm-flat">Jan '26 · ACoS 70% · TACOS 19%</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">TACOS range — growth phase</div>
+          <div class="lm-val">11–19%</div>
+          <div class="lm-change lm-flat">Jun '25 → Apr '26 (11 months)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">ACoS range — growth phase</div>
+          <div class="lm-val">38–81%</div>
+          <div class="lm-change lm-flat">Same 11-month window</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">May '26 ACoS</div>
+          <div class="lm-val">158%</div>
+          <div class="lm-change lm-down">↓ PPC sales $120 · 3 orders</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">May '26 TACOS</div>
+          <div class="lm-val">~8%</div>
+          <div class="lm-change lm-flat">Low spend = low TACOS, low sales</div>
+        </div>
+      </div>
+
+      <div class="log-findings">
+        <div class="log-finding"><span class="fi">📈</span><span><strong>During MiGuard's 11-month growth run (Jun '25–Apr '26), ACoS ranged from 38% to 81% every single month.</strong> Net profit over that period ranged from $500–$922/month. The brand's best absolute profit months (Jan '26 at $875, Sep '25 at $883, Oct '25 at $840) all had ACoS between 44–70%. The 30% ACoS target is a known company goal — the data suggests the brand's growth phase operated above that threshold while still generating healthy net margins.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>TACOS is the more stable signal across the growth period.</strong> While ACoS moved widely month to month, TACOS held consistently between 11–19% during all 11 growth months. This suggests PPC was proportionally efficient relative to total revenue even when ACoS appeared high — because organic sales were absorbing much of the total revenue, making the PPC share smaller as a percentage of the whole.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Miguard headache and migraine relief" drove 22–50% of all PPC revenue in every month it ran.</strong> This is the account's anchor keyword. In Nov '25 it generated $231 at 16% ACoS. Jan '26: $399 at 14% ACoS. Feb '26: $239 at 9% ACoS. Mar '26: $159 at 7% ACoS. The CPC on this term rose from $1.29 (Nov '25) to $2.00–$2.45 (Jan–Feb '26) — a 55–90% increase over 3 months — before tapering back to $1.62 in Mar '26. The CPC spike appears correlated with increased competition on the term, which is common when a branded keyword gains conversion history.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine supplement" shows a clear pattern: performance improves significantly at lower spend levels.</strong> At $138 spend (Jan '26, broad match): $79 sales, 173% ACoS. At $12 spend (Mar '26): $31 sales, 39% ACoS. At $6 spend (Apr '26): $39 sales, 16% ACoS. The data suggests this keyword performs better when constrained — likely because lower bids shift toward exact or phrase match impressions where purchase intent is higher.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>March 2026 was the most balanced month in the dataset: 37.8% ACoS, $811 net, 34% margin, 68 units.</strong> It had the highest number of converting keywords (13 unique terms generated sales) and the most distributed revenue — the anchor keyword was only 24% of PPC sales that month vs. 35–50% in other months. The keyword diversity in March appears to be what made it the most efficient month proportionally.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>May 2026 shows a structural disconnect: 87 keywords active, 99 total, but only 3 orders.</strong> The account added significant keyword volume (22+ ASIN product targets, 30+ new terms) while total budget decreased. The ASIN product-targeting keywords (b0... format) generated zero sales across an estimated $30+ in combined spend. This match type/target category produced no revenue in May.</span></div>
+      </div>
+
+      <div class="log-action watch">
+        <strong>↳ Data suggests:</strong> (1) TACOS in the 11–19% range may be a more reliable performance indicator than ACoS for this account given the organic/PPC sales mix. (2) "Migraine supplement" performs better at constrained spend — worth testing exact-match only at a fixed daily budget. (3) ASIN product targeting generated $0 in May — results should be reviewed before continuing that spend. (4) March '26 keyword diversity (13 converters) vs. other months (3–6 converters) is worth understanding as a structural goal.
+      </div>
+    </div>
+
+    <!-- ENTRY 5 — June 1 2026: Month-by-Month PPC Campaign Analysis -->
+    <div class="log-entry mixed">
+      <div class="log-header">
+        <div>
+          <div class="log-title">Nov '25–May '26 PPC Campaign Performance — Month-by-Month</div>
+          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">Nov 25 Ads Report</span>
+            <span class="log-source">Dec 25 Ads Report</span>
+            <span class="log-source">Jan 26 Ads Report</span>
+            <span class="log-source">Feb 26 Ads Report</span>
+            <span class="log-source">Mar 26 Ads Report</span>
+            <span class="log-source">Apr 26 Ads Report</span>
+            <span class="log-source">May 26 Ads Report</span>
+          </div>
+        </div>
+        <span class="log-date">June 1, 2026</span>
+      </div>
+
+      <div class="log-metric-row">
+        <div class="log-metric"><div class="lm-lbl">Nov '25</div><div class="lm-val">$655</div><div class="lm-change lm-flat">$505 spend · 17 orders · ACoS 77%</div></div>
+        <div class="log-metric"><div class="lm-lbl">Dec '25</div><div class="lm-val">$479</div><div class="lm-change lm-flat">$373 spend · 11 orders · ACoS 78%</div></div>
+        <div class="log-metric"><div class="lm-lbl">Jan '26</div><div class="lm-val">$918</div><div class="lm-change lm-up">↑ $643 spend · 22 orders · ACoS 70%</div></div>
+        <div class="log-metric"><div class="lm-lbl">Feb '26</div><div class="lm-val">$639</div><div class="lm-change lm-flat">$424 spend · 13 orders · ACoS 66%</div></div>
+        <div class="log-metric"><div class="lm-lbl">Mar '26</div><div class="lm-val">$673</div><div class="lm-change lm-up">↑ $254 spend · 17 orders · ACoS 38%</div></div>
+        <div class="log-metric"><div class="lm-lbl">Apr '26</div><div class="lm-val">$360</div><div class="lm-change lm-flat">$205 spend · 9 orders · ACoS 57%</div></div>
+      </div>
+
+      <div class="log-findings">
+        <div class="log-finding"><span class="fi">📈</span><span><strong>"Miguard headache and migraine relief" was the top-performing keyword every month without exception.</strong> Nov: $231 (16% ACoS). Dec: $239 (15%). Jan: $399 (14%). Feb: $239 (9%). Mar: $159 (7%). Apr: $79 (8%). Its ACoS improved consistently as its conversion history built — from 16% in Nov down to 7–8% by Mar–Apr. However, the absolute sales contribution fell as spend on it was reduced (from $56/mo in Jan to $6/mo in Apr), which proportionally reduced total PPC revenue.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>Several low-spend keywords converted with very high efficiency across multiple months.</strong> "Mi guard migraine relief" (Feb '26): $0.88 spend → $159 sales, 1% ACoS. "Migraine relief cap" (Jan + Mar): $5–$4 spend → $79 sales each. "Migraine medicine" (Mar): $2.69 → $33 sales, 8% ACoS. These appear sporadically — they are likely exact-match brand-adjacent or long-tail terms catching high-intent searches at very low CPCs.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine supplement" was the largest spend item in Dec and Jan, at $109 and $138 respectively, with ACoS of 137% and 173%.</strong> In Mar and Apr when spend dropped to $12 and $6, ACoS improved to 39% and 16%. The same keyword produced very different results depending on spend level and likely match type. Spend consolidation on this term appears to improve efficiency.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>January 2026 was the highest-sales PPC month ($918) and also highest-spend ($643).</strong> It coincided with the all-time unit sales record (92 units total). The relationship between spend and sales velocity in Jan '26 suggests spend contributed to ranking momentum that month — organic sessions also peaked in May '26 at 557, up from April's 530, consistent with a lagged organic benefit from Jan's PPC push.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>May 2026 had the highest keyword count (99) but lowest PPC sales ($119) and worst ACoS (158%) in the 7-month window.</strong> The 22+ ASIN product-targeting keywords (b0... format) are a new addition not present in earlier months — they generated no sales. The conversion rate on the account dropped from 6–8% (Nov–Mar) to 2.2% (May), suggesting the new keyword mix brought lower-intent traffic.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>The highest net profit months in the dataset don't correspond to the lowest ACoS months.</strong> Apr '26 is the all-time best net profit month ($922, 37% margin) at 57% ACoS and just 8% TACOS. Sep '25 ($883 net, 31% margin) ran at 57% ACoS. Jan '26 ($875 net) at 70% ACoS. The data shows net margin holding in the 26–37% range across a wide ACoS band, suggesting PPC efficiency alone isn't the primary driver of profitability — total unit volume and the organic/PPC sales mix together determine the outcome.</span></div>
+      </div>
+
+      <div class="log-action do">
+        <strong>↑ Observations to test:</strong> (1) "Miguard headache and migraine relief" ACoS improved as it ran longer — more time on this keyword at a controlled bid may continue that efficiency curve. (2) Low-CPC brand-adjacent terms ("mi guard migraine relief," "miguard headache," etc.) appear and convert at 1–3% ACoS — worth isolating in a dedicated exact-match campaign. (3) ASIN product targeting produced $0 in May — worth reviewing whether this match type is appropriate for MiGuard's category and price point. (4) March's 13-converter distribution vs. May's 3-converter concentration is worth discussing as a keyword strategy question.
+      </div>
+    </div>
+
+    <!-- ENTRY 4 — June 1 2026 PPC Analysis -->
+    <div class="log-entry watch">
+      <div class="log-header">
+        <div>
+          <div class="log-title">PPC Comparison — November 2025 vs May 2026</div>
+          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">Nov 2025 Ads Report</span>
+            <span class="log-source">May 2026 Ads Report</span>
+          </div>
+        </div>
+        <span class="log-date">June 1, 2026</span>
+      </div>
+
+      <div class="log-metric-row">
+        <div class="log-metric">
+          <div class="lm-lbl">ACoS (May)</div>
+          <div class="lm-val">158%</div>
+          <div class="lm-change lm-down">↓ Was 77% in Nov</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">ROAS (May)</div>
+          <div class="lm-val">0.63x</div>
+          <div class="lm-change lm-down">↓ Was 1.30x in Nov · losing money</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Orders (May)</div>
+          <div class="lm-val">3</div>
+          <div class="lm-change lm-down">↓ Was 17 in Nov (-82%)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Spend (May)</div>
+          <div class="lm-val">$190</div>
+          <div class="lm-change lm-down">↓ Was $505 in Nov (-62%)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Conv% (May)</div>
+          <div class="lm-val">2.2%</div>
+          <div class="lm-change lm-down">↓ Was 6.7% in Nov</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Keywords Active</div>
+          <div class="lm-val">99</div>
+          <div class="lm-change lm-down">↑ Was 68 in Nov — more, worse</div>
+        </div>
+      </div>
+
+      <div class="log-findings">
+        <div class="log-finding"><span class="fi">🔴</span><span><strong>"miguard" brand exact-match was dropped between Nov and May.</strong> In November this single keyword returned 35.99x ROAS on $1.11 spend. It was not running in May at all. Protecting your brand term is the highest-priority, lowest-cost PPC action available.</span></div>
+        <div class="log-finding"><span class="fi">🔴</span><span><strong>22+ ASIN product-targeting keywords added in May generated $0 across ~$35 combined spend.</strong> Targeting competitor ASINs (MigreLief, generic competitors) did not work — likely because $39.95 MiGuard is showing on pages for $14–29 OTC products where buyers won't switch up in price.</span></div>
+        <div class="log-finding"><span class="fi">🔴</span><span><strong>87 new keywords added, 59 proven keywords dropped.</strong> The three keywords dropped that had proven ROAS in November: "miguard" (35.99x), "strong migraine pills" (15.24x), "migraine relief products" (8.42x). These need to be restored immediately.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"migraine supplement" spent $21.64 with 12 clicks and 0 conversions in May.</strong> Same pattern as November ($97, 4 orders, 64% ACoS) — this keyword gets clicks but conversion is poor. Needs exact-match only with bid capped at $1.20, not broad.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>Two surprise converters in May: "beta blocker for headaches" (4.4% ACoS) and "migraine care" (2.4% ACoS).</strong> Both had only 1 click each — thin data — but the buyer intent signal is strong. Increase bids and let these run.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>Budget cut 62% while keywords expanded 45%.</strong> Less money spread thinner across more targets = no keyword gets enough impressions to optimize. Consolidate to 10–15 proven or high-intent keywords with adequate daily budget before expanding again.</span></div>
+      </div>
+
+      <div class="log-action do">
+        <strong>↑ Immediate actions:</strong> (1) Restore "miguard" brand exact-match. (2) Pause all ASIN targets (b0... keywords). (3) Restore "strong migraine pills" and "migraine relief products." (4) Switch "migraine supplement" to exact-match, bid max $1.20. (5) Increase bids on "beta blocker for headaches" and "migraine care." Target ACoS: 60–70% at $39.95 price point. See PPC tab for full restructure plan.
+      </div>
+    </div>
+
+    <!-- ENTRY 3 — June 1 2026 (Latest) -->
+    <div class="log-entry mixed">
+      <div class="log-header">
+        <div>
+          <div class="log-title">May Business Report + Q1 2026 SQP + April 2026 SQP</div>
+          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">May Business Report</span>
+            <span class="log-source">April Business Report</span>
+            <span class="log-source">Q1 2026 SQP</span>
+            <span class="log-source">April 2026 SQP</span>
+            <span class="log-source">H10 KW Tracker Jun 1</span>
+          </div>
+        </div>
+        <span class="log-date">June 1, 2026</span>
+      </div>
+
+      <div class="log-metric-row">
+        <div class="log-metric">
+          <div class="lm-lbl">Sessions (May)</div>
+          <div class="lm-val">557</div>
+          <div class="lm-change lm-up">↑ +27 vs April (+5.1%)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Units (May)</div>
+          <div class="lm-val">58</div>
+          <div class="lm-change lm-down">↓ -4 vs April (-6.5%)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Conv% (May)</div>
+          <div class="lm-val">10.41%</div>
+          <div class="lm-change lm-down">↓ -1.29pp vs April (11.70%)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Revenue (May)</div>
+          <div class="lm-val">$2,317</div>
+          <div class="lm-change lm-down">↓ -$160 vs April (-6.5%)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Brand Term Purch (Q1)</div>
+          <div class="lm-val">20</div>
+          <div class="lm-change lm-up">↑ +6 vs Q4 2025 (14)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">"Migraine supp" Purch (Q1)</div>
+          <div class="lm-val">3</div>
+          <div class="lm-change lm-up">↑ +1 vs Q4 2025 (2) · 0.9% share</div>
+        </div>
+      </div>
+
+      <div class="log-findings">
+        <div class="log-finding"><span class="fi">📈</span><span><strong>Sessions up, units down — traffic is improving but listing changes mid-May are blending the conversion signal.</strong> Listing updates (title, bullets, description, backend) went live partway through May. The month is a hybrid of old-listing and new-listing performance. June will be the first clean read.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>Brand term is growing.</strong> "MiGuard headache and migraine relief" generated 20 purchases in Q1 2026 vs 14 in Q4 2025 — up 43%. Direct brand searches are increasing, signaling growing awareness or repeat buyers.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>"Natural remedies for migraines" showing high purchase conversion.</strong> April SQP shows 1 brand purchase at 20% share on this term. Low absolute number but high efficiency — a keyword MiGuard ranks #4 on is converting when buyers find it.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine supplement" (8,976 vol Q1 SQP) still only 3 brand purchases at 0.9% share.</strong> This is the highest-priority commercial keyword. Organic rank is #28 (down from #23 in May — likely post-update re-indexing). PPC is the lever to change this number. 0 brand purchases in April alone — expected at this volume but confirms PPC is essential.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>Keyword ranks show minor softening post-update.</strong> "Migraine supplement" slipped from #23 to #28. "Headache and migraine wellness supplements" dropped from #3 to #11. Both are within normal re-indexing variance (2–4 weeks). "Natural supplements for migraine headaches" held at #1. No significant drops.</span></div>
+        <div class="log-finding"><span class="fi">🔴</span><span><strong>"Migraine relief" (63K vol in April) is not a realistic near-term target.</strong> 1 brand purchase at 0.02% share. OTC drugs dominate. Confirmed long-term aspiration only — not worth PPC spend yet.</span></div>
+      </div>
+
+      <div class="log-action do">
+        <strong>↑ Actions:</strong> Pull June business report + fresh KW tracker in ~30 days. If conv% climbs back toward 12%+ in June, listing updates are working. If it stays flat or drops further, revisit B1 (clinical stat lead). Launch exact-match PPC on "migraine supplement" and "migraine prevention supplement" — organic alone won't move the SQP purchase share meaningfully.
+      </div>
+    </div>
+
+    <!-- ENTRY 2 — May 13 2026 -->
+    <div class="log-entry positive">
+      <div class="log-header">
+        <div>
+          <div class="log-title">Full Listing Update Executed — Title, Bullets, Description, Backend</div>
+          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">Seller Central — Listing Update</span>
+            <span class="log-source">April Business Report</span>
+            <span class="log-source">H10 KW Tracker</span>
+            <span class="log-source">Q3 + Q4 2025 SQP</span>
+          </div>
+        </div>
+        <span class="log-date">May 13, 2026</span>
+      </div>
+
+      <div class="log-metric-row">
+        <div class="log-metric">
+          <div class="lm-lbl">Sessions (Apr)</div>
+          <div class="lm-val">530</div>
+          <div class="lm-change lm-flat">Baseline pre-update</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Units (Apr)</div>
+          <div class="lm-val">62</div>
+          <div class="lm-change lm-flat">Baseline pre-update</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Conv% (Apr)</div>
+          <div class="lm-val">11.70%</div>
+          <div class="lm-change lm-up">↑ Improving (Jan 10.6% → Apr 12.3%*)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Buy Box (Apr)</div>
+          <div class="lm-val">100%</div>
+          <div class="lm-change lm-flat">Confirmed corrected from prior 92.4% error</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Top Ranking KW</div>
+          <div class="lm-val">#23</div>
+          <div class="lm-change lm-flat">"migraine supplement" — 1,173/mo</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Keywords Top 50</div>
+          <div class="lm-val">~8</div>
+          <div class="lm-change lm-flat">of 68 tracked</div>
+        </div>
+      </div>
+
+      <div class="log-findings">
+        <div class="log-finding"><span class="fi">✅</span><span><strong>Title updated:</strong> "MiGuard Migraine Supplement – Headache and Migraine Relief Supplements, Drug Free Migraine Prevention, Natural Supplements for Migraine Headaches, Reduce Frequency &amp; Severity (60 Capsules)" — 188 chars. "Migraine supplement" added at position 1. All 3 existing #1 ranking phrases preserved verbatim.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>All 5 bullets rewritten.</strong> B1: clinical stat (95%/97%) moved to lead. Two compliance violations fixed: "scientifically proven to relieve" (B1) and "without side effects" (B4) removed. "Migraine supplements for women" added to B3. Clinical study added to B5 for first time.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>Description updated.</strong> Factual error corrected (Vitamin B12 → Riboflavin B2). All compliance language cleaned. "How to Apply" removed (A+ content handles visual display). Clinical study added.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>Backend keywords rebuilt.</strong> Previous backend: 475 bytes, identical duplicates, included "minoxidil" (compliance risk). New backend: 236 bytes, 10 unique terms not in title/bullets, no compliance risks. Space-separated only (no commas per Amazon indexing guidelines).</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>18 ranked keywords cross-verified before publishing.</strong> Three gaps found and fixed: "headache and migraine relief supplements" (rank #1) dropped from early title draft — restored. "Migraine prevention supplement" (rank #23) dropped from B1 — restored. "Feverfew for migraines" (rank #80) dropped from B2 — restored.</span></div>
+      </div>
+
+      <div class="log-action watch">
+        <strong>↳ Watch:</strong> Re-run keyword tracker in 30 days to confirm no ranking drops from re-indexing. Benchmark: all 18 verified keywords should hold or improve. Key signal: "migraine supplement" moving above #23.
+      </div>
+    </div>
+
+    <!-- ENTRY 1 — May 13 2026 (Initial Audit) -->
+    <div class="log-entry watch">
+      <div class="log-header">
+        <div>
+          <div class="log-title">Initial Brand Audit — Baseline Established</div>
+          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">MiGuard Report Excel</span>
+            <span class="log-source">H10 KW Tracker (68 kws)</span>
+            <span class="log-source">Apr Business Report</span>
+            <span class="log-source">Q3 + Q4 2025 SQP</span>
+            <span class="log-source">32 Reviews</span>
+          </div>
+        </div>
+        <span class="log-date">May 13, 2026</span>
+      </div>
+
+      <div class="log-metric-row">
+        <div class="log-metric">
+          <div class="lm-lbl">BSR</div>
+          <div class="lm-val">#388</div>
+          <div class="lm-change lm-flat">Pain Relief Homeopathic Remedies</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Reviews</div>
+          <div class="lm-val">48</div>
+          <div class="lm-change lm-flat">Below 100-review threshold</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Rating</div>
+          <div class="lm-val">4.2 ★</div>
+          <div class="lm-change lm-flat">Stable</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Top KW Rank</div>
+          <div class="lm-val">#1</div>
+          <div class="lm-change lm-flat">"natural supplements for migraine headaches" (850/mo)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Sales Trend</div>
+          <div class="lm-val">↑ Growth</div>
+          <div class="lm-change lm-up">13 units Jan '23 → 92 units Jan '26</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">SQP — Q4 Brand Purch</div>
+          <div class="lm-val">2</div>
+          <div class="lm-change lm-flat">"migraine supplement" · 0.72% share</div>
+        </div>
+      </div>
+
+      <div class="log-findings">
+        <div class="log-finding"><span class="fi">🔴</span><span><strong>Two live compliance violations</strong> in current listing: "scientifically proven to relieve" (B1) and "without side effects" (B4). Amazon + FTC risk — flagged for immediate fix.</span></div>
+        <div class="log-finding"><span class="fi">🔴</span><span><strong>Factual error in live description:</strong> lists "Vitamin B12" as an ingredient. Formula contains Riboflavin (B2). Mislabeling risk — flagged for immediate correction.</span></div>
+        <div class="log-finding"><span class="fi">🔴</span><span><strong>Backend keywords at 475 bytes</strong> — double Amazon's limit (~500 chars). Approximately half not being indexed. String contains duplicates and "minoxidil" (compliance flag for a supplement).</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>Conv% at 11.70%</strong> — below 15% benchmark. Historical data shows upward trend (Jan 10.6% → Apr 12.3%*) so direction is positive but gap remains. Listing copy identified as primary lever.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine supplement" at rank #23</strong> (1,173/mo, 41.7% ABA) — highest-volume keyword with organic signal. Not in title. PPC + title placement identified as fastest path to page 1.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>Scale-up trend confirmed:</strong> Jun '25 inflection point, all-time highs at Jul '25 (61 units), Oct '25 (80 units), Jan '26 (92 units). Brand is growing organically.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>SQP "natural migraine relief"</strong> showed 4.59% purchase share in Q3 2025 — disproportionately high for a mid-volume term (485/mo). Indicates strong buyer-to-product fit on this query.</span></div>
+      </div>
+
+      <div class="log-action do">
+        <strong>↑ Actions taken:</strong> Full listing audit completed. Title, all 5 bullets, description, and backend keywords rewritten and published May 13. All 18 ranked keywords verified before publishing. Dashboard built and hosted.
+      </div>
+    </div>
+
+  </div><!-- /log-entries -->
+</div>
+
+<script>
+// ── Product context ────────────────────────────────────────────────────
+const CTX = `PRODUCT: MiGuard Migraine Prevention Supplement (60 Capsules)
+ASIN: B0B9187Q4P | PRICE: $39.95 | RATING: 4.2★ | REVIEWS: 48
+BSR: #388 Pain Relief Homeopathic Remedies
+APRIL METRICS: Sessions 530 | Units 62 | Unit Session% 11.70% | Buy Box 100%
+SALES HISTORY (units): Apr'24:33 May:29 Jun:45 Jul:61 Aug:61 Sep:64 Oct:80 Nov:73 Dec:56 Apr'26:62
+FORMULA: Riboflavin B2, Magnesium, CoQ10, Alpha-Lipoic Acid, Feverfew, Ginger
+DOCTOR: Dr. Benjamin Taimoorazy, headache sub-specialist
+CLINICAL: Retrospective comparative clinical study — improvement in headache frequency at 90 days
+CERTIFICATIONS: Vegan, Non-GMO, Gluten-Free, GMP-Certified
+SQP Q4 2025: "migraine supplement" 219K vol 0.72% brand purchase share | "migraine prevention supplement" 38K vol 1.3% | "migraine relief" 269K vol 0.02%
+SQP Q3 2025: "migraine supplement" 196K 1.47% | "natural migraine relief" 4.59% purchase share
+TOP RANKING KWS: migraine supplement #23 | migraine prevention supplement #23 | migraine vitamin supplement #27 | migraine supplements for women #28 | natural remedies for migraines #1 | headache and migraine relief supplements #1 | natural supplements for migraine headaches #1
+VOC: positive: "reduced frequency/severity" "game-changer" "natural ingredients peace of mind" "energy improvement". Objections: bright yellow urine surprise (B2), 2-week expectation gap, need 4-8 weeks.
+COMPLIANCE — NEVER: "scientifically proven to relieve" "without side effects" "treats/cures" "anti-inflammatory" "heals"
+COMPLIANCE — SAFE: "clinically studied" "may help reduce" "in a retrospective comparative clinical study..." "supports head comfort" "doctor-formulated" "drug-free" "non-habit forming"`;
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function toggleLogForm() {
+  const form = document.getElementById('log-form');
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    // Set today's date
+    const today = new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+    document.getElementById('log-input-date').value = today;
+    form.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+function addLogEntry() {
+  const date = document.getElementById('log-input-date').value.trim();
+  const title = document.getElementById('log-input-title').value.trim();
+  const sources = document.getElementById('log-input-sources').value.trim();
+  const metrics = document.getElementById('log-input-metrics').value.trim();
+  const findings = document.getElementById('log-input-findings').value.trim();
+  const action = document.getElementById('log-input-action').value.trim();
+  const status = document.getElementById('log-save-status');
+
+  if (!date || !title) { status.textContent = '⚠ Date and title are required.'; status.style.color = 'var(--rose)'; return; }
+
+  // Build metrics HTML
+  let metricsHtml = '';
+  if (metrics) {
+    const metricRows = metrics.split('\n').filter(Boolean).map(line => {
+      const parts = line.split('|').map(s => s.trim());
+      const lbl = parts[0] || '';
+      const val = parts[1] || '';
+      const chg = parts[2] || '';
+      const cls = chg.startsWith('+') || chg.startsWith('↑') ? 'lm-up' : chg.startsWith('-') || chg.startsWith('↓') ? 'lm-down' : 'lm-flat';
+      return `<div class="log-metric"><div class="lm-lbl">${lbl}</div><div class="lm-val">${val}</div>${chg ? `<div class="lm-change ${cls}">${chg}</div>` : ''}</div>`;
+    }).join('');
+    metricsHtml = `<div class="log-metric-row">${metricRows}</div>`;
+  }
+
+  // Build findings HTML
+  let findingsHtml = '';
+  if (findings) {
+    const findingRows = findings.split('\n').filter(Boolean).map(line => {
+      const icon = line.match(/^(📈|✅|⚠|🔴|📋|💡)/)?.[0] || '📋';
+      const text = line.replace(/^(📈|✅|⚠|🔴|📋|💡)\s*/, '');
+      return `<div class="log-finding"><span class="fi">${icon}</span><span>${text}</span></div>`;
+    }).join('');
+    findingsHtml = `<div class="log-findings">${findingRows}</div>`;
+  }
+
+  // Build sources HTML
+  let sourcesHtml = '';
+  if (sources) {
+    sourcesHtml = sources.split(',').map(s => `<span class="log-source">${s.trim()}</span>`).join('');
+    sourcesHtml = `<div class="log-sources" style="margin-top:6px;">${sourcesHtml}</div>`;
+  }
+
+  // Build action HTML
+  const actionHtml = action ? `<div class="log-action do"><strong>↑ Actions / Watch:</strong> ${action}</div>` : '';
+
+  // Determine entry type from findings
+  const hasCritical = findings.includes('🔴');
+  const hasWarning = findings.includes('⚠');
+  const entryClass = hasCritical ? 'watch' : hasWarning ? 'mixed' : 'positive';
+
+  const entryHtml = `
+  <div class="log-entry ${entryClass}">
+    <div class="log-header">
+      <div>
+        <div class="log-title">${title}</div>
+        ${sourcesHtml}
+      </div>
+      <span class="log-date">${date}</span>
+    </div>
+    ${metricsHtml}
+    ${findingsHtml}
+    ${actionHtml}
+  </div>`;
+
+  // Insert at top of log entries
+  const container = document.getElementById('log-entries');
+  container.insertAdjacentHTML('afterbegin', entryHtml);
+
+  // Clear form
+  ['log-input-date','log-input-title','log-input-sources','log-input-metrics','log-input-findings','log-input-action']
+    .forEach(id => document.getElementById(id).value = '');
+
+  toggleLogForm();
+  status.textContent = '✓ Entry saved';
+  status.style.color = 'var(--green)';
+  setTimeout(() => status.textContent = '', 3000);
+}
+function getKey() { return document.querySelector('.api-key-global').value.trim(); }
+async function callClaude(user, sys, tokens=1500) {
+  const k = getKey();
+  if (!k) throw new Error('Paste your Anthropic API key in the header field first.');
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:tokens,system:sys,messages:[{role:'user',content:user}]})
+  });
+  if (!r.ok) { const j = await r.json().catch(()=>({})); throw new Error(j?.error?.message || 'HTTP '+r.status); }
+  const d = await r.json();
+  return d?.content?.find(b=>b.type==='text')?.text || '';
+}
+function copyEl(id, btnId) {
+  navigator.clipboard.writeText(document.getElementById(id).innerText).then(()=>{
+    const b = document.getElementById(btnId), o = b.textContent;
+    b.textContent='Copied!'; setTimeout(()=>b.textContent=o, 2000);
+  });
+}
+
+// ── Sales Chart ────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const sctx = document.getElementById('salesChart').getContext('2d');
+  const salesLabels = ["Jan '23","Feb '23","Mar '23","Apr '23","May '23","Jun '23","Jul '23","Aug '23","Sep '23","Oct '23","Nov '23","Dec '23","Jan '24","Feb '24","Mar '24","Apr '24","May '24","Jun '24","Jul '24","Aug '24","Sep '24","Oct '24","Nov '24","Dec '24","Jan '25","Feb '25","Mar '25","Apr '25","May '25","Jun '25","Jul '25","Aug '25","Sep '25","Oct '25","Nov '25","Dec '25","Jan '26","Feb '26","Mar '26","Apr '26"];
+  const unitsData = [13,5,15,0,13,10,19,20,16,21,18,13,12,17,24,20,7,17,20,10,16,12,19,15,23,22,28,33,29,45,61,61,69,80,73,57,92,62,68,65];
+  const revenueData = [779.35,299.75,899.35,0,779.35,599.50,1079.10,1199.00,959.20,1210.99,995.17,779.35,719.40,1019.15,1438.80,1199.00,419.65,1019.15,1007.16,599.50,959.20,683.43,1139.05,896.26,978.05,840.00,1092.66,1317.95,1158.55,1797.75,2357.05,2357.05,2869.75,3091.73,2982.49,2087.24,3374.75,2476.90,2368.08,2505.16];
+
+  new Chart(sctx, {
+    type: 'bar',
+    data: {
+      labels: salesLabels,
+      datasets: [
+        {
+          label: 'Units Ordered',
+          data: unitsData,
+          backgroundColor: unitsData.map((v, i) => {
+            if (i === 36 || i === 33 || i === 30) return 'rgba(36,233,163,0.95)'; // all-time highs: Jan'26, Oct'25, Jul'25
+            if (i >= 29) return 'rgba(0,31,96,0.75)'; // scale-up phase Jun'25+
+            if (i >= 26) return 'rgba(0,31,96,0.4)';  // early growth Mar-May'25
+            if (i === 25) return 'rgba(107,123,162,0.6)'; // Feb'25 listing update
+            return 'rgba(107,123,162,0.35)';            // baseline
+          }),
+          borderColor: unitsData.map((v, i) => {
+            if (i === 36 || i === 33 || i === 30) return 'rgba(36,233,163,1)';
+            if (i >= 29) return 'rgba(0,31,96,0.9)';
+            if (i >= 26) return 'rgba(0,31,96,0.6)';
+            if (i === 25) return 'rgba(107,123,162,0.9)';
+            return 'rgba(107,123,162,0.5)';
+          }),
+          borderWidth: 1,
+          borderRadius: 3,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Revenue',
+          data: revenueData,
+          type: 'line',
+          borderColor: 'rgba(107,123,162,0.9)',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [4,3],
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          tension: 0.3,
+          yAxisID: 'y2'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => c.dataset.label === 'Revenue' ? `Revenue: $${c.raw.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}` : `Units: ${c.raw}`
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, position: 'left', grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, stepSize: 20 }, title: { display: true, text: 'Units', font: { size: 10 }, color: 'rgba(0,31,96,0.8)' } },
+        y2: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { font: { size: 10 }, callback: v => '$' + (v/1000).toFixed(1) + 'k' }, title: { display: true, text: 'Revenue', font: { size: 10 }, color: 'rgba(107,123,162,0.9)' } },
+        x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 45 } }
+      }
+    }
+  });
+
+  const starCtx = document.getElementById('starChart').getContext('2d');
+  // Estimated from reviews: 5★ ~25, 4★ ~2, 3★ ~5, 2★ ~0, 1★ ~3
+  new Chart(starCtx, {
+    type:'bar',
+    data:{
+      labels:['5★','4★','3★','2★','1★'],
+      datasets:[{data:[25,5,7,2,3],
+        backgroundColor:['rgba(36,233,163,0.85)','rgba(36,233,163,0.5)','rgba(107,123,162,0.6)','rgba(184,64,64,0.4)','rgba(184,64,64,0.7)'],
+        borderRadius:4,borderWidth:0}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:12}}}}}
+  });
+});
+
+// ── Analyze / Regenerate ───────────────────────────────────────────────
+async function runAnalysis() {
+  const btn = document.getElementById('analyze-btn');
+  const status = document.getElementById('analyze-status');
+  const out = document.getElementById('opp-out');
+  btn.disabled=true; btn.textContent='Analyzing…';
+  status.textContent='Calling AI — 15–20 seconds…'; status.style.color='var(--ink3)';
+  const sys = `You are an expert Amazon brand manager for MiGuard.\n${CTX}\nGenerate exactly 5 priority opportunities. Format:\nPRIORITY: [High/Medium/Low] | CATEGORY: [tag]\nACTION: [specific action with exact keywords/numbers]\nIMPACT: [expected outcome]\n---\nRepeat 5 times. Be specific. Follow compliance rules. Never suggest drug claims.`;
+  const bsr=document.getElementById('upd-bsr').value, biz=document.getElementById('upd-biz').value, kw=document.getElementById('upd-kw').value, rev=document.getElementById('upd-rev').value;
+  try {
+    const text = await callClaude(`Generate 5 priority opportunities.\nBSR: ${bsr||'no change'}\nMetrics: ${biz||'no change'}\nKeywords: ${kw||'no change'}\nNew reviews: ${rev||'none'}`, sys, 1200);
+    const blocks = text.split('---').map(s=>s.trim()).filter(Boolean);
+    let html='';
+    blocks.forEach(b=>{
+      const pm=b.match(/PRIORITY:\s*(High|Medium|Low)/i), cm=b.match(/CATEGORY:\s*([^\n]+)/i), am=b.match(/ACTION:\s*([^\n]+(?:\n(?!IMPACT)[^\n]+)*)/i), im=b.match(/IMPACT:\s*([^\n]+)/i);
+      if(!pm) return;
+      const pri=pm[1], cat=cm?cm[1].trim():'', act=am?am[1].trim():b, imp=im?im[1].trim():'';
+      const cls=pri.toLowerCase()==='high'?'oh':pri.toLowerCase()==='medium'?'om':'ol';
+      html+=`<div class="opp ${cls}"><div class="opp-hdr"><span class="pri">${pri}</span><span class="otag">${cat}</span></div><div class="obody"><strong>${act}</strong>${imp?'<br><span style="color:var(--ink3);font-size:12px;">Expected: '+imp+'</span>':''}</div></div>`;
+    });
+    out.innerHTML = html || `<pre>${text}</pre>`;
+    document.getElementById('copy-opp-btn').style.display='inline-block';
+    status.textContent='✓ Insights regenerated'; status.style.color='var(--teal)';
+    document.getElementById('last-analyzed').textContent='Last analyzed: '+new Date().toLocaleString();
+  } catch(e){ status.textContent='⚠ '+e.message; status.style.color='var(--rose)'; }
+  finally{ btn.disabled=false; btn.textContent='Analyze + Regenerate Insights'; }
+}
+
+// ── Full Listing Audit ─────────────────────────────────────────────────
+async function runFullAudit() {
+  const btn=document.getElementById('full-audit-btn'), status=document.getElementById('audit-status'), out=document.getElementById('audit-output');
+  btn.disabled=true; btn.textContent='Generating…';
+  status.textContent='Generating full audit — 25–35 seconds…';
+  const sys = `You are an expert Amazon listing copywriter for MiGuard migraine supplement.\n${CTX}\n\nCRITICAL RANKING RULE: Every keyword MiGuard currently ranks for MUST be preserved in the rewrites. Do NOT remove any of these ranking phrases: "headache and migraine relief supplements" "drug free migraine prevention supplement" "natural supplements for migraine headaches" "migraine supplement" "migraine prevention supplement" "migraine vitamin supplement" "drug free migraine relief" "natural remedies for migraines"\n\nGenerate a complete listing audit:\n=== MIGUARD FULL LISTING AUDIT ===\nOVERALL SCORE: X/10\nVERDICT: [one sentence]\n\n--- TITLE ---\nCURRENT: [text]\nSCORE: X/10\nISSUES: [bullets]\nRANKING-SAFE REWRITE: [under 200 chars, preserves all existing ranking phrases]\n\n--- BULLET 1 through 5 ---\nCURRENT: [text]\nSCORE: X/10\nCOMPLIANCE: [pass/flag with note]\nRANKING-SAFE REWRITE: [under 500 chars, paste-ready]\n\n--- TOP 3 THIS-WEEK ACTIONS ---\n1. [specific action]\n2. [specific action]\n3. [specific action]\n\nBe specific. Cite numbers from SQP data and keyword data. All rewrites paste-ready for Seller Central.`;
+  try {
+    const text = await callClaude('Generate the full ranking-safe listing audit for MiGuard.', sys, 2200);
+    out.style.display='block'; out.innerHTML=`<pre>${text}</pre>`;
+    document.getElementById('copy-audit-btn').style.display='inline-block';
+    status.textContent='✓ Report generated'; status.style.color='var(--teal)';
+  } catch(e){ status.textContent='⚠ '+e.message; status.style.color='var(--rose)'; }
+  finally{ btn.disabled=false; btn.textContent='Generate Full Listing Audit Report'; }
+}
+
+// ── Review Analysis ────────────────────────────────────────────────────
+async function runReviewAnalysis() {
+  const btn=document.getElementById('review-btn'), status=document.getElementById('review-status'), out=document.getElementById('review-output');
+  const data=document.getElementById('review-input').value.trim();
+  if(!data){ status.textContent='⚠ Paste review data above first.'; status.style.color='var(--rose)'; return; }
+  btn.disabled=true; btn.textContent='Analyzing…'; status.textContent='Running VOC analysis — 20–30 seconds…';
+  const sys = `You are a VOC analyst for MiGuard.\n${CTX}\nAnalyze reviews and return:\n=== VOC ANALYSIS ===\nTOP POSITIVE THEMES (exact phrases to mirror in copy)\nTOP OBJECTIONS (specific frustrations — address proactively)\nUNMET NEEDS (positioning opportunities)\nPRICING SENTIMENT\nUSE CASE SIGNALS\nCOMPLIANCE FLAGS (any review language that cannot be used in bullets)\nCOPY RECOMMENDATIONS (5 exact phrases to use in listing)\n\nBe specific. Quote actual phrases. Never invent data.`;
+  try {
+    const text = await callClaude(`Analyze these reviews:\n\n${data}`, sys, 1500);
+    out.style.display='block'; out.innerHTML=`<pre>${text}</pre>`;
+    status.textContent='✓ VOC analysis complete'; status.style.color='var(--teal)';
+  } catch(e){ status.textContent='⚠ '+e.message; status.style.color='var(--rose)'; }
+  finally{ btn.disabled=false; btn.textContent='Analyze + Extract VOC Themes'; }
+}
+</script>
+</body>
+</html>
