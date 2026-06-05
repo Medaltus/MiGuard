@@ -6,6 +6,7 @@
 <title>MiGuard — Brand Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg:#F4F1EC;--bg2:#EDE8E3;--bg3:#FFFFFF;
@@ -29,7 +30,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-siz
 .api-row label{font-size:11px;color:rgba(244,241,236,0.45);text-transform:uppercase;letter-spacing:0.08em;}
 .api-row input{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#fff;border-radius:6px;padding:6px 12px;font-size:12px;font-family:var(--font-mono);width:210px;}
 .api-row input::placeholder{color:rgba(244,241,236,0.22);}
-.tab-nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 40px;overflow-x:auto;}
+.tab-nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 40px;overflow-x:auto;position:sticky;top:61px;z-index:99;}
 .tab-btn{background:none;border:none;border-bottom:3px solid transparent;padding:14px 20px;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;}
 .tab-btn:hover{color:var(--navy);}
 .tab-btn.active{color:var(--navy);border-bottom-color:var(--green);font-weight:600;}
@@ -151,7 +152,18 @@ table.data tr:hover td{background:var(--bg);}
 .sqp-wrap{overflow-x:auto;font-size:12.5px;}
 
 @media(max-width:900px){.two,.ug{grid-template-columns:1fr;}.site-header,.page{padding:16px 20px;}.tab-nav{padding:0 16px;}}
-/* ── INSIGHTS LOG ── */
+/* ── INSIGHTS UPLOAD PANEL ── */
+.log-upload-panel{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:20px;}
+.upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.upload-zone{background:var(--bg);border:2px dashed var(--silver);border-radius:10px;padding:20px 16px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.upload-zone:hover{border-color:var(--navy);background:var(--bg2);}
+.upload-zone.loaded{border-color:var(--green);border-style:solid;background:var(--teal-light);}
+.uz-icon{font-size:24px;margin-bottom:8px;}
+.uz-label{font-weight:600;font-size:13px;color:var(--navy);margin-bottom:3px;}
+.uz-sub{font-size:11.5px;color:var(--ink3);margin-bottom:6px;line-height:1.4;}
+.uz-formats{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);padding:2px 8px;background:var(--bg2);border-radius:20px;display:inline-block;}
+.uz-filename{font-size:11px;color:var(--navy);font-family:var(--font-mono);margin-top:8px;word-break:break-all;line-height:1.4;}
+@media(max-width:700px){.upload-grid{grid-template-columns:1fr;}}
 .log-entry{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:20px;position:relative;overflow:hidden;}
 .log-entry::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;}
 .log-entry.positive::before{background:var(--green);}
@@ -195,13 +207,10 @@ table.data tr:hover td{background:var(--bg);}
 
 <nav class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('overview',this)">Overview</button>
-  <button class="tab-btn" onclick="switchTab('product',this)">MiGuard</button>
-  <button class="tab-btn" onclick="switchTab('keywords',this)">Keywords</button>
-  <button class="tab-btn" onclick="switchTab('sqp',this)">Search Query</button>
+  <button class="tab-btn" onclick="switchTab('keywords',this)">Organic</button>
   <button class="tab-btn" onclick="switchTab('competitors',this)">Competitors</button>
   <button class="tab-btn" onclick="switchTab('ppc',this)">PPC</button>
   <button class="tab-btn" onclick="switchTab('listing',this)">Listing Audit</button>
-  <button class="tab-btn" onclick="switchTab('descbackend',this)">Description + Backend</button>
   <button class="tab-btn" onclick="switchTab('reviews',this)">Reviews</button>
   <button class="tab-btn" onclick="switchTab('insights',this)">Insights Log</button>
 </nav>
@@ -277,10 +286,11 @@ table.data tr:hover td{background:var(--bg);}
       </table>
     </div>
   </div>
-</div>
 
-<!-- ══ PRODUCT ══ -->
-<div id="tab-product" class="page">
+  <div style="border-top:2px solid var(--silver);margin-top:36px;padding-top:32px;">
+    <div style="font-family:var(--font-serif);font-size:22px;color:var(--navy);margin-bottom:6px;">MiGuard — Product Detail</div>
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:24px;">Pulse metrics, formula, competitive advantage, and AI opportunity panel</div>
+  </div>
   <div class="sec">
     <div class="sec-title">Pulse — April 2026 <span class="badge bg-amber">Current Period</span></div>
     <div class="pulse">
@@ -344,9 +354,10 @@ table.data tr:hover td{background:var(--bg);}
     <div id="analyze-status" class="smsg"></div>
     <div class="ts" id="last-analyzed"></div>
   </div>
+
 </div>
 
-<!-- ══ KEYWORDS ══ -->
+<!-- ══ PRODUCT ══ -->
 <div id="tab-keywords" class="page">
   <div class="sec">
     <div class="sec-title">Tier 1 — Core High-Intent <span class="badge bg-green">All PPC targets</span></div>
@@ -401,10 +412,11 @@ table.data tr:hover td{background:var(--bg);}
       </tbody>
     </table>
   </div>
-</div>
 
-<!-- ══ SEARCH QUERY PERFORMANCE ══ -->
-<div id="tab-sqp" class="page">
+  <div style="border-top:2px solid var(--silver);margin-top:8px;padding-top:8px;">
+    <div style="font-family:var(--font-serif);font-size:20px;color:var(--navy);margin-bottom:6px;padding:20px 0 0 0;">Search Query Performance</div>
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:20px;">Brand purchase share by query — Q4 2025, Q1 2026, and April 2026</div>
+  </div>
   <div class="alert">
     <span style="font-size:16px;flex-shrink:0;">📊</span>
     <span><strong>Search Query Performance data — Q4 2025 (top) and Q3 2025 (bottom).</strong> This is brand-level data from Seller Central showing where MiGuard appears in the search funnel and what % of category purchases it captures. Brand Share = MiGuard's clicks or purchases as % of total for that keyword.</span>
@@ -467,9 +479,10 @@ table.data tr:hover td{background:var(--bg);}
       <strong>4. Brand protection is solid.</strong> You own 100% of brand-term purchases. Protect the brand term with PPC just in case competitors start bidding on it.
     </div>
   </div>
+
 </div>
 
-<!-- ══ COMPETITORS ══ -->
+<!-- ══ SEARCH QUERY PERFORMANCE ══ -->
 <div id="tab-competitors" class="page">
   <div class="sec">
     <div class="sec-title">Current Competitors — Early-Stage Peers</div>
@@ -513,132 +526,169 @@ table.data tr:hover td{background:var(--bg);}
 <!-- ══ PPC ══ -->
 <div id="tab-ppc" class="page">
 
-  <div class="alert" style="background:var(--rose-light);border-color:rgba(184,64,64,0.3);color:#7A1F1F;">
-    <span style="font-size:16px;flex-shrink:0;">🚨</span>
-    <span><strong>May 2026 PPC is significantly underperforming.</strong> $190 spend generated only 3 orders at 158% ACoS. The core problem is structural — three high-ROAS brand keywords that drove most November revenue were dropped, replaced by 87 new targets (mostly ASIN product targeting) that generated zero sales. The campaign needs restructuring before increasing budget.</span>
+  <div class="alert" style="background:var(--teal-light);border-color:rgba(0,31,96,0.2);color:var(--navy);">
+    <span style="font-size:16px;flex-shrink:0;">📊</span>
+    <span><strong>7 months of PPC data reviewed: Nov 2025 – May 2026.</strong> The account has a clear anchor keyword, some proven high-efficiency terms that appear inconsistently, and a few patterns in the data that point to opportunities worth testing.</span>
   </div>
 
-  <!-- Summary comparison -->
-  <div class="cards">
-    <div class="card bad"><div class="lbl">May ACoS</div><div class="val">158%</div><div class="sub">Was 77% in Nov 2025</div></div>
-    <div class="card bad"><div class="lbl">May ROAS</div><div class="val">0.63x</div><div class="sub">Was 1.30x in Nov · losing money</div></div>
-    <div class="card bad"><div class="lbl">May Orders</div><div class="val">3</div><div class="sub">Was 17 in Nov (-82%)</div></div>
-    <div class="card warn"><div class="lbl">May Spend</div><div class="val">$190</div><div class="sub">Was $505 in Nov (-62%)</div></div>
-    <div class="card bad"><div class="lbl">May Conv%</div><div class="val">2.2%</div><div class="sub">Was 6.7% in Nov</div></div>
-    <div class="card warn"><div class="lbl">Keywords Active</div><div class="val">99</div><div class="sub">Was 68 in Nov — more, worse</div></div>
-  </div>
-
-  <div class="two">
-    <!-- Nov 2025 -->
-    <div class="sec">
-      <div class="sec-title">November 2025 — Baseline <span class="badge bg-amber">Pre-listing update</span></div>
-      <table class="data">
-        <thead><tr><th>Keyword</th><th>Spend</th><th>Sales</th><th>ACoS</th><th>ROAS</th><th>Orders</th></tr></thead>
-        <tbody>
-          <tr class="our"><td>miguard headache and migraine relief</td><td>$37.67</td><td>$231.71</td><td><span class="pill pill-g">16.3%</span></td><td>6.15x</td><td>6</td></tr>
-          <tr class="our"><td>miguard</td><td>$1.11</td><td>$39.95</td><td><span class="pill pill-g">2.8%</span></td><td>35.99x</td><td>1</td></tr>
-          <tr class="our"><td>miguard migraine and head ache relief</td><td>$11.02</td><td>$31.96</td><td><span class="pill pill-g">34.5%</span></td><td>2.90x</td><td>1</td></tr>
-          <tr class="our"><td>strong migraine pills</td><td>$2.62</td><td>$39.95</td><td><span class="pill pill-g">6.6%</span></td><td>15.24x</td><td>1</td></tr>
-          <tr class="our"><td>migraine relief products</td><td>$4.74</td><td>$39.95</td><td><span class="pill pill-g">11.9%</span></td><td>8.42x</td><td>1</td></tr>
-          <tr class="our"><td>migraine relief</td><td>$9.76</td><td>$39.95</td><td><span class="pill pill-g">24.4%</span></td><td>4.09x</td><td>1</td></tr>
-          <tr><td>migraine supplement</td><td>$97.34</td><td>$151.81</td><td><span class="pill pill-a">64.1%</span></td><td>1.55x</td><td>4</td></tr>
-          <tr><td>migraine prevention supplement</td><td>$49.11</td><td>$39.95</td><td><span class="pill pill-r">122.9%</span></td><td>0.81x</td><td>1</td></tr>
-          <tr><td>migraine prevention</td><td>$47.77</td><td>$39.95</td><td><span class="pill pill-r">119.6%</span></td><td>0.83x</td><td>1</td></tr>
-          <tr><td style="color:var(--rose);">migraine supplements prevention</td><td>$43.37</td><td>$0</td><td>—</td><td>—</td><td>0</td></tr>
-          <tr><td style="color:var(--rose);">natural migraine relief</td><td>$33.08</td><td>$0</td><td>—</td><td>—</td><td>0</td></tr>
-          <tr><td style="color:var(--rose);">migraine relief supplements</td><td>$22.10</td><td>$0</td><td>—</td><td>—</td><td>0</td></tr>
-        </tbody>
-      </table>
-      <div style="margin-top:10px;font-size:12px;color:var(--ink3);">Highlighted rows = keywords that were dropped by May 2026</div>
-    </div>
-
-    <!-- May 2026 -->
-    <div class="sec">
-      <div class="sec-title">May 2026 — Current <span class="badge bg-red">Needs restructure</span></div>
-      <table class="data">
-        <thead><tr><th>Keyword</th><th>Spend</th><th>Sales</th><th>ACoS</th><th>Orders</th><th>Status</th></tr></thead>
-        <tbody>
-          <tr class="our"><td>miguard headache and migraine relief</td><td>$24.30</td><td>$39.95</td><td><span class="pill pill-a">60.8%</span></td><td>1</td><td>✅ Keep</td></tr>
-          <tr class="our"><td>beta blocker for headaches</td><td>$1.76</td><td>$39.95</td><td><span class="pill pill-g">4.4%</span></td><td>1</td><td>✅ Scale</td></tr>
-          <tr class="our"><td>migraine care</td><td>$0.97</td><td>$39.95</td><td><span class="pill pill-g">2.4%</span></td><td>1</td><td>✅ Scale</td></tr>
-          <tr><td style="color:var(--rose);">migraine supplement</td><td>$21.64</td><td>$0</td><td>—</td><td>0</td><td>⚡ Exact only</td></tr>
-          <tr><td style="color:var(--rose);">migraine relief products</td><td>$6.63</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
-          <tr><td style="color:var(--rose);">migraine relief</td><td>$4.85</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
-          <tr><td style="color:var(--rose);">b000uy2bui (ASIN target)</td><td>$4.64</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
-          <tr><td style="color:var(--rose);">b0013ovxwq (ASIN target)</td><td>$3.05</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
-          <tr><td style="color:var(--rose);">migraine relief supplements</td><td>$3.96</td><td>$0</td><td>—</td><td>0</td><td>🔴 Pause</td></tr>
-          <tr><td colspan="5" style="font-size:11px;color:var(--ink3);font-style:italic;">+ 18 more ASIN targets (b0...) — all $0 sales</td><td>🔴 All pause</td></tr>
-          <tr><td colspan="5" style="font-size:11px;color:var(--ink3);font-style:italic;">+ 70 single-click keywords — all $0 sales</td><td>🔴 Review</td></tr>
-        </tbody>
-      </table>
-      <div style="margin-top:10px;font-size:12px;color:var(--ink3);">Highlighted rows = only converters</div>
-    </div>
-  </div>
-
-  <!-- Root cause -->
+  <!-- 7-month trend table -->
   <div class="sec">
-    <div class="sec-title">Root Cause Analysis</div>
-    <div class="two">
-      <div>
-        <div style="font-weight:600;color:var(--rose);margin-bottom:12px;font-size:13px;">What went wrong in May</div>
-        <div class="opp oh" style="margin-bottom:10px;">
-          <div class="opp-hdr"><span class="pri">Critical</span><span class="otag">Campaign Structure</span></div>
-          <div class="obody"><strong>"miguard" brand exact-match was dropped.</strong> In November this keyword had a 35.99x ROAS on just $1.11 of spend. Losing your brand term is the single most preventable mistake in PPC — it's your highest-intent, lowest-cost traffic. It was not in May at all.</div>
-        </div>
-        <div class="opp oh" style="margin-bottom:10px;">
-          <div class="opp-hdr"><span class="pri">Critical</span><span class="otag">Wasted Spend</span></div>
-          <div class="obody"><strong>22+ ASIN product-targeting campaigns generated $0 in sales on ~$35 combined spend.</strong> ASIN targeting works when you're targeting directly comparable products whose buyers would switch. The ASINs targeted here (MigreLief competitors etc.) are not a good match for MiGuard's natural/supplement positioning at $39.95 against $29.99 OTC alternatives.</div>
-        </div>
-        <div class="opp om">
-          <div class="opp-hdr"><span class="pri">Medium</span><span class="otag">Budget</span></div>
-          <div class="obody"><strong>Budget was cut 62% ($505 → $190) while keyword count expanded 45% (68 → 99).</strong> Less budget spread across more keywords means no keyword got enough impressions to find its conversion floor. The fragmentation made the data unreadable and the campaign unoptimizable.</div>
-        </div>
-      </div>
-      <div>
-        <div style="font-weight:600;color:var(--navy);margin-bottom:12px;font-size:13px;">Restructure priority list</div>
-        <table class="data" style="font-size:12.5px;">
-          <thead><tr><th>Action</th><th>Keyword</th><th>Reason</th></tr></thead>
-          <tbody>
-            <tr><td><span class="pill pill-r">Restore</span></td><td>miguard (exact)</td><td>35.99x ROAS in Nov — must protect brand</td></tr>
-            <tr><td><span class="pill pill-r">Restore</span></td><td>miguard headache and migraine relief</td><td>Best volume converter both months</td></tr>
-            <tr><td><span class="pill pill-r">Restore</span></td><td>strong migraine pills</td><td>15.24x ROAS in Nov — dropped with no reason</td></tr>
-            <tr><td><span class="pill pill-g">Scale</span></td><td>beta blocker for headaches</td><td>4.4% ACoS in May — increase bid + budget</td></tr>
-            <tr><td><span class="pill pill-g">Scale</span></td><td>migraine care</td><td>2.4% ACoS in May — increase bid + budget</td></tr>
-            <tr><td><span class="pill pill-a">Fix</span></td><td>migraine supplement</td><td>Switch to exact-match only, bid $1.20 max</td></tr>
-            <tr><td><span class="pill pill-a">Add</span></td><td>migraine prevention supplement</td><td>Rank #25, 62.5% ABA, low comp (490)</td></tr>
-            <tr><td><span class="pill pill-a">Add</span></td><td>feverfew for migraines</td><td>Rank #75, 43.5% ABA, only 132 competing</td></tr>
-            <tr><td><span class="pill pill-r">Pause all</span></td><td>All b0... ASIN targets</td><td>22 keywords, $35+ spend, $0 sales</td></tr>
-            <tr><td><span class="pill pill-r">Pause</span></td><td>migraine relief (broad)</span></td><td>OTC drugs dominate, 0 conversions May</td></tr>
-          </tbody>
-        </table>
-        <div style="margin-top:12px;padding:12px 14px;background:var(--teal-light);border-radius:8px;font-size:12.5px;color:var(--navy);line-height:1.7;">
-          <strong>Target ACoS: 60–70%</strong> at $39.95 price point. At a ~50% margin that means breaking even on first purchase — acceptable given LTV from repeat buyers and review velocity. Once conv% recovers to 6%+ on the restructured campaign, tighten to 50%.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Nov vs May signal keywords -->
-  <div class="sec">
-    <div class="sec-title">Keywords Dropped Nov → May That Had Proven ROAS</div>
-    <div class="alert" style="background:var(--sand);">
-      <span style="font-size:15px;flex-shrink:0;">📌</span>
-      <span>These keywords were active and converting in November but were absent from May entirely. They should be restored before any other campaign work.</span>
-    </div>
+    <div class="sec-title">7-Month Performance Trend</div>
+    <div style="overflow-x:auto;">
     <table class="data">
-      <thead><tr><th>Keyword</th><th>Nov Spend</th><th>Nov Sales</th><th>Nov ACoS</th><th>Nov ROAS</th><th>Nov Orders</th><th>May Status</th></tr></thead>
+      <thead><tr><th>Month</th><th>Spend</th><th>PPC Sales</th><th>ACoS</th><th>ROAS</th><th>Orders</th><th>Conv%</th><th>Keywords</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td><strong>miguard</strong></td><td>$1.11</td><td>$39.95</td><td><span class="pill pill-g">2.8%</span></td><td>35.99x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
-        <tr><td><strong>miguard migraine and head ache relief</strong></td><td>$11.02</td><td>$31.96</td><td><span class="pill pill-g">34.5%</span></td><td>2.90x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
-        <tr><td><strong>strong migraine pills</strong></td><td>$2.62</td><td>$39.95</td><td><span class="pill pill-g">6.6%</span></td><td>15.24x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
-        <tr><td><strong>migraine relief products</strong></td><td>$4.74</td><td>$39.95</td><td><span class="pill pill-g">11.9%</span></td><td>8.42x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
-        <tr><td><strong>migraine relief</strong></td><td>$9.76</td><td>$39.95</td><td><span class="pill pill-g">24.4%</span></td><td>4.09x</td><td>1</td><td><span class="pill pill-r">Dropped</span></td></tr>
+        <tr><td><strong>Nov '25</strong></td><td>$505</td><td>$655</td><td><span class="pill pill-a">77%</span></td><td>1.30x</td><td>17</td><td>6.7%</td><td>68</td><td>Strong brand term performance</td></tr>
+        <tr><td><strong>Dec '25</strong></td><td>$373</td><td>$479</td><td><span class="pill pill-a">78%</span></td><td>1.28x</td><td>11</td><td>6.6%</td><td>48</td><td>Anchor KW carrying 50% of revenue</td></tr>
+        <tr class="our"><td><strong>Jan '26</strong></td><td>$643</td><td>$918</td><td><span class="pill pill-a">70%</span></td><td>1.43x</td><td>22</td><td>6.4%</td><td>107</td><td>↑ Highest PPC sales month · anchor KW $399</td></tr>
+        <tr><td><strong>Feb '26</strong></td><td>$424</td><td>$639</td><td><span class="pill pill-a">66%</span></td><td>1.51x</td><td>13</td><td>5.5%</td><td>147</td><td>Anchor KW $239 at 9% ACoS</td></tr>
+        <tr class="our"><td><strong>Mar '26</strong></td><td>$254</td><td>$673</td><td><span class="pill pill-g">38%</span></td><td>2.65x</td><td>17</td><td>8.0%</td><td>143</td><td>↑ Best ACoS · 13 different converting keywords</td></tr>
+        <tr><td><strong>Apr '26</strong></td><td>$205</td><td>$360</td><td><span class="pill pill-a">57%</span></td><td>1.76x</td><td>9</td><td>5.1%</td><td>130</td><td>Listing update live mid-month</td></tr>
+        <tr><td><strong>May '26</strong></td><td>$190</td><td>$120</td><td><span class="pill pill-r">158%</span></td><td>0.63x</td><td>3</td><td>2.2%</td><td>99</td><td>Listing update still re-indexing</td></tr>
       </tbody>
     </table>
+    </div>
+    <div style="margin-top:12px;padding:12px 16px;background:var(--bg);border-radius:8px;font-size:13px;color:var(--ink2);line-height:1.7;">
+      Company ACoS target: <strong>30%</strong>. TACOS target: <strong>10–15%</strong>. TACOS held between 8–19% across Nov '25–Apr '26 — within or near target range — while ACoS ran higher during that same window, reflecting a healthy organic/PPC sales mix.
+    </div>
+  </div>
+
+  <!-- Anchor keyword -->
+  <div class="sec">
+    <div class="sec-title">The Anchor Keyword — "miguard headache and migraine relief"</div>
+    <p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:16px;">This single keyword has been the top PPC revenue driver in every month it ran. Its ACoS has improved consistently as its conversion history built — from 16% in November down to 7–8% by March–April. The CPC rose from $1.29 (Nov) to $2.00–$2.45 (Jan–Feb) before coming back down to $1.62 in March, which likely reflects competitive bid pressure on a high-converting term. Opportunity: this keyword has historically produced its best results when given consistent budget rather than variable allocation.</p>
+    <table class="data">
+      <thead><tr><th>Month</th><th>Spend</th><th>Sales</th><th>ACoS</th><th>Orders</th><th>CPC</th><th>% of Total PPC Sales</th></tr></thead>
+      <tbody>
+        <tr><td>Nov '25</td><td>$37.67</td><td>$231.71</td><td><span class="pill pill-g">16%</span></td><td>6</td><td>$1.29</td><td>35%</td></tr>
+        <tr><td>Dec '25</td><td>$35.12</td><td>$239.70</td><td><span class="pill pill-g">15%</span></td><td>5</td><td>$2.06</td><td>50%</td></tr>
+        <tr><td>Jan '26</td><td>$56.11</td><td>$399.50</td><td><span class="pill pill-g">14%</span></td><td>10</td><td>$2.00</td><td>43%</td></tr>
+        <tr><td>Feb '26</td><td>$22.12</td><td>$239.70</td><td><span class="pill pill-g">9%</span></td><td>6</td><td>$2.45</td><td>38%</td></tr>
+        <tr><td>Mar '26</td><td>$11.35</td><td>$159.80</td><td><span class="pill pill-g">7%</span></td><td>4</td><td>$1.62</td><td>24%</td></tr>
+        <tr><td>Apr '26</td><td>$6.40</td><td>$79.90</td><td><span class="pill pill-g">8%</span></td><td>2</td><td>$2.13</td><td>22%</td></tr>
+        <tr><td>May '26</td><td>$24.30</td><td>$39.95</td><td><span class="pill pill-a">61%</span></td><td>1</td><td>$4.86</td><td>33%</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;padding:12px 16px;background:var(--teal-light);border-radius:8px;font-size:13px;color:var(--navy);line-height:1.7;">
+      <strong>What the trend shows:</strong> ACoS on this keyword improved every month from Nov (16%) through Mar (7%) as conversion history accumulated. The CPC spike in Jan–Feb ($2.00–$2.45) reflects competitive pressure — common when a keyword establishes a strong conversion record. One option worth considering: setting a manual bid ceiling here ($1.50–1.75) to maintain consistent presence without paying peak competitive rates.
+    </div>
+  </div>
+
+  <!-- "migraine supplement" pattern -->
+  <div class="sec">
+    <div class="sec-title">"migraine supplement" — Efficiency at Different Spend Levels</div>
+    <p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:16px;">This keyword shows an interesting pattern across the dataset — performance varies significantly depending on spend level, which typically reflects match type and bid behavior. Worth looking at as a signal for how to structure it going forward.</p>
+    <table class="data">
+      <thead><tr><th>Month</th><th>Spend</th><th>Sales</th><th>ACoS</th><th>CPC</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>Nov '25</td><td>$97.34</td><td>$151.81</td><td><span class="pill pill-a">64%</span></td><td>$1.43</td><td>4 orders — best absolute return at high spend</td></tr>
+        <tr><td>Dec '25</td><td>$109.76</td><td>$79.90</td><td><span class="pill pill-r">137%</span></td><td>$2.33</td><td>2 orders — efficiency dropped sharply</td></tr>
+        <tr><td>Jan '26</td><td>$138.55</td><td>$79.90</td><td><span class="pill pill-r">173%</span></td><td>$1.75</td><td>2 orders — highest spend, lowest efficiency</td></tr>
+        <tr><td>Feb '26</td><td>$54.19</td><td>$39.95</td><td><span class="pill pill-r">136%</span></td><td>$2.16</td><td>1 order</td></tr>
+        <tr class="our"><td>Mar '26</td><td>$12.33</td><td>$31.96</td><td><span class="pill pill-g">39%</span></td><td>$0.88</td><td>↑ Best ACoS — lower spend, lower CPC</td></tr>
+        <tr class="our"><td>Apr '26</td><td>$6.25</td><td>$39.95</td><td><span class="pill pill-g">16%</span></td><td>$1.04</td><td>↑ Best ACoS — 1 order on minimal spend</td></tr>
+        <tr><td>May '26</td><td>$21.64</td><td>$0</td><td>—</td><td>$1.80</td><td>0 orders</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;padding:12px 16px;background:var(--teal-light);border-radius:8px;font-size:13px;color:var(--navy);line-height:1.7;">
+      <strong>Pattern:</strong> Mar and Apr show this keyword converting well at low spend and low CPC ($0.88–$1.04), which typically suggests exact-match behavior where impressions are fewer but intent is higher. The higher-spend months (Dec–Feb) show the opposite — more spend, worse efficiency, likely from broad match pulling in lower-intent traffic. Testing exact-match only with a capped daily budget ($5–8/day) may capture the Mar/Apr efficiency more consistently.
+    </div>
+  </div>
+
+  <!-- High-efficiency discoveries -->
+  <div class="sec">
+    <div class="sec-title">High-Efficiency Keywords Appearing Across the Dataset</div>
+    <p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:16px;">Several keywords converted at very low ACoS across multiple months, often with just 1–2 clicks and minimal spend. These appear sporadically rather than consistently — likely because they're catching high-intent, brand-adjacent searches at low CPCs. Keeping these active with small consistent budgets may capture that efficiency more reliably.</p>
+    <table class="data">
+      <thead><tr><th>Keyword</th><th>Month</th><th>Spend</th><th>Sales</th><th>ACoS</th><th>CPC</th></tr></thead>
+      <tbody>
+        <tr><td>mi guard migraine relief</td><td>Feb '26</td><td>$0.88</td><td>$159.80</td><td><span class="pill pill-g">1%</span></td><td>$0.88</td></tr>
+        <tr><td>miguard headache</td><td>Mar '26</td><td>$0.86</td><td>$31.96</td><td><span class="pill pill-g">3%</span></td><td>$0.86</td></tr>
+        <tr><td>migraine care</td><td>Apr '26 + May '26</td><td>$0.97</td><td>$39.95</td><td><span class="pill pill-g">2%</span></td><td>$0.97</td></tr>
+        <tr><td>beta blocker for headaches</td><td>May '26</td><td>$1.76</td><td>$39.95</td><td><span class="pill pill-g">4%</span></td><td>$1.76</td></tr>
+        <tr><td>migraine relief products natural</td><td>Mar '26</td><td>$2.08</td><td>$79.90</td><td><span class="pill pill-g">3%</span></td><td>$2.08</td></tr>
+        <tr><td>mi guard for headaches</td><td>Mar '26</td><td>$0.77</td><td>$39.95</td><td><span class="pill pill-g">2%</span></td><td>$0.77</td></tr>
+        <tr><td>headache hat</td><td>Mar '26</td><td>$0.72</td><td>$31.96</td><td><span class="pill pill-g">2%</span></td><td>$0.72</td></tr>
+        <tr><td>migraine relief cap</td><td>Jan + Mar '26</td><td>$5.27 / $3.99</td><td>$79.90 / $39.95</td><td><span class="pill pill-g">7% / 10%</span></td><td>$0.66–$1.33</td></tr>
+        <tr><td>migraine medicine</td><td>Mar '26</td><td>$2.69</td><td>$33.96</td><td><span class="pill pill-g">8%</span></td><td>$0.89</td></tr>
+        <tr><td>strong migraine pills</td><td>Nov '25</td><td>$2.62</td><td>$39.95</td><td><span class="pill pill-g">7%</span></td><td>$1.31</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;padding:12px 16px;background:var(--teal-light);border-radius:8px;font-size:13px;color:var(--navy);line-height:1.7;">
+      <strong>March '26 stands out:</strong> 13 different keywords converted that month — the most in the 7-month dataset — contributing to the best ACoS (38%) and a healthy $811 net profit. When the converting keyword base is wider, the account is less dependent on any single term and individual CPC fluctuations have less impact.
+    </div>
+  </div>
+
+  <!-- ASIN targeting context -->
+  <div class="sec">
+    <div class="sec-title">ASIN Product Targeting — May 2026 Results</div>
+    <p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:16px;">22+ product targeting keywords (b0... ASIN format) were active in May '26. Combined spend across these was approximately $30–35 with $0 in attributed sales. ASIN targeting can work well in certain contexts — it's worth reviewing whether the targeted ASINs are priced comparably to MiGuard ($39.95) and whether those product pages attract buyers who are considering a supplement purchase vs. an OTC or device alternative. The results from May suggest the current target selection may not be the right fit, but the match type itself isn't necessarily the issue.</p>
+    <div style="padding:12px 16px;background:var(--bg);border-radius:8px;font-size:13px;color:var(--ink2);line-height:1.7;">
+      <strong>One consideration:</strong> ASIN targeting tends to work best when the targeted product is a close substitute (similar price, similar form factor, similar use case). Targeting products priced significantly lower or in a different category (e.g., topical patches vs. oral supplements) typically sees lower conversion because the buyer intent doesn't transfer well.
+    </div>
+  </div>
+
+  <!-- Opportunity summary -->
+  <div class="sec">
+    <div class="sec-title">Data-Informed Opportunities <span class="badge bg-amber">For discussion</span></div>
+    <div class="opp ol" style="margin-bottom:10px;">
+      <div class="opp-hdr"><span class="pri" style="color:var(--navy);">Opportunity</span><span class="otag">Anchor keyword consistency</span></div>
+      <div class="obody">The anchor keyword ("miguard headache and migraine relief") improved its ACoS from 16% to 7–8% over 5 months as conversion history built. Maintaining consistent presence on this term — even at controlled bid levels — may continue that efficiency curve. A fixed manual bid ceiling ($1.50–1.75) could help manage CPC spikes while keeping it active.</div>
+    </div>
+    <div class="opp ol" style="margin-bottom:10px;">
+      <div class="opp-hdr"><span class="pri" style="color:var(--navy);">Opportunity</span><span class="otag">Keyword diversity — March model</span></div>
+      <div class="obody">March '26 had 13 converting keywords, the best ACoS (38%), and strong net profit ($811) — with lower total spend ($254) than most months. The keyword distribution that month reduced dependence on the anchor term. Understanding what drove that diversity (match types, campaign structure, bid strategy) could help replicate it.</div>
+    </div>
+    <div class="opp ol" style="margin-bottom:10px;">
+      <div class="opp-hdr"><span class="pri" style="color:var(--navy);">Opportunity</span><span class="otag">"migraine supplement" match type test</span></div>
+      <div class="obody">This keyword shows a strong inverse relationship between spend level/CPC and efficiency. Mar and Apr results (39% and 16% ACoS at $0.88–$1.04 CPC) contrast with Dec–Feb results (137–173% ACoS at $1.75–$2.33 CPC). A controlled exact-match test at a capped daily budget could isolate whether the efficiency difference is match type, bid level, or both.</div>
+    </div>
+    <div class="opp ol" style="margin-bottom:10px;">
+      <div class="opp-hdr"><span class="pri" style="color:var(--navy);">Opportunity</span><span class="otag">Low-CPC brand-adjacent terms</span></div>
+      <div class="obody">Terms like "mi guard migraine relief" (1% ACoS), "migraine care" (2%), "beta blocker for headaches" (4%), and "headache hat" (2%) appear sporadically and convert efficiently at very low CPCs ($0.72–$1.76). Grouping these in a dedicated exact-match campaign with small consistent budgets may surface their efficiency more reliably rather than leaving them to appear by chance.</div>
+    </div>
+    <div class="opp ol">
+      <div class="opp-hdr"><span class="pri" style="color:var(--navy);">Opportunity</span><span class="otag">TACOS as the primary efficiency signal</span></div>
+      <div class="obody">TACOS held between 8–19% across all of Nov '25–Apr '26 — consistently within or near the 10–15% target — while ACoS ran higher. This reflects organic sales absorbing a meaningful share of total revenue, making PPC a proportionally smaller contributor. TACOS may be the more stable indicator for this account's current organic/PPC mix.</div>
+    </div>
+  </div>
+
+
+  <!-- PPC for ranking velocity -->
+  <div class="sec">
+    <div class="sec-title">PPC as a Ranking Tool — Organic Plateau Context</div>
+    <p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:16px;">Organic growth ran strongly from Jun '25 through Jan '26 — unit sales climbed from 45 to 92. Since then, monthly units have held in the 62–68 range. This kind of plateau after a growth run is common and typically reflects the listing reaching the ceiling of its current organic rank on key terms. PPC can play a direct role in breaking through that ceiling by generating conversion velocity on specific keywords, which signals Amazon to move the organic rank up.</p>
+    <div class="two">
+      <div>
+        <div style="font-weight:600;color:var(--navy);margin-bottom:10px;font-size:13px;">How PPC drives organic rank movement</div>
+        <div style="font-size:13px;color:var(--ink2);line-height:1.85;">
+          Amazon's A9 algorithm weights recent sales velocity per keyword when determining organic rank. A PPC conversion on "migraine supplement" tells Amazon that buyers searching that term purchased MiGuard — which improves the organic rank for that exact term over time. This is why high-spend months like Jan '26 ($643 spend, 22 PPC orders) often precede organic rank improvements that show up 2–4 weeks later in the keyword tracker.
+          <br><br>
+          The organic plateau since Feb '26 corresponds to a period of declining PPC orders (13 → 9 → 3). This doesn't mean PPC caused the plateau — but it does mean PPC isn't currently supplying the conversion velocity needed to push key terms higher.
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:600;color:var(--navy);margin-bottom:10px;font-size:13px;">Keywords closest to page 1 — highest leverage</div>
+        <table class="data" style="font-size:12.5px;">
+          <thead><tr><th>Keyword</th><th>Rank</th><th>Vol/mo</th><th>Gap to p.1</th></tr></thead>
+          <tbody>
+            <tr class="our"><td><strong>migraine supplement</strong></td><td>#28</td><td>1,173</td><td>~18 positions</td></tr>
+            <tr class="our"><td><strong>migraine supplements for women</strong></td><td>#23</td><td>558</td><td>~13 positions</td></tr>
+            <tr><td>migraine prevention supplement</td><td>#25</td><td>465</td><td>~15 positions</td></tr>
+            <tr><td>migraine prevention</td><td>#29</td><td>455</td><td>~19 positions</td></tr>
+            <tr><td>migraine vitamins</td><td>#36</td><td>551</td><td>~26 positions</td></tr>
+            <tr><td>feverfew for migraines</td><td>#75</td><td>669</td><td>132 competing — winnable</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;font-size:12.5px;color:var(--ink2);line-height:1.65;">Focused PPC spend on these exact terms — not broad variations — is the most direct way to generate the keyword-specific conversions Amazon needs to move organic ranks. Even 2–3 additional PPC orders/month on "migraine supplement" (exact match) would add meaningful conversion signal.</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:14px 18px;background:var(--teal-light);border-radius:8px;font-size:13px;color:var(--navy);line-height:1.75;">
+      <strong>The connection to TACOS:</strong> As organic rank improves on high-volume terms, organic sessions increase — which raises total sales without proportionally raising ad spend. This is the mechanism that brings TACOS down over time. PPC orders on the right keywords today are an investment in lower TACOS 30–60 days from now.
+    </div>
   </div>
 
 </div>
-
 <div id="tab-listing" class="page">
 
   <div class="alert" style="background:var(--teal-light);border-color:rgba(0,31,96,0.2);color:var(--navy);">
@@ -784,9 +834,11 @@ table.data tr:hover td{background:var(--bg);}
     <div id="audit-status" class="smsg"></div>
     <div id="audit-output" class="abox" style="margin-top:16px;display:none;"></div>
   </div>
-</div>
 
-<div id="tab-descbackend" class="page">
+  <div style="border-top:2px solid var(--silver);margin-top:8px;padding-top:8px;">
+    <div style="font-family:var(--font-serif);font-size:20px;color:var(--navy);margin-bottom:6px;padding:20px 0 0 0;">Description + Backend Keywords</div>
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:20px;">Live SEO description and optimized backend keyword string</div>
+  </div>
 
   <div class="alert" style="background:var(--teal-light);border-color:rgba(0,31,96,0.2);color:var(--navy);">
     <span style="font-size:16px;flex-shrink:0;">✅</span>
@@ -869,10 +921,10 @@ table.data tr:hover td{background:var(--bg);}
     </div>
   </div>
 
+
+
+
 </div>
-
-
-<!-- ══ REVIEWS ══ -->
 <div id="tab-reviews" class="page">
 
   <!-- VOC Summary from actual reviews -->
@@ -990,273 +1042,192 @@ table.data tr:hover td{background:var(--bg);}
     <span><strong>Running insights log.</strong> Each entry records what data was reviewed, what the numbers showed, and what to watch or action next. Newest entries at the top. Add a new entry whenever you pull fresh reports.</span>
   </div>
 
-  <!-- ADD NEW ENTRY BUTTON -->
-  <div class="log-add-btn" onclick="toggleLogForm()">
-    <div style="font-size:22px;">+</div>
-    <p>Add new insight entry</p>
+  <!-- UPLOAD + AI SCAN SECTION -->
+  <div class="log-upload-panel" id="log-upload-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-family:var(--font-serif);font-size:18px;color:var(--navy);margin-bottom:4px;">Weekly Insights Scan</div>
+        <div style="font-size:12.5px;color:var(--ink3);">Upload this week's reports — AI will analyze and generate a draft entry for you to review and edit before publishing.</div>
+      </div>
+      <button class="btn2" onclick="toggleUploadPanel()" id="upload-toggle-btn">+ Upload &amp; Scan</button>
+    </div>
+
+    <!-- Upload form — hidden by default -->
+    <div id="upload-form" style="display:none;">
+      <div class="upload-grid">
+
+        <div class="upload-zone" id="zone-br" onclick="triggerUpload('file-br')">
+          <div class="uz-icon">📊</div>
+          <div class="uz-label">Business Report</div>
+          <div class="uz-sub">Sessions · Units · Conv% · Revenue</div>
+          <div class="uz-formats">CSV or XLSX</div>
+          <div class="uz-filename" id="fname-br"></div>
+          <input type="file" id="file-br" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleFileSelect('br', this)" />
+        </div>
+
+        <div class="upload-zone" id="zone-kw" onclick="triggerUpload('file-kw')">
+          <div class="uz-icon">🔑</div>
+          <div class="uz-label">Keyword Tracker</div>
+          <div class="uz-sub">Organic ranks · Search volume · ABA% · Select multiple files if needed</div>
+          <div class="uz-formats">CSV or XLSX · Multi-select OK</div>
+          <div class="uz-filename" id="fname-kw"></div>
+          <input type="file" id="file-kw" accept=".csv,.xlsx,.xls" style="display:none;" multiple onchange="handleKwFiles(this)" />
+        </div>
+
+        <div class="upload-zone" id="zone-ads" onclick="triggerUpload('file-ads')">
+          <div class="uz-icon">📣</div>
+          <div class="uz-label">Ads Search Terms Report</div>
+          <div class="uz-sub">Spend · Sales · ACoS · Orders</div>
+          <div class="uz-formats">CSV or XLSX</div>
+          <div class="uz-filename" id="fname-ads"></div>
+          <input type="file" id="file-ads" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleFileSelect('ads', this)" />
+        </div>
+
+      </div>
+
+      <div style="margin-top:16px;">
+        <div class="ulbl" style="margin-bottom:6px;">Context / Notes for this scan (optional)</div>
+        <textarea id="scan-context" rows="2" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-sans);font-size:13px;color:var(--ink);resize:vertical;" placeholder="e.g. Listing updates went live June 10. PPC budget increased this week. Watching migraine supplement rank movement."></textarea>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;">
+        <button class="btn" id="scan-btn" onclick="runInsightsScan()">
+          <span id="scan-btn-text">✦ Generate Insights Entry</span>
+        </button>
+        <button class="btn2" onclick="toggleUploadPanel()">Cancel</button>
+        <span id="scan-status" class="smsg" style="margin-top:0;"></span>
+      </div>
+    </div>
   </div>
 
-  <!-- QUICK ADD FORM -->
-  <div class="log-form" id="log-form">
-    <div class="sec-title" style="font-family:var(--font-serif);font-size:18px;color:var(--navy);margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--silver);">New Insight Entry</div>
-    <div class="ug">
-      <div>
-        <div class="ulbl">Date</div>
-        <input type="text" id="log-input-date" placeholder="e.g. June 1, 2026" style="min-height:auto;font-size:13px;" />
+  <!-- PREVIEW PANEL — shown after AI generates draft -->
+  <div id="preview-panel" style="display:none;margin-bottom:24px;">
+    <div class="sec" style="border:2px solid var(--green);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-family:var(--font-serif);font-size:18px;color:var(--navy);margin-bottom:3px;">Review Draft Entry</div>
+          <div style="font-size:12.5px;color:var(--ink3);">Edit any field below before publishing to the log. Changes you make here are final.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" onclick="publishEntry()">✓ Publish to Log</button>
+          <button class="btn2" onclick="discardPreview()">Discard</button>
+        </div>
       </div>
-      <div>
-        <div class="ulbl">Title</div>
-        <input type="text" id="log-input-title" placeholder="e.g. May Business Report + Q1 SQP Review" style="min-height:auto;font-size:13px;" />
+
+      <!-- Editable title + date row -->
+      <div class="ug" style="margin-bottom:16px;">
+        <div>
+          <div class="ulbl">Entry Title</div>
+          <input type="text" id="preview-title" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-sans);font-size:13px;color:var(--ink);min-height:auto;" />
+        </div>
+        <div>
+          <div class="ulbl">Date</div>
+          <input type="text" id="preview-date" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-sans);font-size:13px;color:var(--ink);min-height:auto;" />
+        </div>
       </div>
-    </div>
-    <div style="margin-bottom:14px;">
-      <div class="ulbl">Data Sources (comma separated)</div>
-      <input type="text" id="log-input-sources" placeholder="e.g. May Business Report, Q1 2026 SQP, Helium 10 KW Tracker" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);min-height:auto;" />
-    </div>
-    <div style="margin-bottom:14px;">
-      <div class="ulbl">Key Metrics (one per line: Label | Value | Change)</div>
-      <textarea id="log-input-metrics" rows="4" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;" placeholder="Sessions | 557 | +5.1%&#10;Units | 58 | -6.5%&#10;Conv% | 10.41% | -1.29pp&#10;Revenue | $2,317 | -6.5%"></textarea>
-    </div>
-    <div style="margin-bottom:14px;">
-      <div class="ulbl">Findings (one per line — prefix with ✅ 📈 ⚠ or 🔴)</div>
-      <textarea id="log-input-findings" rows="5" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;" placeholder="📈 Sessions grew +5.1% — traffic improving&#10;⚠ Conv% dropped to 10.41% — listing changes mid-month blending&#10;✅ Brand term purchases grew Q4→Q1: 14→20 on miguard search&#10;⚠ migraine supplement: only 3 purchases Q1 at 0.9% share"></textarea>
-    </div>
-    <div style="margin-bottom:16px;">
-      <div class="ulbl">Action / Watch (what to do or monitor next)</div>
-      <textarea id="log-input-action" rows="3" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;" placeholder="Watch June conv% — if still below 11% the listing copy needs revision&#10;Pull fresh KW tracker in 30 days to check migraine supplement rank movement"></textarea>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center;">
-      <button class="btn" onclick="addLogEntry()">Save Entry</button>
-      <button class="btn2" style="margin-left:0;" onclick="toggleLogForm()">Cancel</button>
-      <span id="log-save-status" class="smsg" style="margin-top:0;margin-left:4px;"></span>
+
+      <!-- Editable metrics -->
+      <div style="margin-bottom:16px;">
+        <div class="ulbl" style="margin-bottom:6px;">Key Metrics (one per line: Label | Value | Change)</div>
+        <textarea id="preview-metrics" rows="5" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;"></textarea>
+      </div>
+
+      <!-- Editable findings -->
+      <div style="margin-bottom:16px;">
+        <div class="ulbl" style="margin-bottom:6px;">Findings (prefix each line with ✅ 📈 ⚠ or 🔴)</div>
+        <div style="font-size:11.5px;color:var(--ink3);margin-bottom:6px;">Review each finding for tone — these will be visible to the full team.</div>
+        <textarea id="preview-findings" rows="8" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);resize:vertical;"></textarea>
+      </div>
+
+      <!-- Editable action -->
+      <div style="margin-bottom:16px;">
+        <div class="ulbl" style="margin-bottom:6px;">Action / Watch</div>
+        <textarea id="preview-action" rows="3" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-sans);font-size:13px;color:var(--ink);resize:vertical;"></textarea>
+      </div>
+
+      <!-- Editable sources -->
+      <div style="margin-bottom:8px;">
+        <div class="ulbl" style="margin-bottom:6px;">Data Sources (auto-filled from uploaded files)</div>
+        <input type="text" id="preview-sources" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink);" />
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+        <button class="btn" onclick="publishEntry()">✓ Publish to Log</button>
+        <button class="btn2" onclick="discardPreview()">Discard</button>
+        <span id="publish-status" class="smsg" style="margin-top:0;margin-left:4px;"></span>
+      </div>
     </div>
   </div>
 
   <!-- LOG ENTRIES CONTAINER -->
   <div id="log-entries">
 
-    <!-- ENTRY 6 — June 1 2026: 7-Month ACoS/TACOS Pattern Analysis -->
+    <!-- ENTRY — June 1, 2026 -->
     <div class="log-entry mixed">
       <div class="log-header">
         <div>
-          <div class="log-title">7-Month PPC Pattern — ACoS, TACOS & Net Profit Relationship</div>
+          <div class="log-title">PPC Deep-Dive + Business Report + SQP Review — Nov '25 through May '26</div>
           <div class="log-sources" style="margin-top:6px;">
-            <span class="log-source">Medaltus P&amp;L Screenshot</span>
-            <span class="log-source">Dec 25–Apr 26 Ads Reports</span>
-            <span class="log-source">Nov 25 + May 26 Ads Reports</span>
-          </div>
-        </div>
-        <span class="log-date">June 1, 2026</span>
-      </div>
-
-      <div class="log-metric-row">
-        <div class="log-metric">
-          <div class="lm-lbl">Best Net Profit Month</div>
-          <div class="lm-val">$922</div>
-          <div class="lm-change lm-flat">Apr '26 · ACoS 57% · TACOS 8%</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">Most Units Sold</div>
-          <div class="lm-val">92</div>
-          <div class="lm-change lm-flat">Jan '26 · ACoS 70% · TACOS 19%</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">TACOS range — growth phase</div>
-          <div class="lm-val">11–19%</div>
-          <div class="lm-change lm-flat">Jun '25 → Apr '26 (11 months)</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">ACoS range — growth phase</div>
-          <div class="lm-val">38–81%</div>
-          <div class="lm-change lm-flat">Same 11-month window</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">May '26 ACoS</div>
-          <div class="lm-val">158%</div>
-          <div class="lm-change lm-down">↓ PPC sales $120 · 3 orders</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">May '26 TACOS</div>
-          <div class="lm-val">~8%</div>
-          <div class="lm-change lm-flat">Low spend = low TACOS, low sales</div>
-        </div>
-      </div>
-
-      <div class="log-findings">
-        <div class="log-finding"><span class="fi">📈</span><span><strong>During MiGuard's 11-month growth run (Jun '25–Apr '26), ACoS ranged from 38% to 81% every single month.</strong> Net profit over that period ranged from $500–$922/month. The brand's best absolute profit months (Jan '26 at $875, Sep '25 at $883, Oct '25 at $840) all had ACoS between 44–70%. The 30% ACoS target is a known company goal — the data suggests the brand's growth phase operated above that threshold while still generating healthy net margins.</span></div>
-        <div class="log-finding"><span class="fi">📈</span><span><strong>TACOS is the more stable signal across the growth period.</strong> While ACoS moved widely month to month, TACOS held consistently between 11–19% during all 11 growth months. This suggests PPC was proportionally efficient relative to total revenue even when ACoS appeared high — because organic sales were absorbing much of the total revenue, making the PPC share smaller as a percentage of the whole.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Miguard headache and migraine relief" drove 22–50% of all PPC revenue in every month it ran.</strong> This is the account's anchor keyword. In Nov '25 it generated $231 at 16% ACoS. Jan '26: $399 at 14% ACoS. Feb '26: $239 at 9% ACoS. Mar '26: $159 at 7% ACoS. The CPC on this term rose from $1.29 (Nov '25) to $2.00–$2.45 (Jan–Feb '26) — a 55–90% increase over 3 months — before tapering back to $1.62 in Mar '26. The CPC spike appears correlated with increased competition on the term, which is common when a branded keyword gains conversion history.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine supplement" shows a clear pattern: performance improves significantly at lower spend levels.</strong> At $138 spend (Jan '26, broad match): $79 sales, 173% ACoS. At $12 spend (Mar '26): $31 sales, 39% ACoS. At $6 spend (Apr '26): $39 sales, 16% ACoS. The data suggests this keyword performs better when constrained — likely because lower bids shift toward exact or phrase match impressions where purchase intent is higher.</span></div>
-        <div class="log-finding"><span class="fi">📈</span><span><strong>March 2026 was the most balanced month in the dataset: 37.8% ACoS, $811 net, 34% margin, 68 units.</strong> It had the highest number of converting keywords (13 unique terms generated sales) and the most distributed revenue — the anchor keyword was only 24% of PPC sales that month vs. 35–50% in other months. The keyword diversity in March appears to be what made it the most efficient month proportionally.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>May 2026 shows a structural disconnect: 87 keywords active, 99 total, but only 3 orders.</strong> The account added significant keyword volume (22+ ASIN product targets, 30+ new terms) while total budget decreased. The ASIN product-targeting keywords (b0... format) generated zero sales across an estimated $30+ in combined spend. This match type/target category produced no revenue in May.</span></div>
-      </div>
-
-      <div class="log-action watch">
-        <strong>↳ Data suggests:</strong> (1) TACOS in the 11–19% range may be a more reliable performance indicator than ACoS for this account given the organic/PPC sales mix. (2) "Migraine supplement" performs better at constrained spend — worth testing exact-match only at a fixed daily budget. (3) ASIN product targeting generated $0 in May — results should be reviewed before continuing that spend. (4) March '26 keyword diversity (13 converters) vs. other months (3–6 converters) is worth understanding as a structural goal.
-      </div>
-    </div>
-
-    <!-- ENTRY 5 — June 1 2026: Month-by-Month PPC Campaign Analysis -->
-    <div class="log-entry mixed">
-      <div class="log-header">
-        <div>
-          <div class="log-title">Nov '25–May '26 PPC Campaign Performance — Month-by-Month</div>
-          <div class="log-sources" style="margin-top:6px;">
-            <span class="log-source">Nov 25 Ads Report</span>
-            <span class="log-source">Dec 25 Ads Report</span>
-            <span class="log-source">Jan 26 Ads Report</span>
-            <span class="log-source">Feb 26 Ads Report</span>
-            <span class="log-source">Mar 26 Ads Report</span>
-            <span class="log-source">Apr 26 Ads Report</span>
-            <span class="log-source">May 26 Ads Report</span>
-          </div>
-        </div>
-        <span class="log-date">June 1, 2026</span>
-      </div>
-
-      <div class="log-metric-row">
-        <div class="log-metric"><div class="lm-lbl">Nov '25</div><div class="lm-val">$655</div><div class="lm-change lm-flat">$505 spend · 17 orders · ACoS 77%</div></div>
-        <div class="log-metric"><div class="lm-lbl">Dec '25</div><div class="lm-val">$479</div><div class="lm-change lm-flat">$373 spend · 11 orders · ACoS 78%</div></div>
-        <div class="log-metric"><div class="lm-lbl">Jan '26</div><div class="lm-val">$918</div><div class="lm-change lm-up">↑ $643 spend · 22 orders · ACoS 70%</div></div>
-        <div class="log-metric"><div class="lm-lbl">Feb '26</div><div class="lm-val">$639</div><div class="lm-change lm-flat">$424 spend · 13 orders · ACoS 66%</div></div>
-        <div class="log-metric"><div class="lm-lbl">Mar '26</div><div class="lm-val">$673</div><div class="lm-change lm-up">↑ $254 spend · 17 orders · ACoS 38%</div></div>
-        <div class="log-metric"><div class="lm-lbl">Apr '26</div><div class="lm-val">$360</div><div class="lm-change lm-flat">$205 spend · 9 orders · ACoS 57%</div></div>
-      </div>
-
-      <div class="log-findings">
-        <div class="log-finding"><span class="fi">📈</span><span><strong>"Miguard headache and migraine relief" was the top-performing keyword every month without exception.</strong> Nov: $231 (16% ACoS). Dec: $239 (15%). Jan: $399 (14%). Feb: $239 (9%). Mar: $159 (7%). Apr: $79 (8%). Its ACoS improved consistently as its conversion history built — from 16% in Nov down to 7–8% by Mar–Apr. However, the absolute sales contribution fell as spend on it was reduced (from $56/mo in Jan to $6/mo in Apr), which proportionally reduced total PPC revenue.</span></div>
-        <div class="log-finding"><span class="fi">📈</span><span><strong>Several low-spend keywords converted with very high efficiency across multiple months.</strong> "Mi guard migraine relief" (Feb '26): $0.88 spend → $159 sales, 1% ACoS. "Migraine relief cap" (Jan + Mar): $5–$4 spend → $79 sales each. "Migraine medicine" (Mar): $2.69 → $33 sales, 8% ACoS. These appear sporadically — they are likely exact-match brand-adjacent or long-tail terms catching high-intent searches at very low CPCs.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine supplement" was the largest spend item in Dec and Jan, at $109 and $138 respectively, with ACoS of 137% and 173%.</strong> In Mar and Apr when spend dropped to $12 and $6, ACoS improved to 39% and 16%. The same keyword produced very different results depending on spend level and likely match type. Spend consolidation on this term appears to improve efficiency.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>January 2026 was the highest-sales PPC month ($918) and also highest-spend ($643).</strong> It coincided with the all-time unit sales record (92 units total). The relationship between spend and sales velocity in Jan '26 suggests spend contributed to ranking momentum that month — organic sessions also peaked in May '26 at 557, up from April's 530, consistent with a lagged organic benefit from Jan's PPC push.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>May 2026 had the highest keyword count (99) but lowest PPC sales ($119) and worst ACoS (158%) in the 7-month window.</strong> The 22+ ASIN product-targeting keywords (b0... format) are a new addition not present in earlier months — they generated no sales. The conversion rate on the account dropped from 6–8% (Nov–Mar) to 2.2% (May), suggesting the new keyword mix brought lower-intent traffic.</span></div>
-        <div class="log-finding"><span class="fi">📈</span><span><strong>The highest net profit months in the dataset don't correspond to the lowest ACoS months.</strong> Apr '26 is the all-time best net profit month ($922, 37% margin) at 57% ACoS and just 8% TACOS. Sep '25 ($883 net, 31% margin) ran at 57% ACoS. Jan '26 ($875 net) at 70% ACoS. The data shows net margin holding in the 26–37% range across a wide ACoS band, suggesting PPC efficiency alone isn't the primary driver of profitability — total unit volume and the organic/PPC sales mix together determine the outcome.</span></div>
-      </div>
-
-      <div class="log-action do">
-        <strong>↑ Observations to test:</strong> (1) "Miguard headache and migraine relief" ACoS improved as it ran longer — more time on this keyword at a controlled bid may continue that efficiency curve. (2) Low-CPC brand-adjacent terms ("mi guard migraine relief," "miguard headache," etc.) appear and convert at 1–3% ACoS — worth isolating in a dedicated exact-match campaign. (3) ASIN product targeting produced $0 in May — worth reviewing whether this match type is appropriate for MiGuard's category and price point. (4) March's 13-converter distribution vs. May's 3-converter concentration is worth discussing as a keyword strategy question.
-      </div>
-    </div>
-
-    <!-- ENTRY 4 — June 1 2026 PPC Analysis -->
-    <div class="log-entry watch">
-      <div class="log-header">
-        <div>
-          <div class="log-title">PPC Comparison — November 2025 vs May 2026</div>
-          <div class="log-sources" style="margin-top:6px;">
-            <span class="log-source">Nov 2025 Ads Report</span>
-            <span class="log-source">May 2026 Ads Report</span>
-          </div>
-        </div>
-        <span class="log-date">June 1, 2026</span>
-      </div>
-
-      <div class="log-metric-row">
-        <div class="log-metric">
-          <div class="lm-lbl">ACoS (May)</div>
-          <div class="lm-val">158%</div>
-          <div class="lm-change lm-down">↓ Was 77% in Nov</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">ROAS (May)</div>
-          <div class="lm-val">0.63x</div>
-          <div class="lm-change lm-down">↓ Was 1.30x in Nov · losing money</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">Orders (May)</div>
-          <div class="lm-val">3</div>
-          <div class="lm-change lm-down">↓ Was 17 in Nov (-82%)</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">Spend (May)</div>
-          <div class="lm-val">$190</div>
-          <div class="lm-change lm-down">↓ Was $505 in Nov (-62%)</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">Conv% (May)</div>
-          <div class="lm-val">2.2%</div>
-          <div class="lm-change lm-down">↓ Was 6.7% in Nov</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">Keywords Active</div>
-          <div class="lm-val">99</div>
-          <div class="lm-change lm-down">↑ Was 68 in Nov — more, worse</div>
-        </div>
-      </div>
-
-      <div class="log-findings">
-        <div class="log-finding"><span class="fi">🔴</span><span><strong>"miguard" brand exact-match was dropped between Nov and May.</strong> In November this single keyword returned 35.99x ROAS on $1.11 spend. It was not running in May at all. Protecting your brand term is the highest-priority, lowest-cost PPC action available.</span></div>
-        <div class="log-finding"><span class="fi">🔴</span><span><strong>22+ ASIN product-targeting keywords added in May generated $0 across ~$35 combined spend.</strong> Targeting competitor ASINs (MigreLief, generic competitors) did not work — likely because $39.95 MiGuard is showing on pages for $14–29 OTC products where buyers won't switch up in price.</span></div>
-        <div class="log-finding"><span class="fi">🔴</span><span><strong>87 new keywords added, 59 proven keywords dropped.</strong> The three keywords dropped that had proven ROAS in November: "miguard" (35.99x), "strong migraine pills" (15.24x), "migraine relief products" (8.42x). These need to be restored immediately.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>"migraine supplement" spent $21.64 with 12 clicks and 0 conversions in May.</strong> Same pattern as November ($97, 4 orders, 64% ACoS) — this keyword gets clicks but conversion is poor. Needs exact-match only with bid capped at $1.20, not broad.</span></div>
-        <div class="log-finding"><span class="fi">✅</span><span><strong>Two surprise converters in May: "beta blocker for headaches" (4.4% ACoS) and "migraine care" (2.4% ACoS).</strong> Both had only 1 click each — thin data — but the buyer intent signal is strong. Increase bids and let these run.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>Budget cut 62% while keywords expanded 45%.</strong> Less money spread thinner across more targets = no keyword gets enough impressions to optimize. Consolidate to 10–15 proven or high-intent keywords with adequate daily budget before expanding again.</span></div>
-      </div>
-
-      <div class="log-action do">
-        <strong>↑ Immediate actions:</strong> (1) Restore "miguard" brand exact-match. (2) Pause all ASIN targets (b0... keywords). (3) Restore "strong migraine pills" and "migraine relief products." (4) Switch "migraine supplement" to exact-match, bid max $1.20. (5) Increase bids on "beta blocker for headaches" and "migraine care." Target ACoS: 60–70% at $39.95 price point. See PPC tab for full restructure plan.
-      </div>
-    </div>
-
-    <!-- ENTRY 3 — June 1 2026 (Latest) -->
-    <div class="log-entry mixed">
-      <div class="log-header">
-        <div>
-          <div class="log-title">May Business Report + Q1 2026 SQP + April 2026 SQP</div>
-          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">Nov 25 Ads</span>
+            <span class="log-source">Dec 25 Ads</span>
+            <span class="log-source">Jan 26 Ads</span>
+            <span class="log-source">Feb 26 Ads</span>
+            <span class="log-source">Mar 26 Ads</span>
+            <span class="log-source">Apr 26 Ads</span>
+            <span class="log-source">May 26 Ads</span>
             <span class="log-source">May Business Report</span>
             <span class="log-source">April Business Report</span>
             <span class="log-source">Q1 2026 SQP</span>
             <span class="log-source">April 2026 SQP</span>
-            <span class="log-source">H10 KW Tracker Jun 1</span>
+            <span class="log-source">Medaltus P&amp;L</span>
           </div>
         </div>
         <span class="log-date">June 1, 2026</span>
       </div>
 
+      <!-- Business report metrics -->
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--ink3);margin-bottom:10px;margin-top:4px;">Business Report — April vs May</div>
       <div class="log-metric-row">
-        <div class="log-metric">
-          <div class="lm-lbl">Sessions (May)</div>
-          <div class="lm-val">557</div>
-          <div class="lm-change lm-up">↑ +27 vs April (+5.1%)</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">Units (May)</div>
-          <div class="lm-val">58</div>
-          <div class="lm-change lm-down">↓ -4 vs April (-6.5%)</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">Conv% (May)</div>
-          <div class="lm-val">10.41%</div>
-          <div class="lm-change lm-down">↓ -1.29pp vs April (11.70%)</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">Revenue (May)</div>
-          <div class="lm-val">$2,317</div>
-          <div class="lm-change lm-down">↓ -$160 vs April (-6.5%)</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">Brand Term Purch (Q1)</div>
-          <div class="lm-val">20</div>
-          <div class="lm-change lm-up">↑ +6 vs Q4 2025 (14)</div>
-        </div>
-        <div class="log-metric">
-          <div class="lm-lbl">"Migraine supp" Purch (Q1)</div>
-          <div class="lm-val">3</div>
-          <div class="lm-change lm-up">↑ +1 vs Q4 2025 (2) · 0.9% share</div>
-        </div>
+        <div class="log-metric"><div class="lm-lbl">Sessions (May)</div><div class="lm-val">557</div><div class="lm-change lm-up">↑ +27 vs April (+5.1%)</div></div>
+        <div class="log-metric"><div class="lm-lbl">Units (May)</div><div class="lm-val">58</div><div class="lm-change lm-down">↓ -4 vs April (-6.5%)</div></div>
+        <div class="log-metric"><div class="lm-lbl">Conv% (May)</div><div class="lm-val">10.41%</div><div class="lm-change lm-down">↓ -1.29pp vs April (11.70%)</div></div>
+        <div class="log-metric"><div class="lm-lbl">Revenue (May)</div><div class="lm-val">$2,317</div><div class="lm-change lm-down">↓ -$160 vs April</div></div>
+        <div class="log-metric"><div class="lm-lbl">Brand Purchases (Q1)</div><div class="lm-val">20</div><div class="lm-change lm-up">↑ +6 vs Q4 2025 (14)</div></div>
+        <div class="log-metric"><div class="lm-lbl">"Migraine supp" (Q1)</div><div class="lm-val">3</div><div class="lm-change lm-flat">0.9% share · 0 in April</div></div>
+      </div>
+
+      <!-- PPC 7-month metrics -->
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--ink3);margin-bottom:10px;margin-top:20px;">PPC Performance — 7-Month Trend</div>
+      <div style="overflow-x:auto;margin-bottom:20px;">
+      <table class="data" style="font-size:12.5px;">
+        <thead><tr><th>Month</th><th>Spend</th><th>PPC Sales</th><th>ACoS</th><th>ROAS</th><th>Orders</th><th>Conv%</th><th>Active KWs</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Nov '25</td><td>$505</td><td>$655</td><td><span class="pill pill-a">77%</span></td><td>1.30x</td><td>17</td><td>6.7%</td><td>68</td><td>Strong brand term performance</td></tr>
+          <tr><td>Dec '25</td><td>$373</td><td>$479</td><td><span class="pill pill-a">78%</span></td><td>1.28x</td><td>11</td><td>6.6%</td><td>48</td><td>Anchor KW 50% of revenue</td></tr>
+          <tr class="our"><td>Jan '26</td><td>$643</td><td>$918</td><td><span class="pill pill-a">70%</span></td><td>1.43x</td><td>22</td><td>6.4%</td><td>107</td><td>↑ Highest PPC sales · ATH 92 units total</td></tr>
+          <tr><td>Feb '26</td><td>$424</td><td>$639</td><td><span class="pill pill-a">66%</span></td><td>1.51x</td><td>13</td><td>5.5%</td><td>147</td><td>Anchor KW $239 at 9% ACoS</td></tr>
+          <tr class="our"><td>Mar '26</td><td>$254</td><td>$673</td><td><span class="pill pill-g">38%</span></td><td>2.65x</td><td>17</td><td>8.0%</td><td>143</td><td>↑ Best ACoS · 13 converting keywords</td></tr>
+          <tr><td>Apr '26</td><td>$205</td><td>$360</td><td><span class="pill pill-a">57%</span></td><td>1.76x</td><td>9</td><td>5.1%</td><td>130</td><td>Listing update live mid-month</td></tr>
+          <tr><td>May '26</td><td>$190</td><td>$120</td><td><span class="pill pill-r">158%</span></td><td>0.63x</td><td>3</td><td>2.2%</td><td>99</td><td>ASIN targets added · brand term CPC spike</td></tr>
+        </tbody>
+      </table>
       </div>
 
       <div class="log-findings">
-        <div class="log-finding"><span class="fi">📈</span><span><strong>Sessions up, units down — traffic is improving but listing changes mid-May are blending the conversion signal.</strong> Listing updates (title, bullets, description, backend) went live partway through May. The month is a hybrid of old-listing and new-listing performance. June will be the first clean read.</span></div>
-        <div class="log-finding"><span class="fi">✅</span><span><strong>Brand term is growing.</strong> "MiGuard headache and migraine relief" generated 20 purchases in Q1 2026 vs 14 in Q4 2025 — up 43%. Direct brand searches are increasing, signaling growing awareness or repeat buyers.</span></div>
-        <div class="log-finding"><span class="fi">✅</span><span><strong>"Natural remedies for migraines" showing high purchase conversion.</strong> April SQP shows 1 brand purchase at 20% share on this term. Low absolute number but high efficiency — a keyword MiGuard ranks #4 on is converting when buyers find it.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine supplement" (8,976 vol Q1 SQP) still only 3 brand purchases at 0.9% share.</strong> This is the highest-priority commercial keyword. Organic rank is #28 (down from #23 in May — likely post-update re-indexing). PPC is the lever to change this number. 0 brand purchases in April alone — expected at this volume but confirms PPC is essential.</span></div>
-        <div class="log-finding"><span class="fi">⚠</span><span><strong>Keyword ranks show minor softening post-update.</strong> "Migraine supplement" slipped from #23 to #28. "Headache and migraine wellness supplements" dropped from #3 to #11. Both are within normal re-indexing variance (2–4 weeks). "Natural supplements for migraine headaches" held at #1. No significant drops.</span></div>
-        <div class="log-finding"><span class="fi">🔴</span><span><strong>"Migraine relief" (63K vol in April) is not a realistic near-term target.</strong> 1 brand purchase at 0.02% share. OTC drugs dominate. Confirmed long-term aspiration only — not worth PPC spend yet.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>Sessions up in May (+5.1%), units down — listing changes mid-May are blending the conversion signal.</strong> The listing update went live partway through May, making it a hybrid month. June will be the first clean read on whether the updated copy improves conversion rate.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>Brand term purchases growing quarter over quarter.</strong> "MiGuard headache and migraine relief" generated 20 purchases in Q1 2026 vs 14 in Q4 2025 (+43%). Brand recognition is building and direct/repeat buyers are increasing.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>"Natural remedies for migraines" converting at 20% purchase share in April SQP.</strong> MiGuard ranks #4 on this term and the SQP shows 1 brand purchase at 20% share — low absolute number but high efficiency signal on a term already in the organic top 5.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine supplement" (8,976 vol Q1 SQP) at 3 brand purchases and 0.9% share.</strong> The highest-priority commercial keyword is generating marginal commercial signal. Organic rank is currently #28. This is where PPC conversion velocity would have the most impact on moving the organic rank — each exact-match PPC order on this term tells Amazon's algorithm that buyers searching it chose MiGuard.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>The anchor PPC keyword improved its ACoS from 16% (Nov) to 7–8% (Mar–Apr) as conversion history built.</strong> "Miguard headache and migraine relief" drove 22–50% of PPC revenue every month it ran. Its CPC rose from $1.29 (Nov) to $2.00–$2.45 (Jan–Feb) — competitive pressure common on a high-converting term — before returning to $1.62 in March. A manual bid ceiling ($1.50–1.75) could maintain presence without paying peak rates.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>"Migraine supplement" performs significantly better at low spend levels.</strong> At $138 spend (Jan, likely broad): $79 sales, 173% ACoS. At $12 spend (Mar): $31 sales, 39% ACoS. At $6 spend (Apr): $39 sales, 16% ACoS. The efficiency improvement at lower CPC ($0.88–$1.04 vs $1.75–$2.33) suggests exact-match behavior is capturing higher-intent impressions. A capped exact-match test ($5–8/day) is worth running.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>March 2026 was the standout month: 38% ACoS, $673 PPC sales, $811 net profit, 13 converting keywords.</strong> The keyword diversity that month (vs. 3–6 converters in other months) reduced dependence on the anchor term. Several low-CPC brand-adjacent terms appeared — "mi guard migraine relief" (1% ACoS), "migraine care" (2%), "headache hat" (2%), "migraine relief cap" (7%) — all converting on $0.72–$2.08 spend. These appear sporadically; a dedicated exact-match campaign for these terms could capture that efficiency more consistently.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>ASIN product targeting (b0... keywords) in May generated $0 across ~$30–35 combined spend.</strong> 22+ product-targeting keywords were active. Results suggest the current target selection may not match MiGuard's buyer profile — ASIN targeting typically converts best when the targeted product is a close substitute in price and form factor.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>TACOS held 8–19% across all of Nov '25–Apr '26 — within or near the 10–15% target range — while ACoS ran 38–78% over the same window.</strong> This reflects healthy organic sales absorbing a significant share of total revenue. The best absolute profit months (Jan '26 $875 net, Sep '25 $883, Oct '25 $840) all had ACoS between 44–70%, with TACOS at 14–19%. The organic/PPC sales mix appears to be the driver of TACOS efficiency more than ACoS alone.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>Organic unit sales have plateaued since Feb '26 in the 58–68 unit range after the Jan '26 ATH of 92.</strong> This pattern often reflects a listing reaching its current organic rank ceiling. PPC conversion velocity on specific terms — particularly "migraine supplement" (#28), "migraine supplements for women" (#23), and "migraine prevention supplement" (#25) — is the most direct mechanism for signaling Amazon to move those ranks higher. Each PPC order on an exact keyword contributes to that term's conversion history.</span></div>
       </div>
 
-      <div class="log-action do">
-        <strong>↑ Actions:</strong> Pull June business report + fresh KW tracker in ~30 days. If conv% climbs back toward 12%+ in June, listing updates are working. If it stays flat or drops further, revisit B1 (clinical stat lead). Launch exact-match PPC on "migraine supplement" and "migraine prevention supplement" — organic alone won't move the SQP purchase share meaningfully.
+      <div class="log-action watch">
+        <strong>↳ Watch for June:</strong> Conv% recovery toward 12%+ would confirm listing updates are working. Pull fresh KW tracker to check "migraine supplement" rank movement from #28. For PPC: the March 13-converter distribution is the model — understanding what drove it could inform campaign structure going forward. ASIN targeting results worth reviewing before continuing that spend.
       </div>
     </div>
 
@@ -1413,67 +1384,306 @@ function switchTab(id, btn) {
   btn.classList.add('active');
 }
 
-function toggleLogForm() {
-  const form = document.getElementById('log-form');
-  form.classList.toggle('open');
-  if (form.classList.contains('open')) {
-    // Set today's date
-    const today = new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
-    document.getElementById('log-input-date').value = today;
-    form.scrollIntoView({behavior:'smooth', block:'start'});
+function toggleLogForm() {} // kept for backwards compat — no-op
+function addLogEntry() {}   // kept for backwards compat — no-op
+
+// ── Upload panel toggle ───────────────────────────────────────────────
+function toggleUploadPanel() {
+  const form = document.getElementById('upload-form');
+  const btn  = document.getElementById('upload-toggle-btn');
+  const open = form.style.display === 'none';
+  form.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '✕ Close' : '+ Upload & Scan';
+  if (open) form.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ── File data store ───────────────────────────────────────────────────
+const uploadedFiles = { br: null, kw: null, ads: null };
+
+function triggerUpload(inputId) {
+  document.getElementById(inputId).click();
+}
+
+// ── Multi-file keyword tracker handler ───────────────────────────────
+async function handleKwFiles(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  const zone  = document.getElementById('zone-kw');
+  const fname = document.getElementById('fname-kw');
+  fname.textContent = '⏳ Reading ' + files.length + ' file' + (files.length > 1 ? 's' : '') + '…';
+  zone.classList.remove('loaded');
+
+  // Read all files and merge their text
+  const readFile = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    const isXlsx = /\.xlsx?$/i.test(file.name);
+    if (isXlsx) {
+      reader.onload = e => {
+        try {
+          const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+          let text = '';
+          wb.SheetNames.forEach(name => {
+            const csv = XLSX.utils.sheet_to_csv(wb.Sheets[name], {blankrows:false});
+            if (csv.trim()) text += `\n### Sheet: ${name}\n${csv}`;
+          });
+          resolve({ name: file.name, text: text.trim() });
+        } catch(err) { reject(err); }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      reader.onload = e => resolve({ name: file.name, text: e.target.result });
+      reader.readAsText(file);
+    }
+  });
+
+  try {
+    const results = await Promise.all(files.map(readFile));
+    // Merge: if multiple files, label each section with its filename
+    const merged = results.length === 1
+      ? results[0].text
+      : results.map(r => `### File: ${r.name}\n${r.text}`).join('\n\n');
+    uploadedFiles.kw = {
+      name: results.map(r => r.name).join(', '),
+      text: merged
+    };
+    fname.textContent = files.length === 1
+      ? files[0].name
+      : files.length + ' files: ' + files.map(f => f.name).join(', ');
+    zone.classList.add('loaded');
+  } catch(err) {
+    fname.textContent = '⚠ Error reading files: ' + err.message;
   }
 }
 
-function addLogEntry() {
-  const date = document.getElementById('log-input-date').value.trim();
-  const title = document.getElementById('log-input-title').value.trim();
-  const sources = document.getElementById('log-input-sources').value.trim();
-  const metrics = document.getElementById('log-input-metrics').value.trim();
-  const findings = document.getElementById('log-input-findings').value.trim();
-  const action = document.getElementById('log-input-action').value.trim();
-  const status = document.getElementById('log-save-status');
+function handleFileSelect(key, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const zone  = document.getElementById('zone-' + key);
+  const fname = document.getElementById('fname-' + key);
+  fname.textContent = file.name;
+  zone.classList.add('loaded');
 
-  if (!date || !title) { status.textContent = '⚠ Date and title are required.'; status.style.color = 'var(--rose)'; return; }
+  const reader = new FileReader();
+  const isXlsx = file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls');
+
+  if (isXlsx) {
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+        // Convert all sheets to CSV text, concatenate with sheet name headers
+        let text = '';
+        wb.SheetNames.forEach(name => {
+          const ws = wb.Sheets[name];
+          const csv = XLSX.utils.sheet_to_csv(ws, {blankrows:false});
+          if (csv.trim()) text += `\n### Sheet: ${name}\n${csv}`;
+        });
+        uploadedFiles[key] = { name: file.name, text: text.trim() };
+      } catch(err) {
+        document.getElementById('fname-' + key).textContent = '⚠ Parse error: ' + err.message;
+        zone.classList.remove('loaded');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.onload = e => {
+      uploadedFiles[key] = { name: file.name, text: e.target.result };
+    };
+    reader.readAsText(file);
+  }
+}
+
+// ── AI scan ───────────────────────────────────────────────────────────
+async function runInsightsScan() {
+  const k = getKey();
+  if (!k) { document.getElementById('scan-status').textContent = '⚠ API key required — paste it in the header.'; return; }
+
+  const hasAny = uploadedFiles.br || uploadedFiles.kw || uploadedFiles.ads;
+  if (!hasAny) { document.getElementById('scan-status').textContent = '⚠ Upload at least one file to run a scan.'; return; }
+
+  const btn = document.getElementById('scan-btn');
+  const statusEl = document.getElementById('scan-status');
+  btn.disabled = true;
+  document.getElementById('scan-btn-text').textContent = '⏳ Analyzing files…';
+  statusEl.textContent = 'Reading data and generating insights — 20–30 seconds…';
+  statusEl.style.color = 'var(--ink3)';
+
+  const today = new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+  const context = document.getElementById('scan-context').value.trim();
+
+  // Build the data payload — truncate large files to stay within token limits
+  const MAX_CHARS = 18000;
+  let dataPayload = '';
+  const sourceNames = [];
+
+  if (uploadedFiles.br) {
+    sourceNames.push(uploadedFiles.br.name);
+    const text = uploadedFiles.br.text.slice(0, Math.floor(MAX_CHARS * 0.4));
+    dataPayload += `\n\n=== BUSINESS REPORT (${uploadedFiles.br.name}) ===\n${text}`;
+  }
+  if (uploadedFiles.kw) {
+    sourceNames.push(uploadedFiles.kw.name);
+    const text = uploadedFiles.kw.text.slice(0, Math.floor(MAX_CHARS * 0.35));
+    dataPayload += `\n\n=== KEYWORD TRACKER (${uploadedFiles.kw.name}) ===\n${text}`;
+  }
+  if (uploadedFiles.ads) {
+    sourceNames.push(uploadedFiles.ads.name);
+    const text = uploadedFiles.ads.text.slice(0, Math.floor(MAX_CHARS * 0.25));
+    dataPayload += `\n\n=== ADS SEARCH TERMS REPORT (${uploadedFiles.ads.name}) ===\n${text}`;
+  }
+
+  // Build the prior entries summary so AI has comparison context
+  const priorEntries = document.querySelectorAll('#log-entries .log-entry');
+  let priorContext = '';
+  if (priorEntries.length > 0) {
+    const latest = priorEntries[0];
+    const latestTitle = latest.querySelector('.log-title')?.innerText || '';
+    const latestDate  = latest.querySelector('.log-date')?.innerText || '';
+    const latestMetrics = [...latest.querySelectorAll('.lm-val')].map(e => e.innerText).join(', ');
+    priorContext = `\nMost recent log entry: "${latestTitle}" (${latestDate}). Key prior metrics: ${latestMetrics}.`;
+  }
+
+  const BRAND_CTX = `You are an expert Amazon brand analyst for MiGuard, a migraine prevention supplement.
+PRODUCT: MiGuard Migraine Prevention Supplement (60 Caps) · ASIN: B0B9187Q4P · $39.95
+FORMULA: Riboflavin B2, Magnesium, CoQ10, Alpha-Lipoic Acid, Feverfew, Ginger
+DOCTOR: Dr. Benjamin Taimoorazy · GMP-certified · Vegan · Non-GMO
+BSR: #388 Pain Relief Homeopathic Remedies · Rating: 4.2★ (48 reviews)
+PRIOR CONTEXT:${priorContext}
+KEY KEYWORDS TRACKED: migraine supplement (#28), natural supplements for migraine headaches (#1), drug free migraine relief (#12), migraine supplements for women (#23), migraine prevention supplement (#25)
+COMPANY ACOS TARGET: 30% · TACOS TARGET: 10–15%
+LISTING UPDATED: May 13, 2026 — title, bullets, description, backend all revised`;
+
+  const systemPrompt = `${BRAND_CTX}
+
+You are writing a weekly insights log entry for the MiGuard brand dashboard. This entry will be read by the full team — write in a collaborative, data-forward tone. Observe findings from the data; do not assign blame or frame things as failures. Use positive framing where possible: "opportunity" not "problem," "the data shows" not "you did X wrong."
+
+Analyze the uploaded data files and produce a structured insights entry in EXACTLY this format — use these exact section labels:
+
+TITLE: [concise descriptive title for this week's insights]
+METRICS:
+Sessions | [value] | [change vs prior if available]
+Units | [value] | [change vs prior if available]  
+Conv% | [value] | [change]
+Revenue | [value] | [change]
+ACoS | [value if ads data present] | [change]
+[add any other meaningful metrics from the data]
+FINDINGS:
+[emoji] [finding — data-forward, collaborative tone, specific numbers]
+[emoji] [finding]
+[repeat for each significant finding, 5–8 total]
+Use: ✅ for positive signals, 📈 for improving trends, ⚠ for things to watch, 🔴 only for urgent action items
+ACTION:
+[1–3 specific, actionable next steps based on what the data shows]
+
+Be specific — reference actual keyword names, rank numbers, spend amounts, and conversion rates from the data. Do not use placeholder text.`;
+
+  const userMsg = `Today's date: ${today}
+${context ? `Team context: ${context}` : ''}
+
+Please analyze this week's data and generate the insights entry:
+${dataPayload}`;
+
+  try {
+    const raw = await callClaude(userMsg, systemPrompt, 2000);
+    populatePreview(raw, today, sourceNames);
+    document.getElementById('preview-panel').style.display = 'block';
+    document.getElementById('preview-panel').scrollIntoView({behavior:'smooth', block:'start'});
+    statusEl.textContent = '✓ Draft ready — review below before publishing.';
+    statusEl.style.color = 'var(--navy)';
+    // Collapse upload form
+    document.getElementById('upload-form').style.display = 'none';
+    document.getElementById('upload-toggle-btn').textContent = '+ Upload & Scan';
+  } catch(err) {
+    statusEl.textContent = '⚠ ' + err.message;
+    statusEl.style.color = 'var(--rose)';
+  } finally {
+    btn.disabled = false;
+    document.getElementById('scan-btn-text').textContent = '✦ Generate Insights Entry';
+  }
+}
+
+// ── Parse AI output into preview fields ──────────────────────────────
+function populatePreview(raw, today, sourceNames) {
+  // Title
+  const titleMatch = raw.match(/TITLE:\s*(.+)/i);
+  document.getElementById('preview-title').value = titleMatch ? titleMatch[1].trim() : 'Weekly Insights — ' + today;
+  document.getElementById('preview-date').value = today;
+  document.getElementById('preview-sources').value = sourceNames.join(', ');
+
+  // Metrics block
+  const metricsMatch = raw.match(/METRICS:\s*([\s\S]*?)(?=\nFINDINGS:|$)/i);
+  if (metricsMatch) {
+    const lines = metricsMatch[1].trim().split('\n')
+      .map(l => l.trim())
+      .filter(l => l.includes('|'));
+    document.getElementById('preview-metrics').value = lines.join('\n');
+  }
+
+  // Findings block
+  const findingsMatch = raw.match(/FINDINGS:\s*([\s\S]*?)(?=\nACTION:|$)/i);
+  if (findingsMatch) {
+    const lines = findingsMatch[1].trim().split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 2);
+    document.getElementById('preview-findings').value = lines.join('\n');
+  }
+
+  // Action block
+  const actionMatch = raw.match(/ACTION:\s*([\s\S]*?)$/i);
+  if (actionMatch) {
+    document.getElementById('preview-action').value = actionMatch[1].trim();
+  }
+}
+
+// ── Publish preview to log ────────────────────────────────────────────
+function publishEntry() {
+  const title    = document.getElementById('preview-title').value.trim();
+  const date     = document.getElementById('preview-date').value.trim();
+  const sources  = document.getElementById('preview-sources').value.trim();
+  const metrics  = document.getElementById('preview-metrics').value.trim();
+  const findings = document.getElementById('preview-findings').value.trim();
+  const action   = document.getElementById('preview-action').value.trim();
+  const statusEl = document.getElementById('publish-status');
+
+  if (!title) { statusEl.textContent = '⚠ Title is required.'; statusEl.style.color = 'var(--rose)'; return; }
 
   // Build metrics HTML
   let metricsHtml = '';
   if (metrics) {
-    const metricRows = metrics.split('\n').filter(Boolean).map(line => {
+    const rows = metrics.split('\n').filter(Boolean).map(line => {
       const parts = line.split('|').map(s => s.trim());
-      const lbl = parts[0] || '';
-      const val = parts[1] || '';
-      const chg = parts[2] || '';
-      const cls = chg.startsWith('+') || chg.startsWith('↑') ? 'lm-up' : chg.startsWith('-') || chg.startsWith('↓') ? 'lm-down' : 'lm-flat';
+      const lbl = parts[0] || '', val = parts[1] || '', chg = parts[2] || '';
+      const cls = chg.startsWith('+') || chg.startsWith('↑') ? 'lm-up'
+                : chg.startsWith('-') || chg.startsWith('↓') ? 'lm-down' : 'lm-flat';
       return `<div class="log-metric"><div class="lm-lbl">${lbl}</div><div class="lm-val">${val}</div>${chg ? `<div class="lm-change ${cls}">${chg}</div>` : ''}</div>`;
     }).join('');
-    metricsHtml = `<div class="log-metric-row">${metricRows}</div>`;
+    metricsHtml = `<div class="log-metric-row">${rows}</div>`;
   }
 
   // Build findings HTML
   let findingsHtml = '';
   if (findings) {
-    const findingRows = findings.split('\n').filter(Boolean).map(line => {
+    const rows = findings.split('\n').filter(Boolean).map(line => {
       const icon = line.match(/^(📈|✅|⚠|🔴|📋|💡)/)?.[0] || '📋';
       const text = line.replace(/^(📈|✅|⚠|🔴|📋|💡)\s*/, '');
       return `<div class="log-finding"><span class="fi">${icon}</span><span>${text}</span></div>`;
     }).join('');
-    findingsHtml = `<div class="log-findings">${findingRows}</div>`;
+    findingsHtml = `<div class="log-findings">${rows}</div>`;
   }
 
   // Build sources HTML
   let sourcesHtml = '';
   if (sources) {
-    sourcesHtml = sources.split(',').map(s => `<span class="log-source">${s.trim()}</span>`).join('');
-    sourcesHtml = `<div class="log-sources" style="margin-top:6px;">${sourcesHtml}</div>`;
+    const chips = sources.split(',').map(s => `<span class="log-source">${s.trim()}</span>`).join('');
+    sourcesHtml = `<div class="log-sources" style="margin-top:6px;">${chips}</div>`;
   }
 
-  // Build action HTML
   const actionHtml = action ? `<div class="log-action do"><strong>↑ Actions / Watch:</strong> ${action}</div>` : '';
 
-  // Determine entry type from findings
+  // Determine entry type
   const hasCritical = findings.includes('🔴');
-  const hasWarning = findings.includes('⚠');
-  const entryClass = hasCritical ? 'watch' : hasWarning ? 'mixed' : 'positive';
+  const hasWarning  = findings.includes('⚠');
+  const entryClass  = hasCritical ? 'watch' : hasWarning ? 'mixed' : 'positive';
 
   const entryHtml = `
   <div class="log-entry ${entryClass}">
@@ -1489,18 +1699,28 @@ function addLogEntry() {
     ${actionHtml}
   </div>`;
 
-  // Insert at top of log entries
-  const container = document.getElementById('log-entries');
-  container.insertAdjacentHTML('afterbegin', entryHtml);
+  document.getElementById('log-entries').insertAdjacentHTML('afterbegin', entryHtml);
+  discardPreview();
+  statusEl.textContent = '✓ Published';
 
-  // Clear form
-  ['log-input-date','log-input-title','log-input-sources','log-input-metrics','log-input-findings','log-input-action']
-    .forEach(id => document.getElementById(id).value = '');
+  // Reset uploaded files
+  ['br','kw','ads'].forEach(k => {
+    uploadedFiles[k] = null;
+    const zone = document.getElementById('zone-' + k);
+    const fname = document.getElementById('fname-' + k);
+    if (zone) zone.classList.remove('loaded');
+    if (fname) fname.textContent = '';
+    const input = document.getElementById('file-' + k);
+    if (input) input.value = '';
+  });
+  document.getElementById('scan-context').value = '';
+  document.getElementById('scan-status').textContent = '';
+}
 
-  toggleLogForm();
-  status.textContent = '✓ Entry saved';
-  status.style.color = 'var(--green)';
-  setTimeout(() => status.textContent = '', 3000);
+function discardPreview() {
+  document.getElementById('preview-panel').style.display = 'none';
+  ['preview-title','preview-date','preview-sources','preview-metrics','preview-findings','preview-action']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 }
 function getKey() { return document.querySelector('.api-key-global').value.trim(); }
 async function callClaude(user, sys, tokens=1500) {
