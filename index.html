@@ -227,7 +227,7 @@ table.data tr:hover td{background:var(--bg);}
     <div class="card"><div class="lbl">Sessions — Apr</div><div class="val">530</div><div class="sub">702 page views</div></div>
     <div class="card warn"><div class="lbl">Unit Session %</div><div class="val">12.3%</div><div class="sub"><span style="color:var(--green);font-weight:700;">↑</span> Improving · target 15–20%</div></div>
     <div class="card"><div class="lbl">Apr Units</div><div class="val">62</div><div class="sub">$2,477 sales</div></div>
-    <div class="card good"><div class="lbl">Buy Box %</div><div class="val">100%</div><div class="sub">B2B 100%</div></div>
+    <div class="card good"><div class="lbl">Rating</div><div class="val">4.2 ★</div><div class="sub">48 reviews · B0B9187Q4P</div></div>
     <div class="card"><div class="lbl">Rating</div><div class="val">4.2 ★</div><div class="sub">48 reviews</div></div>
     <div class="card good"><div class="lbl">Peak Month</div><div class="val">Jan '26</div><div class="sub">92 units · $3,375 revenue</div></div>
     <div class="card good" style="border-left:3px solid var(--green);"><div class="lbl">Trend</div><div class="val" style="color:var(--navy);">↑ Growth</div><div class="sub"><span style="color:var(--green);font-weight:700;">↑</span> 13 units Jan '23 → 92 Jan '26</div></div>
@@ -298,7 +298,7 @@ table.data tr:hover td{background:var(--bg);}
       <div class="pulse-item"><div class="p-lbl">Sessions</div><div class="p-val">530</div><div class="p-note">702 page views</div></div>
       <div class="pulse-item"><div class="p-lbl">Units</div><div class="p-val">62</div><div class="p-note">$2,476 in sales</div></div>
       <div class="pulse-item w" style="border-left-color:var(--green);"><div class="p-lbl">Unit Session %</div><div class="p-val" style="color:var(--navy);">12.3% <span style="font-size:14px;color:var(--green);">↑</span></div><div class="p-note" style="color:var(--green);font-weight:500;">Improving — Jan 10.6% → Feb 8.6% → Mar 10.2% → Apr 12.3%</div></div>
-      <div class="pulse-item g"><div class="p-lbl">Buy Box %</div><div class="p-val">100%</div><div class="p-note">B2B 100%</div></div>
+      <div class="pulse-item g"><div class="p-lbl">Revenue (Apr)</div><div class="p-val">$2,477</div><div class="p-note">May: $2,317</div></div>
       <div class="pulse-item"><div class="p-lbl">Rating</div><div class="p-val">4.2 ★</div><div class="p-note">48 reviews</div></div>
     </div>
   </div>
@@ -345,7 +345,7 @@ table.data tr:hover td{background:var(--bg);}
     <div class="sec-title">Update Data + Regenerate Insights</div>
     <div class="ug">
       <div><div class="ulbl">BSR Update</div><input type="text" id="upd-bsr" placeholder="#388 in Pain Relief Homeopathic Remedies" style="min-height:auto;" /></div>
-      <div><div class="ulbl">Business Report (Sessions / Units / Conv% / Buy Box)</div><textarea id="upd-biz" rows="3" placeholder="Sessions: 530&#10;Units: 62&#10;Unit Session %: 11.70%&#10;Buy Box: 100%"></textarea></div>
+      <div><div class="ulbl">Business Report (Sessions / Units / Conv%)</div><textarea id="upd-biz" rows="3" placeholder="Sessions: 530&#10;Units: 62&#10;Unit Session %: 11.70%"></textarea></div>
       <div><div class="ulbl">Keyword Updates</div><textarea id="upd-kw" rows="3" placeholder="migraine supplement, 23, 1173&#10;migraine prevention supplement, 23, 465"></textarea></div>
       <div><div class="ulbl">New Reviews</div><textarea id="upd-rev" rows="3" placeholder="Paste any new review text here…"></textarea></div>
     </div>
@@ -1263,11 +1263,6 @@ table.data tr:hover td{background:var(--bg);}
           <div class="lm-change lm-up">↑ Improving (Jan 10.6% → Apr 12.3%*)</div>
         </div>
         <div class="log-metric">
-          <div class="lm-lbl">Buy Box (Apr)</div>
-          <div class="lm-val">100%</div>
-          <div class="lm-change lm-flat">Confirmed corrected from prior 92.4% error</div>
-        </div>
-        <div class="log-metric">
           <div class="lm-lbl">Top Ranking KW</div>
           <div class="lm-val">#23</div>
           <div class="lm-change lm-flat">"migraine supplement" — 1,173/mo</div>
@@ -1364,7 +1359,7 @@ table.data tr:hover td{background:var(--bg);}
 const CTX = `PRODUCT: MiGuard Migraine Prevention Supplement (60 Capsules)
 ASIN: B0B9187Q4P | PRICE: $39.95 | RATING: 4.2★ | REVIEWS: 48
 BSR: #388 Pain Relief Homeopathic Remedies
-APRIL METRICS: Sessions 530 | Units 62 | Unit Session% 11.70% | Buy Box 100%
+APRIL METRICS: Sessions 530 | Units 62 | Unit Session% 11.70% | Revenue $2,476.50
 SALES HISTORY (units): Apr'24:33 May:29 Jun:45 Jul:61 Aug:61 Sep:64 Oct:80 Nov:73 Dec:56 Apr'26:62
 FORMULA: Riboflavin B2, Magnesium, CoQ10, Alpha-Lipoic Acid, Feverfew, Ginger
 DOCTOR: Dr. Benjamin Taimoorazy, headache sub-specialist
@@ -1547,7 +1542,7 @@ async function runInsightsScan() {
 PRODUCT: MiGuard Migraine Prevention Supplement (60 Caps) · ASIN: B0B9187Q4P · $39.95
 FORMULA: Riboflavin B2, Magnesium, CoQ10, Alpha-Lipoic Acid, Feverfew, Ginger
 DOCTOR: Dr. Benjamin Taimoorazy · GMP-certified · Vegan · Non-GMO
-BSR: #388 Pain Relief Homeopathic Remedies · Rating: 4.2★ (48 reviews)
+BSR: #388 Pain Relief Homeopathic Remedies · Rating: 4.2★ (48 reviews) · Buy Box: always 100% (no 3P sellers — exclude from analysis)
 PRIOR CONTEXT:${priorContext}
 KEY KEYWORDS TRACKED: migraine supplement (#28), natural supplements for migraine headaches (#1), drug free migraine relief (#12), migraine supplements for women (#23), migraine prevention supplement (#25)
 COMPANY ACOS TARGET: 30% · TACOS TARGET: 10–15%
