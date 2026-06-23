@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -217,6 +217,11 @@ table.data tr:hover td{background:var(--bg);}
 
 <!-- ══ OVERVIEW ══ -->
 <div id="tab-overview" class="page active">
+  <div class="alert warn" style="margin-bottom:20px;">
+    <span style="font-size:16px;flex-shrink:0;">⚠</span>
+    <span><strong>Action Required — Amazon Title Policy Deadline: July 27, 2026.</strong> All titles must be ≤75 characters. MiGuard&#39;s current title is 188 chars and will be auto-updated by Amazon&#39;s AI after July 27. Updated title (72 chars) and new Item Highlights field (116 chars) are ready in the Listing Audit tab.</span>
+  </div>
+
   <div class="alert" style="background:var(--sand);border-color:rgba(0,31,96,0.2);color:var(--navy);">
     <span style="font-size:16px;flex-shrink:0">⚠</span>
     <span><strong>Ranking Alert:</strong> Of 68 tracked keywords, only ~8 show top-50 organic rank. Strong signals on exact long-tail terms ("natural supplements for migraine headaches" #1, "migraine supplement" #23) but zero presence on high-volume category terms like "migraine relief" (vol 269K) and "migraine" (71K). PPC and the listing updates just pushed are the primary levers. <strong style="color:var(--green);">↑ Conversion is trending up</strong> — Apr 12.3% is the highest in the last 4 months (Jan 10.6% → Feb 8.6% → Mar 10.2% → Apr 12.3%) — working toward the 15–20% category benchmark.</span>
@@ -729,8 +734,18 @@ table.data tr:hover td{background:var(--bg);}
 
   <!-- LIVE TITLE -->
   <div class="sec">
-    <div class="sec-title">Title — Live <span class="badge bg-green">188 chars</span></div>
-    <div class="bullet-safe" style="font-family:var(--font-mono);font-size:13px;">MiGuard Migraine Supplement – Headache and Migraine Relief Supplements, Drug Free Migraine Prevention, Natural Supplements for Migraine Headaches, Reduce Frequency &amp; Severity (60 Capsules)</div>
+    <div class="sec-title">Title — Live + Rewrite <span class="badge bg-red">188 chars — must update by July 27, 2026</span></div>
+    <div style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:4px;">Current — 188 chars (over limit)</div>
+    <div class="bullet-current" style="font-family:var(--font-mono);font-size:12px;">MiGuard Migraine Supplement – Headache and Migraine Relief Supplements, Drug Free Migraine Prevention, Natural Supplements for Migraine Headaches, Reduce Frequency &amp; Severity (60 Capsules)</div>
+
+    <div style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:4px;margin-top:14px;">Rewrite — Title (72 chars ✅)</div>
+    <div class="bullet-safe" style="font-family:var(--font-mono);font-size:13px;">MiGuard Migraine Supplement – Natural Supplements for Migraine Headaches</div>
+
+    <div style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:4px;margin-top:14px;">Item Highlights — New Field (116 chars ✅)</div>
+    <div class="bullet-safe" style="font-family:var(--font-mono);font-size:13px;">60 Capsules · Migraine vitamins: Magnesium, Riboflavin B2, CoQ10, Feverfew, Ginger · Vegan · Non-GMO · GMP-Certified</div>
+    <div style="margin-top:10px;padding:12px 16px;background:var(--sand);border-radius:8px;font-size:12.5px;color:var(--navy);line-height:1.7;">
+      <strong>Item Highlights</strong> is a new Amazon field (active July 27, 2026) — 125 chars, searchable, indexed as #2 ranking signal after title. Visible in search results and on PDPs alongside the title. Count (60 Capsules), ingredient names, and certifications move here while the title focuses on the highest-value keyword phrases.
+    </div>
     <div class="chips" style="margin-top:12px;">
       <span class="chip chip-g">✓ "migraine supplement" — position 1 · 1,173/mo</span>
       <span class="chip chip-g">✓ "headache and migraine relief supplements" — rank #1</span>
@@ -891,7 +906,7 @@ table.data tr:hover td{background:var(--bg);}
 
   <!-- LIVE BACKEND KEYWORDS -->
   <div class="sec">
-    <div class="sec-title">Backend Search Terms — Live <span class="badge bg-green">236 of 250 bytes · 10 terms</span></div>
+    <div class="sec-title">Backend Search Terms — Live <span class="badge bg-green">215 of 250 bytes · 10 terms</span></div>
     <p style="font-size:13px;color:var(--ink2);margin-bottom:20px;line-height:1.7;">These 10 terms extend your indexing coverage beyond what's already captured in your title and bullets. Each targets a real buyer intent, organic ranking signal, or high-ABA keyword that isn't explicitly in the live listing copy. Amazon indexes title and bullets automatically — the backend is for everything else.</p>
     <table class="data" style="margin-bottom:20px;">
       <thead><tr><th>Backend Term</th><th>Search Vol</th><th>Organic Rank</th><th>ABA Conv%</th><th>Why It Extends Coverage</th></tr></thead>
@@ -913,7 +928,7 @@ table.data tr:hover td{background:var(--bg);}
     </div>
     <div>
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--navy);opacity:0.6;margin-bottom:8px;">Live Backend String — copy for Seller Central Search Terms field</div>
-      <div style="background:var(--bg);border:1px solid var(--silver);border-radius:8px;padding:14px;font-family:var(--font-mono);font-size:13px;color:var(--navy);line-height:1.5;" id="backend-string">migraine relief pills migraine pills vitamin b2 magnesium migraine magnesium for migraines homeopathic headache relief migraine relief capsules natural headache relief migraine vitamins for women drug free headache relief migrane relief</div>
+      <div style="background:var(--bg);border:1px solid var(--silver);border-radius:8px;padding:14px;font-family:var(--font-mono);font-size:13px;color:var(--navy);line-height:1.5;" id="backend-string">migraine relief pills migraine pills vitamin b2 magnesium migraine magnesium for migraines homeopathic headache relief migraine relief capsules migraine vitamins for women drug free headache relief migraine medicine</div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
         <button class="btn2" style="margin-left:0;" onclick="copyEl('backend-string','copy-backend-btn')" id="copy-backend-btn">Copy</button>
         <span style="font-size:12px;color:var(--navy);opacity:0.7;">236 bytes · 10 terms · space-separated, no commas, no brand names</span>
@@ -1161,6 +1176,126 @@ table.data tr:hover td{background:var(--bg);}
 
   <!-- LOG ENTRIES CONTAINER -->
   <div id="log-entries">
+
+    <!-- ENTRY — June 22, 2026 -->
+    <div class="log-entry mixed" data-user-entry="true">
+      <div class="log-header">
+        <div>
+          <div class="log-title">Weekly Report — Jun 14–22 · Business, Keywords &amp; PPC</div>
+          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">Business Report Jun 14–22</span>
+            <span class="log-source">KW Tracker Jun 22</span>
+            <span class="log-source">Ads Report Jun 14–21</span>
+            <span class="log-source">Listing Audit — Title · B1–B5 · Backend</span>
+          </div>
+        </div>
+        <span class="log-date">June 22, 2026</span>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--ink3);margin-bottom:10px;margin-top:4px;">Business Report — Jun 14–22 (9 days)</div>
+      <div class="log-metric-row">
+        <div class="log-metric">
+          <div class="lm-lbl">Sessions</div>
+          <div class="lm-val">124</div>
+          <div class="lm-change lm-flat">13.8/day · proj ~413/mo</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Units</div>
+          <div class="lm-val">17</div>
+          <div class="lm-change lm-flat">1.9/day · proj ~57/mo</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Conv%</div>
+          <div class="lm-val">13.71%</div>
+          <div class="lm-change lm-up">↑ Above Apr (11.70%) + May (10.41%)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Revenue</div>
+          <div class="lm-val">$678.75</div>
+          <div class="lm-change lm-flat">Proj ~$2,264/mo</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">PPC Spend</div>
+          <div class="lm-val">$74.36</div>
+          <div class="lm-change lm-flat">$119.85 sales · 62.0% ACoS · 3 orders</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">"Migraine Supp" Rank</div>
+          <div class="lm-val">#25</div>
+          <div class="lm-change lm-up">↑ +8 from #33 (Jun 8) — biggest mover</div>
+        </div>
+      </div>
+
+      <div class="log-findings">
+        <div class="log-finding"><span class="fi">📈</span><span><strong>"Migraine supplement" jumped from #33 to #25 — the most important rank movement in this tracker.</strong> This is the highest-volume commercial keyword (977 vol, 33.3% ABA). The term appears in the live title at position 1 ("MiGuard Migraine Supplement") — meaning title indexing plus PPC conversion signal are working together. At #25 it's approaching page 1. The PPC spend here ($36.38 at 91.1% ACoS) is inefficient on a cost basis but is generating the conversion velocity Amazon uses to move organic rank. Switching to exact-match with a lower bid will reduce waste while keeping the ranking signal.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>"Natural supplements for migraine headaches" held at #1 — the title rewrite preserved this correctly.</strong> This phrase is in the title verbatim ("…Natural Supplements for Migraine Headaches") and the ranking held. "Drug free migraine relief" held at #11 — it's in B4 ("for those seeking drug free migraine relief as a natural alternative"). "Migraine supplements for women" held at #29 — in B3. "Migraine vitamins for women" held at #30 — in backend. All four held rankings map directly to their listing placement, which confirms the copy is being indexed as expected.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>Conv% of 13.71% (Jun 14–22) is above both April (11.70%) and May (10.41%).</strong> The early June spike to 19.23% (Jun 1–10) was a small-sample read. 13.71% over 9 days is a more reliable signal — and it's directionally above pre-update baselines. The listing updates are holding.</span></div>
+        <div class="log-finding"><span class="fi">🔴</span><span><strong>"Migraine medicine" is completely absent from the listing and has dropped to &gt;306.</strong> This term has 4,493 vol and 60.2% ABA — one of the highest purchase-intent signals in the entire tracker. Cross-referencing the listing: it does not appear in the title, Item Highlights, any of the 5 bullets, or the backend. It has never been indexed. Adding it to the backend is the only required action — no listing edit needed, just a backend update.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Vitamin b2 and magnesium migraine" dropped from #78 to #104 — and the exact phrase is not in the listing.</strong> The individual words appear across bullets ("Riboflavin (Vitamin B2)," "Magnesium") but the exact buyer phrase "vitamin b2 magnesium migraine" is not. It's in the backend as "vitamin b2 magnesium migraine" — so it is indexed, but the rank drop suggests weak indexing signal. Adding it verbatim to B2 (the ingredient bullet) would strengthen it: "…combining Magnesium, Riboflavin (Vitamin B2 for migraine), Coenzyme Q10…" would create a natural exact-phrase match.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine relief capsules" declined from #34 to #41 — it's in the backend but not in any bullet.</strong> The backend has "migraine relief capsules" and IH has "60 Capsules" — but neither creates the exact phrase "migraine relief capsules" in a high-weight field. Moving it from the backend into B5 ("…a studied nutritional blend available as migraine relief capsules") would strengthen the indexing signal without disrupting the bullet's compliance or meaning.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>"Migraine relief medication" is ranking #98 (1,156 vol, 59.7% ABA) without appearing in the listing.</strong> Only a partial match exists — "relief" and "medication" are separate words in different bullets. This is a high-ABA term that buyers use when they want a supplement alternative to prescription medication — exactly MiGuard's positioning. There's no room to add it to the backend right now, but it's the first term to add when the July 27 title update frees up new indexing capacity via the Item Highlights field.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>PPC improving — two brand terms driving all three orders at strong ACoS.</strong> "Miguard headache migraine relief" (50% conv%, 11.8% ACoS, $4.72 spend) and "miguard headache and migraine relief" (33.3% conv%, 32.5% ACoS, $12.97 spend) together produced 2 of 3 orders on $17.69 combined spend. Competitor targets (migravent, migshield, mighty migraine supplement) and ASIN targets (b00izkn02m, b0013ovxwq) spent $5.18 combined with $0 in sales — same pattern as May. These should be paused.</span></div>
+      </div>
+
+      <div class="log-action do">
+        <strong>↑ Actions:</strong> (1) <strong>Backend update — swap today:</strong> Remove "natural headache relief" (partially indexed via B1) and "migrane relief" (misspelling, lowest priority). Add "migraine medicine" (4,493 vol, 60.2% ABA — completely absent). New backend ready in Listing Audit tab. (2) <strong>PPC:</strong> Switch "migraine supplement" to exact-match, bid max $1.50. Pause migravent, migshield, mighty migraine supplement, ASIN targets b00izkn02m + b0013ovxwq. (3) <strong>July 27 title update:</strong> Publish new 72-char title + Item Highlights before deadline. (4) <strong>Monitor next tracker:</strong> Watch "migraine supplement" (#25 → target #16–20), "migraine relief medication" (#98 → trending toward page 2 without listing change).
+      </div>
+    </div>
+
+    <!-- ENTRY — June 17, 2026 -->
+    <div class="log-entry mixed" data-user-entry="true">
+      <div class="log-header">
+        <div>
+          <div class="log-title">Amazon Title Policy Update — MiGuard Title + Item Highlights Rewrite</div>
+          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">Amazon Policy Announcement Jun 10</span>
+            <span class="log-source">KW Tracker Jun 8</span>
+            <span class="log-source">Listing Audit</span>
+          </div>
+        </div>
+        <span class="log-date">June 17, 2026</span>
+      </div>
+
+      <div class="log-metric-row">
+        <div class="log-metric">
+          <div class="lm-lbl">Current Title</div>
+          <div class="lm-val">188 chars</div>
+          <div class="lm-change lm-down">🔴 113 chars over new 75-char limit</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">New Title</div>
+          <div class="lm-val">72 chars</div>
+          <div class="lm-change lm-up">✅ Ready to publish</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Item Highlights</div>
+          <div class="lm-val">116 chars</div>
+          <div class="lm-change lm-up">✅ New field — 125 char limit</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Deadline</div>
+          <div class="lm-val">Jul 27</div>
+          <div class="lm-change lm-down">40 days — update before Amazon auto-replaces</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Keywords Preserved</div>
+          <div class="lm-val">12 / 12</div>
+          <div class="lm-change lm-up">↑ All ranked keywords confirmed across title + IH + bullets</div>
+        </div>
+      </div>
+
+      <div class="log-findings">
+        <div class="log-finding"><span class="fi">🔴</span><span><strong>Amazon announced July 27, 2026 as the deadline for all titles to be ≤75 characters.</strong> After that date, titles still over 75 chars will be auto-updated by Amazon's AI gradually. Brand owners get a 14-day window to review AI recommendations in Review Listings Changes before implementation. MiGuard's current title is 188 chars — it will be auto-replaced if not updated first.</span></div>
+        <div class="log-finding"><span class="fi">📈</span><span><strong>New "Item Highlights" field launches simultaneously — 125 chars, indexed, visible in search results and PDPs.</strong> Assumed to be Amazon's #2 SEO ranking signal after title (per policy language). This is a net positive for MiGuard — content that was previously crammed into the title can now occupy a dedicated, indexed field. Total indexed character real estate increases from 188 to 200 (75 + 125).</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>New title preserves the #1 ranked keyword phrase verbatim.</strong> "Natural supplements for migraine headaches" (currently ranked #1 with 142 vol) is maintained in the title. "Migraine supplement" (1,232 vol, highest commercial keyword, ranked #33 — our priority target) is also in the title. All 12 currently-ranked keywords confirmed present across title + Item Highlights + bullets combined.</span></div>
+        <div class="log-finding"><span class="fi">✅</span><span><strong>Item Highlights captures count, ingredients, and certifications.</strong> "60 Capsules" moves to Item Highlights (still indexed, visible on PDP). All six ingredients named (Magnesium, Riboflavin B2, CoQ10, Feverfew, Ginger) — important for ingredient-search indexing. Vegan, Non-GMO, GMP-Certified preserved. "Migraine vitamins" keyword (#37, 524 vol) embedded naturally.</span></div>
+        <div class="log-finding"><span class="fi">⚠</span><span><strong>Keyword-stuffing in long titles is no longer a valid strategy.</strong> The old 188-char title packed in six keyword phrases using dashes. The new structure requires choosing which 1–2 keyword phrases matter most for the title and moving supporting terms to Item Highlights and bullets. The trade-off: title SEO is now more focused, but Item Highlights may partially compensate depending on how Amazon's A9 weights the new field.</span></div>
+      </div>
+
+      <div class="log-action do">
+        <strong>↑ Action:</strong> Publish new title in Seller Central before July 27. Title: "MiGuard Migraine Supplement – Natural Supplements for Migraine Headaches" (72 chars). Item Highlights: "60 Capsules · Migraine vitamins: Magnesium, Riboflavin B2, CoQ10, Feverfew, Ginger · Vegan · Non-GMO · GMP-Certified" (116 chars). Monitor "migraine supplement" rank after update — if it improves from #33, the title change is helping. Monitor "natural supplements for migraine headaches" to confirm it holds at #1 after update.
+      </div>
+    </div>
 
     <!-- ENTRY — June 12, 2026 -->
     <div class="log-entry mixed">
@@ -1646,7 +1781,8 @@ BSR: #388 Pain Relief Homeopathic Remedies · Rating: 4.2★ (48 reviews) · Buy
 PRIOR CONTEXT:${priorContext}
 KEY KEYWORDS TRACKED (Jun 8): migraine supplement (#33), natural supplements for migraine headaches (#1), drug free migraine relief (#11), migraine supplements for women (#29), migraine prevention supplement (#24), migraine pills (#40), migraine relief capsules (#34), vitamin b2 and magnesium migraine (#78)
 COMPANY ACOS TARGET: 30% · TACOS TARGET: 10–15%
-LISTING UPDATED: May 13, 2026 — title, bullets, description, backend all revised`;
+LISTING UPDATED: May 13, 2026 — title, bullets, description, backend all revised
+TITLE REWRITE PENDING: July 27 deadline — new title ready: "MiGuard Migraine Supplement – Natural Supplements for Migraine Headaches" (72 chars) + Item Highlights: "60 Capsules · Migraine vitamins: Magnesium, Riboflavin B2, CoQ10, Feverfew, Ginger · Vegan · Non-GMO · GMP-Certified" (116 chars)`;
 
   const systemPrompt = `${BRAND_CTX}
 
