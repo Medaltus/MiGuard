@@ -240,7 +240,7 @@ table.data tr:hover td{background:var(--bg);}
 
   <!-- Sales trend chart -->
   <div class="sec">
-    <div class="sec-title">Monthly Performance — Jan 2023 – Apr 2026 <span class="badge bg-green">40 months</span></div>
+    <div class="sec-title">Monthly Performance — Jan 2023 – Jul 2026 <span class="badge bg-green">43 months</span> <span class="badge bg-amber">Jul projected</span></div>
     <div class="chart-wrap" style="height:300px;"><canvas id="salesChart"></canvas></div>
     <div style="display:flex;gap:24px;margin-top:14px;flex-wrap:wrap;">
       <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3);"><span style="width:28px;height:3px;background:rgba(0,31,96,0.8);display:inline-block;border-radius:2px;"></span> Units Ordered</div>
@@ -364,131 +364,146 @@ table.data tr:hover td{background:var(--bg);}
 
 <!-- ══ PRODUCT ══ -->
 <div id="tab-keywords" class="page">
-  <div class="sec">
-    <div class="sec-title">Tier 1 — Core High-Intent <span class="badge bg-green">All PPC targets</span></div>
-    <table class="data">
-      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>Organic Rank</th><th>ABA Conv%</th><th>Competing</th><th>Action</th></tr></thead>
-      <tbody>
-        <tr><td>migraine supplement</td><td>1,173</td><td><span class="pill pill-g">#23</span></td><td>33.3%</td><td>&gt;2,000</td><td>✅ PPC + title position 1</td></tr>
-        <tr><td>migraine prevention supplement</td><td>465</td><td><span class="pill pill-g">#23</span></td><td>62.5%</td><td>—</td><td>✅ PPC + title</td></tr>
-        <tr><td>migraine vitamin supplement</td><td>546</td><td><span class="pill pill-g">#27</span></td><td>46.2%</td><td>—</td><td>✅ PPC + bullet 2</td></tr>
-        <tr><td>migraine supplements for women</td><td>558</td><td><span class="pill pill-g">#28</span></td><td>37.5%</td><td>—</td><td>✅ PPC + bullet</td></tr>
-        <tr><td>migraine prevention</td><td>455</td><td><span class="pill pill-g">#26</span></td><td>14.3%</td><td>—</td><td>✅ Backend + PPC</td></tr>
-        <tr><td>natural migraine relief</td><td>485</td><td><span class="pill pill-g">#35</span></td><td>14.3%</td><td>—</td><td>✅ PPC + bullets</td></tr>
-        <tr><td>migraine vitamins</td><td>551</td><td><span class="pill pill-g">#46</span></td><td>25.0%</td><td>—</td><td>✅ PPC secondary</td></tr>
-        <tr><td>migraine relief pills</td><td>622</td><td><span class="pill pill-g">#41</span></td><td>33.3%</td><td>491</td><td>✅ Near page 1 — PPC</td></tr>
-        <tr><td>migraine pills</td><td>627</td><td><span class="pill pill-g">#42</span></td><td>35.7%</td><td>380</td><td>✅ Near page 1 — PPC</td></tr>
-        <tr><td>migraine relief supplements</td><td>390</td><td><span class="pill pill-g">#22</span></td><td>0.0%</td><td>—</td><td>✅ PPC test</td></tr>
-        <tr><td>drug free migraine relief</td><td>—</td><td><span class="pill pill-g">#15</span></td><td>0.0%</td><td>—</td><td>✅ Brand fit — PPC</td></tr>
-        <tr><td>migraine vitamins for women</td><td>153</td><td><span class="pill pill-g">#15</span></td><td>0.0%</td><td>—</td><td>✅ Near page 1 — PPC</td></tr>
-        <tr><td>migraine preventative</td><td>22</td><td><span class="pill pill-g">#15</span></td><td>0.0%</td><td>—</td><td>✅ Page 1 already — PPC</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="sec">
-    <div class="sec-title">Tier 2 — Opportunity Keywords <span class="badge bg-amber">Winnable, low competition</span></div>
-    <table class="data">
-      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>Organic Rank</th><th>ABA Conv%</th><th>Competing</th><th>Action</th></tr></thead>
-      <tbody>
-        <tr><td>feverfew for migraines</td><td>669</td><td><span class="pill pill-g">#80</span></td><td>25.0%</td><td>145</td><td>🎯 Low comp — PPC win</td></tr>
-        <tr><td>migraine relief capsules</td><td>295</td><td><span class="pill pill-g">#55</span></td><td>0.0%</td><td>217</td><td>🎯 PPC + backend</td></tr>
-        <tr><td>vitamin b2 and magnesium migraine</td><td>642</td><td><span class="pill pill-a">#119</span></td><td>23.1%</td><td>—</td><td>🎯 Specific intent — PPC</td></tr>
-        <tr><td>migraine headache relief</td><td>341</td><td><span class="pill pill-a">#121</span></td><td>0.0%</td><td>—</td><td>🎯 Build + PPC</td></tr>
-        <tr><td>natural headache relief</td><td>612</td><td><span class="pill pill-g">#69</span></td><td>23.1%</td><td>&gt;5,000</td><td>⚠ High comp — test low bid</td></tr>
-        <tr><td>homeopathic headache relief</td><td>649</td><td><span class="pill pill-r">&gt;306</span></td><td>44.5%</td><td>—</td><td>🎯 BSR subcategory match</td></tr>
-        <tr><td>magnesium for migraines</td><td>654</td><td><span class="pill pill-r">&gt;306</span></td><td>34.8%</td><td>&gt;1,000</td><td>🎯 High ABA — backend first</td></tr>
-        <tr><td>migraine relief medication</td><td>988</td><td><span class="pill pill-r">&gt;306</span></td><td>58.1%</td><td>&gt;1,000</td><td>🎯 Highest ABA in set — test</td></tr>
-        <tr><td>migrane relief (misspelling)</td><td>302</td><td><span class="pill pill-a">#295</span></td><td>62.5%</td><td>—</td><td>🎯 Misspelling — very high ABA</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="sec">
-    <div class="sec-title">Tier 3 — Reach Targets <span class="badge bg-red">Track only — no PPC yet</span></div>
-    <table class="data">
-      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>Rank</th><th>ABA%</th><th>Notes</th></tr></thead>
-      <tbody>
-        <tr><td>magnesium</td><td>539,259</td><td><span class="pill pill-r">&gt;306</span></td><td>27.9%</td><td>Dominated by standalone Mg brands. 24-mo target.</td></tr>
-        <tr><td>migraine relief</td><td>26,407</td><td><span class="pill pill-r">&gt;306</span></td><td>27.3%</td><td>OTC drugs dominate. Q4 SQP: 269K vol, 0.07% brand share.</td></tr>
-        <tr><td>coenzyme q10</td><td>12,276</td><td><span class="pill pill-r">&gt;306</span></td><td>30.1%</td><td>Cross-category — add to backend search terms.</td></tr>
-        <tr><td>vitamin b2</td><td>11,947</td><td><span class="pill pill-r">&gt;306</span></td><td>57.1%</td><td>High ABA, massive competition. 18-mo target.</td></tr>
-        <tr><td>migraine</td><td>7,534</td><td><span class="pill pill-r">&gt;306</span></td><td>21.9%</td><td>Q3 SQP: 71K vol, 0.05% brand share. Long-term.</td></tr>
-        <tr><td>migraine medicine</td><td>4,792</td><td><span class="pill pill-r">&gt;306</span></td><td>55.1%</td><td>OTC drug positioning blocks entry now.</td></tr>
-        <tr><td>riboflavin</td><td>8,942</td><td><span class="pill pill-r">&gt;306</span></td><td>48.0%</td><td>Add to backend. PPC test at 12 months.</td></tr>
-      </tbody>
-    </table>
+
+  <div class="alert good">
+    <span style="font-size:16px;flex-shrink:0;">📈</span>
+    <span><strong>Keyword Tracker — Jul 23, 2026.</strong> 52 of 68 tracked keywords now ranking. Two keywords reached page 1 organically. "Migraine relief" (vol 27,154) now ranking at #36 — was unranked in 2025. Key drops: "drug free migraine relief" fell from #11 to &gt;306 (title update impact). Change column shows movement vs Jun 22 tracker.</span>
   </div>
 
+  <!-- Rank change tracker — the main view -->
+  <div class="sec">
+    <div class="sec-title">Rank Changes — Jun 22 vs Jul 23 <span class="badge bg-green">Live data</span></div>
+    <div style="overflow-x:auto;">
+    <table class="data" style="font-size:12.5px;">
+      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>ABA%</th><th>Jun 22</th><th>Jul 23</th><th>Change</th><th>Where in Listing</th><th>PPC?</th></tr></thead>
+      <tbody>
+        <tr class="our"><td><strong>natural supplements for migraine headaches</strong></td><td>—</td><td>—</td><td>#1</td><td><strong>#1</strong></td><td><span style="color:var(--green);font-weight:700;">→ HELD</span></td><td>Title</td><td>No — organic</td></tr>
+        <tr class="our"><td><strong>supplements for migraine relief</strong></td><td>—</td><td>—</td><td>#17</td><td><strong>#10</strong></td><td><span style="color:var(--green);font-weight:700;">↑ +7 · PAGE 1</span></td><td>B2</td><td>No — organic</td></tr>
+        <tr class="our"><td><strong>headache and migraine relief supplements</strong></td><td>—</td><td>—</td><td>#5</td><td><strong>#10</strong></td><td><span style="color:var(--green);font-weight:700;">→ PAGE 1</span></td><td>B1 (exact phrase)</td><td>No — organic</td></tr>
+        <tr><td>migraine prevent</td><td>0</td><td>—</td><td>#8</td><td>#10</td><td><span style="color:var(--green);">↑ +2</span></td><td>B1 ("prevention")</td><td>No</td></tr>
+        <tr><td>natural remedies for migraines</td><td>135</td><td>—</td><td>#7</td><td>#12</td><td><span style="color:var(--rose);">↓ -5</span></td><td>B1</td><td>No</td></tr>
+        <tr class="our"><td><strong>migraine prevention supplement</strong></td><td>342</td><td>80.0%</td><td>#23</td><td><strong>#22</strong></td><td><span style="color:var(--green);">↑ +1</span></td><td>B1</td><td>Jun: $0.90/0 ord</td></tr>
+        <tr><td>migraine relief supplements</td><td>341</td><td>—</td><td>#14</td><td>#26</td><td><span style="color:var(--rose);">↓ -12</span></td><td>B2, B5</td><td>No</td></tr>
+        <tr><td>headache and migraine wellness supplements</td><td>—</td><td>—</td><td>#6</td><td>#28</td><td><span style="color:var(--rose);">↓ -22</span></td><td>B1 (added Jun 22)</td><td>No — re-indexing</td></tr>
+        <tr><td>migraine vitamins for women</td><td>180</td><td>—</td><td>#30</td><td>#28</td><td><span style="color:var(--green);">↑ +2</span></td><td>B3 (exact phrase)</td><td>No</td></tr>
+        <tr><td>migraine supplements for women</td><td>411</td><td>—</td><td>#29</td><td>#31</td><td><span style="color:var(--rose);">↓ -2</span></td><td>B3</td><td>Jun: $1.62/0 ord</td></tr>
+        <tr><td>migraine preventative</td><td>—</td><td>—</td><td>—</td><td>#31</td><td><span style="color:var(--green);">↑ NEW</span></td><td>B1 ("prevention")</td><td>No</td></tr>
+        <tr><td><strong>migraine supplement</strong></td><td>977</td><td>33.3%</td><td>#25</td><td>#33</td><td><span style="color:var(--rose);">↓ -8</span></td><td>Title pos.1</td><td>Jun $127 / Jul $62 — 156% ACoS</td></tr>
+        <tr><td>migraine prevention</td><td>486</td><td>33.3%</td><td>#32</td><td>#34</td><td><span style="color:var(--rose);">↓ -2</span></td><td>B1, B2</td><td>Jun: $0.90/0 ord</td></tr>
+        <tr><td><strong>migraine relief</strong></td><td>27,154</td><td>33.1%</td><td>#36</td><td>#36</td><td><span style="color:var(--green);font-weight:700;">→ HELD · was unranked in 2025</span></td><td>B1,B2,B3,B4,B5 (partial)</td><td>Jun 21.6% · Jul 11.0% ACoS ✅</td></tr>
+        <tr><td>migraine vitamin supplement</td><td>326</td><td>—</td><td>#31</td><td>#39</td><td><span style="color:var(--rose);">↓ -8</span></td><td>B2 header</td><td>No</td></tr>
+        <tr><td>migraine relief pills</td><td>493</td><td>69.2%</td><td>#40</td><td>#51</td><td><span style="color:var(--rose);">↓ -11</span></td><td>Backend only</td><td>Jun: $2.22/0 ord</td></tr>
+        <tr><td>migraine pills</td><td>620</td><td>40.9%</td><td>#42</td><td>#54</td><td><span style="color:var(--rose);">↓ -12</span></td><td>Backend only</td><td>Jul: $1.33/0 ord</td></tr>
+        <tr><td>migraine vitamins</td><td>530</td><td>50.0%</td><td>#42</td><td>#55</td><td><span style="color:var(--rose);">↓ -13</span></td><td>IH, Backend, B5</td><td>Jul: $1.71/0 ord</td></tr>
+        <tr><td>migraine relief capsules</td><td>250</td><td>—</td><td>#41</td><td>#55</td><td><span style="color:var(--rose);">↓ -14</span></td><td>B5, Backend</td><td>No</td></tr>
+        <tr><td>feverfew for migraines</td><td>637</td><td>33.3%</td><td>#76</td><td>#71</td><td><span style="color:var(--green);">↑ +5</span></td><td>B2</td><td>No</td></tr>
+        <tr class="our"><td><strong>vitamin b2 and magnesium migraine</strong></td><td>413</td><td>60.0%</td><td>#104</td><td><strong>#77</strong></td><td><span style="color:var(--green);font-weight:700;">↑ +27 · biggest mover</span></td><td>~partial (B2 + backend)</td><td>No</td></tr>
+        <tr><td>migraine headache relief</td><td>368</td><td>—</td><td>#86</td><td>#219</td><td><span style="color:var(--rose);">↓ -133</span></td><td>B5</td><td>No</td></tr>
+        <tr><td>homeopathic headache relief</td><td>532</td><td>41.7%</td><td>#127</td><td><strong>#103</strong></td><td><span style="color:var(--green);">↑ +24</span></td><td>Backend</td><td>No</td></tr>
+        <tr><td>migraine relief medication</td><td>1,156</td><td>59.7%</td><td>#98</td><td>#292</td><td><span style="color:var(--rose);">↓ -194</span></td><td>~partial only</td><td>No</td></tr>
+        <tr><td><strong>drug free migraine relief</strong></td><td>—</td><td>—</td><td>#11</td><td><span style="color:var(--rose);">&gt;306</span></td><td><span style="color:var(--rose);font-weight:700;">🔴 DROPPED</span></td><td>B4 only (was in old title)</td><td>No — needs PPC to rebuild</td></tr>
+        <tr><td>migraine wellness supplements</td><td>—</td><td>—</td><td>#19</td><td>#304</td><td><span style="color:var(--rose);">↓ nearly dropped</span></td><td>B3 (added Jun 22 — re-indexing)</td><td>No — wait for next tracker</td></tr>
+        <tr><td>migraine medicine</td><td>4,493</td><td>60.2%</td><td>&gt;306</td><td>&gt;306</td><td><span style="color:var(--ink3);">→ backend added Jun 22</span></td><td>Backend (added Jun 22)</td><td>No — watch next tracker</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="margin-top:14px;padding:14px 18px;background:var(--teal-light);border-radius:8px;font-size:12.5px;color:var(--navy);line-height:1.8;">
+      <strong>Reading the changes:</strong> Page 1 wins — "supplements for migraine relief" and "headache and migraine relief supplements" both at #10 via listing copy alone, no PPC. Key drops — "drug free migraine relief" from #11 to &gt;306 is the most significant loss, almost certainly caused by the July 27 title update removing "Drug Free" from the title. "Migraine wellness supplements" (#19→#304) and "headache and migraine wellness supplements" (#6→#28) are likely re-indexing after the Jun 22 bullet update (4–6 week lag). "Vitamin b2 and magnesium migraine" improved #104→#77 — backend addition working.
+    </div>
+  </div>
+
+  <!-- Keyword tiers — updated -->
+  <div class="sec">
+    <div class="sec-title">Tier 1 — Core / Highest-Priority <span class="badge bg-green">PPC + listing focus</span></div>
+    <div style="overflow-x:auto;"><table class="data" style="font-size:12.5px;">
+      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>Jul 23 Rank</th><th>ABA%</th><th>Listing Placement</th><th>PPC Signal</th></tr></thead>
+      <tbody>
+        <tr class="our"><td><strong>migraine supplement</strong></td><td>977</td><td>#33</td><td>33.3%</td><td>Title pos.1 + B1 + B3 + B4</td><td>$189 Jun+Jul · 156% ACoS · exact-match needed</td></tr>
+        <tr class="our"><td><strong>migraine relief</strong></td><td>27,154</td><td>#36</td><td>33.1%</td><td>Partial across all bullets</td><td>21% ACoS Jun · 11% ACoS Jul · scale this ↑</td></tr>
+        <tr class="our"><td><strong>migraine prevention supplement</strong></td><td>342</td><td>#22</td><td>80.0%</td><td>B1</td><td>$0.90 Jun (no conv) · increase bid</td></tr>
+        <tr><td>migraine supplements for women</td><td>411</td><td>#31</td><td>—</td><td>B3</td><td>$1.62 Jun (no conv) · test</td></tr>
+        <tr><td>migraine vitamin supplement</td><td>326</td><td>#39</td><td>—</td><td>B2 header</td><td>No PPC · test</td></tr>
+        <tr><td>migraine vitamins</td><td>530</td><td>#55</td><td>50.0%</td><td>IH + Backend + B5</td><td>$1.71 Jul (no conv)</td></tr>
+        <tr><td>migraine relief pills</td><td>493</td><td>#51</td><td>69.2%</td><td>Backend only</td><td>$2.22 Jun (no conv) · needs bullet placement</td></tr>
+        <tr><td>migraine pills</td><td>620</td><td>#54</td><td>40.9%</td><td>Backend only</td><td>$1.33 Jun+Jul (no conv)</td></tr>
+        <tr><td>drug free migraine relief</td><td>—</td><td>&gt;306 🔴</td><td>—</td><td>B4 only — was in old title</td><td>No PPC · exact-match campaign needed to rebuild</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">Tier 2 — Opportunity <span class="badge bg-amber">Winnable with PPC + listing</span></div>
+    <div style="overflow-x:auto;"><table class="data" style="font-size:12.5px;">
+      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>Jul 23 Rank</th><th>ABA%</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr class="our"><td><strong>vitamin b2 and magnesium migraine</strong></td><td>413</td><td>#77 ↑</td><td>60.0%</td><td>+27 positions since Jun 22 · backend working · consider B2 exact phrase</td></tr>
+        <tr><td>feverfew for migraines</td><td>637</td><td>#71 ↑</td><td>33.3%</td><td>+5 positions · in B2 · monitor</td></tr>
+        <tr><td>homeopathic headache relief</td><td>532</td><td>#103 ↑</td><td>41.7%</td><td>+24 positions · backend · now in top 110</td></tr>
+        <tr><td>migraine headache relief</td><td>368</td><td>#219 ↓</td><td>—</td><td>Was #86 · dropped significantly · in B5 · PPC to rebuild</td></tr>
+        <tr><td>migraine relief medication</td><td>1,156</td><td>#292 ↓</td><td>59.7%</td><td>Was #98 · high ABA · partial match only · no room in bullets currently</td></tr>
+        <tr><td>migraine medicine</td><td>4,493</td><td>&gt;306</td><td>60.2%</td><td>Backend added Jun 22 · check Aug tracker</td></tr>
+        <tr><td>natural headache pain relief</td><td>—</td><td>N/T</td><td>—</td><td>New Jul PPC converter at 4.1% ACoS · not yet tracked · add to tracker</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">Tier 3 — Watch / Long-term <span class="badge bg-red">Monitor only</span></div>
+    <div style="overflow-x:auto;"><table class="data" style="font-size:12.5px;">
+      <thead><tr><th>Keyword</th><th>Vol/mo</th><th>Jul 23 Rank</th><th>ABA%</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>migraine</td><td>27,154+</td><td>#230</td><td>—</td><td>Too broad · OTC dominates · long-term ranking goal</td></tr>
+        <tr><td>migraine relief products</td><td>7,784</td><td>&gt;306</td><td>18.3%</td><td>OTC/device category · backend only · 18-mo target</td></tr>
+        <tr><td>vitamin b2</td><td>15,547</td><td>&gt;306</td><td>53.6%</td><td>In backend + B2 · massive competition · 18-mo target</td></tr>
+        <tr><td>riboflavin</td><td>8,942</td><td>&gt;306</td><td>47.8%</td><td>In IH + B2 · add to backend</td></tr>
+        <tr><td>coenzyme q10</td><td>10,888</td><td>&gt;306</td><td>25.9%</td><td>In B2 · high competition · backend candidate</td></tr>
+        <tr><td>magnesium</td><td>500,544</td><td>&gt;306</td><td>25.8%</td><td>Completely dominated by standalone Mg brands · 36-mo target</td></tr>
+        <tr><td>migraine medicine</td><td>4,493</td><td>&gt;306</td><td>60.2%</td><td>OTC drug buyers · backend added · watch for first organic signal</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- SQP section -->
   <div style="border-top:2px solid var(--silver);margin-top:8px;padding-top:8px;">
     <div style="font-family:var(--font-serif);font-size:20px;color:var(--navy);margin-bottom:6px;padding:20px 0 0 0;">Search Query Performance</div>
-    <div style="font-size:13px;color:var(--ink3);margin-bottom:20px;">Brand purchase share by query — Q4 2025, Q1 2026, and April 2026</div>
-  </div>
-  <div class="alert">
-    <span style="font-size:16px;flex-shrink:0;">📊</span>
-    <span><strong>Search Query Performance data — Q4 2025 (top) and Q3 2025 (bottom).</strong> This is brand-level data from Seller Central showing where MiGuard appears in the search funnel and what % of category purchases it captures. Brand Share = MiGuard's clicks or purchases as % of total for that keyword.</span>
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:20px;">Brand purchase share by query — Q3 2025, Q4 2025, and June 2026</div>
   </div>
 
   <div class="sec">
-    <div class="sec-title">Q4 2025 — Top Search Queries <span class="badge bg-amber">Oct–Dec 2025</span></div>
-    <div class="sqp-wrap">
-    <table class="data">
-      <thead><tr><th>Rank</th><th>Search Query</th><th>Vol</th><th>Brand Share (Clicks)</th><th>Brand Share (Purchases)</th><th>Total Purchases</th><th>Brand Purchases</th><th>Insight</th></tr></thead>
+    <div class="sec-title">June 2026 SQP — Brand Purchases <span class="badge bg-green">Most recent</span></div>
+    <table class="data" style="font-size:12.5px;">
+      <thead><tr><th>Search Query</th><th>Vol</th><th>Brand Purchases</th><th>Purchase Share</th><th>Insight</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td>miguard headache and migraine relief</td><td>254</td><td><span class="pill pill-g">60%</span></td><td><span class="pill pill-g">100%</span></td><td>14</td><td>14</td><td>Brand term — owns it</td></tr>
-        <tr><td>2</td><td>migraine supplement</td><td>219,482</td><td><span class="pill pill-a">3.23%</span></td><td><span class="pill pill-a">0.72%</span></td><td>279</td><td>2</td><td>⚡ High priority PPC — massive vol</td></tr>
-        <tr><td>3</td><td>migraine relief</td><td>269,660</td><td><span class="pill pill-r">0.07%</span></td><td><span class="pill pill-r">0.02%</span></td><td>13,661</td><td>3</td><td>Category leader term — long-term</td></tr>
-        <tr><td>4</td><td>miguard</td><td>194</td><td><span class="pill pill-g">55.67%</span></td><td><span class="pill pill-g">100%</span></td><td>7</td><td>7</td><td>Brand term — owns it</td></tr>
-        <tr><td>5</td><td>migraine prevention</td><td>2,091</td><td><span class="pill pill-a">2.67%</span></td><td><span class="pill pill-a">3.57%</span></td><td>56</td><td>2</td><td>✅ Good signal — PPC here</td></tr>
-        <tr><td>6</td><td>migraine relief products</td><td>116,800</td><td><span class="pill pill-r">0.05%</span></td><td><span class="pill pill-r">0.02%</span></td><td>4,337</td><td>1</td><td>Too broad — backend only</td></tr>
-        <tr><td>7</td><td>migraine prevention supplement</td><td>38,183</td><td><span class="pill pill-a">4.16%</span></td><td><span class="pill pill-a">1.3%</span></td><td>77</td><td>1</td><td>⚡ High priority PPC target</td></tr>
-        <tr><td>8</td><td>natural migraine relief</td><td>2,657</td><td><span class="pill pill-a">2.39%</span></td><td><span class="pill pill-a">0.8%</span></td><td>125</td><td>1</td><td>✅ PPC candidate</td></tr>
-        <tr><td>9</td><td>migraine supplements prevention</td><td>1,184</td><td><span class="pill pill-a">1.75%</span></td><td><span class="pill pill-a">2.13%</span></td><td>47</td><td>1</td><td>✅ PPC candidate</td></tr>
-        <tr><td>10</td><td>migraine relief supplements</td><td>1,015</td><td><span class="pill pill-a">4.7%</span></td><td><span class="pill pill-a">4.14%</span></td><td>42</td><td>0</td><td>⚡ Good click share — add PPC</td></tr>
-        <tr><td>11</td><td>migraine relief supplement</td><td>552</td><td><span class="pill pill-a">2.92%</span></td><td><span class="pill pill-a">1.64%</span></td><td>61</td><td>1</td><td>✅ Target</td></tr>
-        <tr><td>13</td><td>migravent migraine relief</td><td>1,768</td><td><span class="pill pill-r">0.12%</span></td><td><span class="pill pill-r">0.47%</span></td><td>212</td><td>1</td><td>Competitor brand — defensive</td></tr>
-        <tr><td>16</td><td>miguard supplement</td><td>17</td><td><span class="pill pill-g">100%</span></td><td><span class="pill pill-g">100%</span></td><td>1</td><td>1</td><td>Brand — owns it</td></tr>
-        <tr><td>17</td><td>migraine supplements for women</td><td>920</td><td><span class="pill pill-a">2.19%</span></td><td><span class="pill pill-a">2.56%</span></td><td>39</td><td>1</td><td>⚡ Women's angle — PPC</td></tr>
+        <tr class="our"><td>miguard headache and migraine relief</td><td>23</td><td>5</td><td><span class="pill pill-g">100%</span></td><td>Core brand term — 100% share, 5 purchases</td></tr>
+        <tr class="our"><td>miguard</td><td>41</td><td>2</td><td><span class="pill pill-g">66.7%</span></td><td>Brand awareness — 3rd party getting 33%</td></tr>
+        <tr><td>migraine supplement</td><td>2,460</td><td>2</td><td><span class="pill pill-a">2.44%</span></td><td>Highest-vol term · 2 brand purchases · scale PPC here carefully</td></tr>
+        <tr><td>migrane prevention supplements</td><td>6</td><td>1</td><td><span class="pill pill-g">50%</span></td><td>Misspelling converting at 50% — add to backend</td></tr>
+        <tr><td>miguard headache migraine relief</td><td>5</td><td>1</td><td><span class="pill pill-g">100%</span></td><td>Brand variant — efficient PPC term (11.8% ACoS Jun)</td></tr>
       </tbody>
     </table>
+    <div style="margin-top:10px;padding:12px 16px;background:var(--teal-light);border-radius:8px;font-size:12.5px;color:var(--navy);line-height:1.7;">
+      <strong>Total June brand purchases: 11</strong> (up from Q1 avg ~9). "Migraine supplement" at 2.44% share on 2,460 vol means every 1% improvement = ~25 more purchases/month. Increasing PPC conversion signal on this exact term is the clearest path to growing SQP share.
     </div>
   </div>
 
   <div class="sec">
-    <div class="sec-title">Q3 2025 — Top Search Queries <span class="badge bg-amber">Jul–Sep 2025</span></div>
-    <div class="sqp-wrap">
-    <table class="data">
-      <thead><tr><th>Rank</th><th>Search Query</th><th>Vol</th><th>Brand Share (Clicks)</th><th>Brand Share (Purchases)</th><th>Total Purchases</th><th>Brand Purchases</th><th>Insight</th></tr></thead>
+    <div class="sec-title">Q4 2025 SQP — Top Search Queries <span class="badge bg-amber">Oct–Dec 2025</span></div>
+    <table class="data" style="font-size:12.5px;">
+      <thead><tr><th>Rank</th><th>Search Query</th><th>Vol</th><th>Brand Share (Clicks)</th><th>Brand Share (Purch)</th><th>Brand Purch</th><th>Insight</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td>miguard headache and migraine relief</td><td>159</td><td><span class="pill pill-g">77%</span></td><td><span class="pill pill-g">83.33%</span></td><td>24</td><td>20</td><td>Brand term</td></tr>
-        <tr><td>3</td><td>migraine supplement</td><td>196,958</td><td><span class="pill pill-a">2.01%</span></td><td><span class="pill pill-a">1.47%</span></td><td>273</td><td>4</td><td>⚡ 4 purchases Q3 vs 2 Q4 — trend watch</td></tr>
-        <tr><td>4</td><td>migraine relief</td><td>218,010</td><td><span class="pill pill-r">0.04%</span></td><td><span class="pill pill-r">0.01%</span></td><td>13,409</td><td>2</td><td>Category — long-term</td></tr>
-        <tr><td>7</td><td>migraine prevention supplement</td><td>43,570</td><td><span class="pill pill-a">3.36%</span></td><td><span class="pill pill-a">3.57%</span></td><td>56</td><td>2</td><td>⚡ High intent — PPC</td></tr>
-        <tr><td>9</td><td>migraine</td><td>71,018</td><td><span class="pill pill-r">0.07%</span></td><td><span class="pill pill-r">0.01%</span></td><td>2,944</td><td>1</td><td>Tier 3 — too competitive now</td></tr>
-        <tr><td>10</td><td>migraine prevention</td><td>2,280</td><td><span class="pill pill-a">2.85%</span></td><td><span class="pill pill-a">1.61%</span></td><td>62</td><td>1</td><td>✅ PPC target</td></tr>
-        <tr><td>14</td><td>migraine vitamin supplement</td><td>26,304</td><td><span class="pill pill-a">1.16%</span></td><td><span class="pill pill-a">2.38%</span></td><td>42</td><td>1</td><td>⚡ Good ratio — PPC priority</td></tr>
-        <tr><td>17</td><td>migradex migraine relief</td><td>445</td><td><span class="pill pill-a">6.98%</span></td><td><span class="pill pill-a">0.67%</span></td><td>3</td><td>0</td><td>Competitor term — monitor</td></tr>
-        <tr><td>19</td><td>natural migraine relief</td><td>2,180</td><td><span class="pill pill-a">1.52%</span></td><td><span class="pill pill-a">4.59%</span></td><td>100</td><td>1</td><td>⚡ 4.59% purchase share — strong signal</td></tr>
-        <tr><td>20</td><td>migrel for migraines</td><td>13,441</td><td><span class="pill pill-r">0.04%</span></td><td><span class="pill pill-r">0%</span></td><td>1,938</td><td>0</td><td>Competitor brand (MigreLief)</td></tr>
-        <tr><td>24</td><td>miguard supplement</td><td>10</td><td><span class="pill pill-g">50%</span></td><td><span class="pill pill-g">100%</span></td><td>1</td><td>1</td><td>Brand term</td></tr>
-        <tr><td>25</td><td>excedrin headcare</td><td>175</td><td><span class="pill pill-a">2.49%</span></td><td><span class="pill pill-a">40%</span></td><td>5</td><td>2</td><td>Cross-buys from OTC users — opportunity</td></tr>
+        <tr class="our"><td>1</td><td>miguard headache and migraine relief</td><td>254</td><td>60%</td><td>100%</td><td>14</td><td>Brand term — owns it</td></tr>
+        <tr><td>2</td><td>migraine supplement</td><td>219,482</td><td>3.23%</td><td>0.72%</td><td>2</td><td>High priority PPC — massive vol</td></tr>
+        <tr><td>3</td><td>migraine relief</td><td>269,660</td><td>0.07%</td><td>0.02%</td><td>3</td><td>Category leader — long-term · now ranking #36</td></tr>
+        <tr><td>4</td><td>miguard</td><td>194</td><td>55.67%</td><td>100%</td><td>7</td><td>Brand term — owns it</td></tr>
+        <tr><td>5</td><td>migraine prevention</td><td>2,091</td><td>2.67%</td><td>3.57%</td><td>2</td><td>Good signal — PPC here</td></tr>
+        <tr><td>7</td><td>migraine prevention supplement</td><td>38,183</td><td>4.16%</td><td>1.3%</td><td>1</td><td>High priority PPC target · 80% ABA</td></tr>
+        <tr><td>9</td><td>natural migraine relief</td><td>2,657</td><td>2.39%</td><td>0.8%</td><td>1</td><td>PPC candidate</td></tr>
+        <tr><td>17</td><td>migraine supplements for women</td><td>920</td><td>2.19%</td><td>2.56%</td><td>1</td><td>Women angle — PPC</td></tr>
       </tbody>
     </table>
-    </div>
   </div>
 
-  <div class="sec">
-    <div class="sec-title">SQP Key Takeaways</div>
-    <div style="font-size:13.5px;color:var(--ink2);line-height:1.9;max-width:860px;">
-      <strong>1. "Migraine supplement" is your #1 commercial priority.</strong> 196K–219K search volume, 2–4 purchases per quarter, 1.5–2% brand share. Every ranking point here is worth dozens of units per month. This keyword should be in position 1 of your title.<br><br>
-      <strong>2. "Natural migraine relief" has disproportionate purchase share.</strong> <span style="color:var(--green);font-weight:600;">↑</span> Q3 shows 4.59% purchase share on a term where you have minimal click share — meaning the people who do find you on this keyword convert at an unusually high rate. PPC here would be highly efficient.<br><br>
-      <strong>3. "Excedrin" crossover buyers purchased MiGuard.</strong> Q3 SQP shows 2 MiGuard purchases attributed to "excedrin headcare" searches — buyers looking for OTC relief are open to your supplement. Backend search terms should include "drug free alternative" and "natural alternative to excedrin."<br><br>
-      <strong>4. Brand protection is solid.</strong> You own 100% of brand-term purchases. Protect the brand term with PPC just in case competitors start bidding on it.
-    </div>
-  </div>
-
-</div>
-
-<!-- ══ SEARCH QUERY PERFORMANCE ══ -->
-<div id="tab-competitors" class="page">
+</div><div id="tab-competitors" class="page">
   <div class="sec">
     <div class="sec-title">Current Competitors — Early-Stage Peers</div>
     <div style="overflow-x:auto;">
@@ -1085,6 +1100,68 @@ table.data tr:hover td{background:var(--bg);}
 
   <!-- LOG ENTRIES CONTAINER -->
   <div id="log-entries">
+
+    <!-- ENTRY — July 23, 2026 · Branded Keywords -->
+    <div class="log-entry positive" data-user-entry="true">
+      <div class="log-header">
+        <div>
+          <div class="log-title">Branded Keyword Strategy — PPC Analysis + Recommendations</div>
+          <div class="log-sources" style="margin-top:6px;">
+            <span class="log-source">June Ads Report</span>
+            <span class="log-source">July Ads Report (Jul 1-23)</span>
+            <span class="log-source">June SQP</span>
+          </div>
+        </div>
+        <span class="log-date">July 23, 2026</span>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--ink3);margin-bottom:10px;margin-top:4px;">Branded Term Performance — June + July</div>
+      <div class="log-metric-row">
+        <div class="log-metric">
+          <div class="lm-lbl">"miguard headache and migraine relief" Jun</div>
+          <div class="lm-val">20.8%</div>
+          <div class="lm-change lm-up">ACoS · $16.62 spend · 2 orders · 40% conv</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">"miguard headache migraine relief" Jun</div>
+          <div class="lm-val">11.8%</div>
+          <div class="lm-change lm-up">ACoS · $4.72 spend · 1 order · 50% conv</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">"miguard" exact Jun/Jul</div>
+          <div class="lm-val">$0</div>
+          <div class="lm-change lm-down">$3.85 Jun + $3.11 Jul · 0 orders both</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">"miguard supplement" Jun/Jul</div>
+          <div class="lm-val">$34.14</div>
+          <div class="lm-change lm-down">$3.62 Jun + $30.52 Jul · 0 orders both</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">SQP Brand purchases (June)</div>
+          <div class="lm-val">11</div>
+          <div class="lm-change lm-up">Brand terms: 8 of 11 purchases (73%)</div>
+        </div>
+        <div class="log-metric">
+          <div class="lm-lbl">Branded CPCs</div>
+          <div class="lm-val">$3.32–$3.93</div>
+          <div class="lm-change lm-down">High vs conversion rate on "miguard" alone</div>
+        </div>
+      </div>
+
+      <div class="log-findings">
+        <div class="log-finding"><span class="fi">&#128200;</span><span><strong>The branded terms are doing two very different things — and they should be managed separately.</strong> "Miguard headache and migraine relief" and "miguard headache migraine relief" convert at 11–20% ACoS with 40–50% conversion rates. These are buyers who already know the brand and are searching with purchase intent. This is normal branded search behavior — the click converts efficiently because the intent is already there. These should stay active at their current spend levels.</span></div>
+        <div class="log-finding"><span class="fi">&#9888;</span><span><strong>"Miguard" (exact brand name) spent $3.85 in June and $3.11 in July with 0 conversions on both.</strong> CPCs are $3.85 per click — high for a brand term. This is counterintuitive: your own brand name should be the cheapest keyword you buy and the one that converts the most. High CPCs on brand exact-match suggests a competitor is actively bidding on your brand name, driving up the auction price. At $3.85/click with 0 conversions, the math does not support continued broad spend here without investigating why.</span></div>
+        <div class="log-finding"><span class="fi">&#128308;</span><span><strong>"Miguard supplement" spent $34.14 combined across June and July with zero orders.</strong> This is the branded keyword the ads manager flagged. $30.52 of that was in July alone — a 9x increase from June with no corresponding improvement in performance. This term is almost certainly matching to queries like "miguard supplement magnesium" or other modified brand searches where the buyer is looking for something specific that MiGuard does not match. Pausing this keyword immediately redirects $30/month to proven converters. There is no data rationale for continuing to run it.</span></div>
+        <div class="log-finding"><span class="fi">&#128200;</span><span><strong>The SQP explains the 39 clicks / 3 conversion pattern your ads manager observed.</strong> June SQP shows "miguard headache and migraine relief" (vol 23, 14 brand clicks, 5 purchases) and "miguard" (vol 41, 15 brand clicks, 2 purchases). Together that is 29 brand clicks generating 7 SQP purchases — but SQP counts organic clicks too, not just PPC. The ads report shows 3 paid orders on branded terms in June. The gap between SQP purchases (7 brand term purchases) and paid conversions (3) is organic + direct buyers who found the brand term without clicking the ad. This is healthy — it means the brand term is generating organic purchase intent that supplements do not need to be paid for.</span></div>
+        <div class="log-finding"><span class="fi">&#9888;</span><span><strong>Branded CPCs at $3.32–$3.93 are high for a brand with 48 reviews and limited brand registry footprint.</strong> Normal branded CPCs for a supplement brand at this stage should be $0.50–$1.50. The elevated CPCs on brand terms strongly suggest a competitor (likely MigreLief, MigraVent, or Mighty Migraine) is bidding on the "MiGuard" keyword. This is a common tactic — the competitor pays to show their ad when someone searches your brand name. To confirm: check the Search Term report for the "miguard" campaign. If clicks are coming from queries that include your brand name but showing competitor products, that confirms it. If confirmed, a defensive exact-match brand campaign at a higher bid ($2.00–2.50) would push competitors out of the auction on your core brand term.</span></div>
+        <div class="log-finding"><span class="fi">&#128200;</span><span><strong>The branded term strategy that the data supports is simple: two tiers.</strong> Tier 1 — keep "miguard headache and migraine relief" and "miguard headache migraine relief" running at current spend (together: $21.34 Jun, proven 11–20% ACoS). These are converting branded searches. Tier 2 — pause "miguard supplement" immediately ($0 return on $34). For "miguard" exact, investigate competitor bidding before deciding; if CPCs are driven by competitor activity, a defensive campaign at $2.00 bid is worth running. If CPCs are Amazon-generated (no competitor), pause it and let organic handle the traffic — your SQP shows buyers find the brand organically anyway.</span></div>
+      </div>
+
+      <div class="log-action do">
+        <strong>Recommendations for discussion:</strong> (1) <strong>Pause "miguard supplement" immediately</strong> — $34 burned Jun+Jul, $0 return. (2) <strong>Investigate "miguard" CPC spike</strong> — pull the search term report for the miguard campaign and check if competitors are bidding on your brand name. If yes, set a defensive exact-match bid at $2.00. If no, pause it and let organic branded traffic handle these searches. (3) <strong>Keep "miguard headache and migraine relief" and "miguard headache migraine relief" active</strong> — 11–20% ACoS, proven converters, brand protection at low cost. (4) <strong>No need to increase branded spend right now</strong> — the SQP shows brand organic purchases are already occurring without paid support. Branded spend should be defensive (protect against competitor bidding) not offensive (trying to grow brand awareness via PPC at this stage).
+      </div>
+    </div>
 
     <!-- ENTRY — July 23, 2026 -->
     <div class="log-entry mixed" data-user-entry="true">
@@ -1962,9 +2039,9 @@ function copyEl(id, btnId) {
 // ── Sales Chart ────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
   const sctx = document.getElementById('salesChart').getContext('2d');
-  const salesLabels = ["Jan '23","Feb '23","Mar '23","Apr '23","May '23","Jun '23","Jul '23","Aug '23","Sep '23","Oct '23","Nov '23","Dec '23","Jan '24","Feb '24","Mar '24","Apr '24","May '24","Jun '24","Jul '24","Aug '24","Sep '24","Oct '24","Nov '24","Dec '24","Jan '25","Feb '25","Mar '25","Apr '25","May '25","Jun '25","Jul '25","Aug '25","Sep '25","Oct '25","Nov '25","Dec '25","Jan '26","Feb '26","Mar '26","Apr '26"];
-  const unitsData = [13,5,15,0,13,10,19,20,16,21,18,13,12,17,24,20,7,17,20,10,16,12,19,15,23,22,28,33,29,45,61,61,69,80,73,57,92,62,68,65];
-  const revenueData = [779.35,299.75,899.35,0,779.35,599.50,1079.10,1199.00,959.20,1210.99,995.17,779.35,719.40,1019.15,1438.80,1199.00,419.65,1019.15,1007.16,599.50,959.20,683.43,1139.05,896.26,978.05,840.00,1092.66,1317.95,1158.55,1797.75,2357.05,2357.05,2869.75,3091.73,2982.49,2087.24,3374.75,2476.90,2368.08,2505.16];
+  const salesLabels = ["Jan '23","Feb '23","Mar '23","Apr '23","May '23","Jun '23","Jul '23","Aug '23","Sep '23","Oct '23","Nov '23","Dec '23","Jan '24","Feb '24","Mar '24","Apr '24","May '24","Jun '24","Jul '24","Aug '24","Sep '24","Oct '24","Nov '24","Dec '24","Jan '25","Feb '25","Mar '25","Apr '25","May '25","Jun '25","Jul '25","Aug '25","Sep '25","Oct '25","Nov '25","Dec '25","Jan '26","Feb '26","Mar '26","Apr '26","May '26","Jun '26","Jul '26*"];
+  const unitsData = [13,5,15,0,13,10,19,20,16,21,18,13,12,17,24,20,7,17,20,10,16,12,19,15,23,22,28,33,29,45,61,61,69,80,73,57,92,62,68,65,58,70,51];
+  const revenueData = [779.35,299.75,899.35,0,779.35,599.50,1079.10,1199.00,959.20,1210.99,995.17,779.35,719.40,1019.15,1438.80,1199.00,419.65,1019.15,1007.16,599.50,959.20,683.43,1139.05,896.26,978.05,840.00,1092.66,1317.95,1158.55,1797.75,2357.05,2357.05,2869.75,3091.73,2982.49,2087.24,3374.75,2476.90,2368.08,2505.16,2316.70,2676.25,2031.00];
 
   new Chart(sctx, {
     type: 'bar',
@@ -1975,7 +2052,9 @@ window.addEventListener('load', () => {
           label: 'Units Ordered',
           data: unitsData,
           backgroundColor: unitsData.map((v, i) => {
-            if (i === 36 || i === 33 || i === 30) return 'rgba(36,233,163,0.95)'; // all-time highs: Jan'26, Oct'25, Jul'25
+            if (i === 36 || i === 33 || i === 30) return 'rgba(36,233,163,0.95)'; // ATH: Jan'26, Oct'25, Jul'25
+            if (i === 41) return 'rgba(36,233,163,0.7)'; // Jun'26 — post-listing high
+            if (i === 42) return 'rgba(107,123,162,0.5)'; // Jul'26 projected
             if (i >= 29) return 'rgba(0,31,96,0.75)'; // scale-up phase Jun'25+
             if (i >= 26) return 'rgba(0,31,96,0.4)';  // early growth Mar-May'25
             if (i === 25) return 'rgba(107,123,162,0.6)'; // Feb'25 listing update
@@ -1983,6 +2062,8 @@ window.addEventListener('load', () => {
           }),
           borderColor: unitsData.map((v, i) => {
             if (i === 36 || i === 33 || i === 30) return 'rgba(36,233,163,1)';
+            if (i === 41) return 'rgba(36,233,163,0.9)';
+            if (i === 42) return 'rgba(107,123,162,0.7)';
             if (i >= 29) return 'rgba(0,31,96,0.9)';
             if (i >= 26) return 'rgba(0,31,96,0.6)';
             if (i === 25) return 'rgba(107,123,162,0.9)';
