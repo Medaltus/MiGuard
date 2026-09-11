@@ -995,6 +995,9 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 /* flex:1 fills all remaining vertical space below the navy block (up to the full 11in page); justify-content:center vertically centers the pill/headline/columns within that remaining space, per the request to justify this content to the middle of the space below the navy area. */
 .pdfx-cover-white{padding:40px 60px;flex:1;display:flex;flex-direction:column;justify-content:center;}
 .pdfx-pill{display:inline-block;align-self:flex-start;background:rgba(36,233,163,.14);border:1px solid rgba(36,233,163,.35);border-radius:20px;padding:5px 16px;font-size:11.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--green);margin-bottom:24px;}
+.pdfx-pill-sand{background:var(--sand);border:1px solid rgba(200,125,47,.35);color:var(--warn);}
+.pdfx-opp-images{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+.pdfx-opp-img{width:56px;height:56px;object-fit:cover;border-radius:5px;border:1px solid var(--border);}
 .pdfx-cover-headline{font-family:var(--font-subheader);font-size:20px;font-weight:600;color:var(--navy);line-height:1.35;margin-bottom:28px;}
 .pdfx-cover-cols{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:8px;}
 .pdfx-cover-col{font-size:12px;color:#48557a;line-height:1.75;}
@@ -1048,6 +1051,14 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 .pdfx-ltd-val{font-size:19px;font-weight:700;color:var(--navy);font-family:var(--font-numbers);}
 .pdfx-ltd-lbl{font-size:9.5px;color:var(--muted);}
 .pdfx-footer{display:flex;justify-content:space-between;align-items:center;margin-top:36px;padding-top:16px;border-top:1px solid var(--border);}
+/* Pin-to-bottom variant — used on the Opportunities page's footer, so it
+   sits flush against the physical page bottom rather than flowing right
+   after whatever content happens to precede it. .pdfx-page is already
+   position:relative with a fixed min-height, so this anchors correctly;
+   left/right match .pdfx-inner's own 46px side padding for alignment.
+   Matches Skinside Seoul's build per Jaclyn. */
+.pdfx-pin-bottom{position:absolute;left:46px;right:46px;bottom:24px;margin-top:0;}
+.pdfx-pin-bottom .pdfx-footer{margin-top:0;}
 .pdfx-footer-brand{font-size:13px;font-weight:700;color:var(--navy);}
 .pdfx-footer-tag{font-size:9.5px;color:var(--muted);}
 .pdfx-footer-right{text-align:right;font-size:10px;color:var(--muted);}
@@ -1386,23 +1397,6 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       <div class="period-pills" id="ov-period-pills" style="display:flex;background:var(--white);border:1px solid var(--border);border-radius:999px;padding:4px;gap:2px;"></div>
     </div>
 
-    <div class="kpi-row">
-      <div class="kpi-card" id="ov-kpi-total-sales"><div class="kpi-label">Total Sales</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-      <div class="kpi-card" id="ov-kpi-units"><div class="kpi-label">Total Units Sold</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-      <div class="kpi-card" id="ov-kpi-orders"><div class="kpi-label">Total Orders</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-      <div class="kpi-card" id="ov-kpi-aov"><div class="kpi-label">Blended AOV</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-      <div class="kpi-card" id="ov-kpi-adspend"><div class="kpi-label">Ad Spend</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-      <div class="kpi-card" id="ov-kpi-acos"><div class="kpi-label">Blended ACOS</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-    </div>
-
-    <div class="kpi-row">
-      <div class="kpi-card" id="ov-kpi-organic-orders"><div class="kpi-label">MTD Organic Units</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-      <div class="kpi-card" id="ov-kpi-organic-sales"><div class="kpi-label">MTD Organic Sales</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-      <div class="kpi-card" id="ov-kpi-ad-orders"><div class="kpi-label">MTD Ad-Driven Units</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-      <div class="kpi-card" id="ov-kpi-ad-sales"><div class="kpi-label">MTD Ad Sales</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-      <div class="kpi-card" id="ov-kpi-pending"><div class="kpi-label">Pending Orders</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
-    </div>
-
     <!-- Goals Tracker — added 2026-09-04 per Jaclyn. First pass/mockup,
          explicitly framed as v1 — see the [qa] console notes throughout
          the JS for the real data-structure quirks found while building
@@ -1425,6 +1419,39 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
           <div style="color:var(--muted);flex:1;text-align:center;padding:20px;">Loading…</div>
         </div>
       </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card" id="ov-kpi-total-sales"><div class="kpi-label">Total Sales</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-units"><div class="kpi-label">Total Units Sold</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-orders"><div class="kpi-label">Total Orders</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-aov"><div class="kpi-label">Blended AOV</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-adspend"><div class="kpi-label">Ad Spend</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-acos"><div class="kpi-label">Blended ACOS</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card" id="ov-kpi-organic-orders"><div class="kpi-label">MTD Organic Units</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-organic-sales"><div class="kpi-label">MTD Organic Sales</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-ad-orders"><div class="kpi-label">MTD Ad-Driven Units</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-ad-sales"><div class="kpi-label">MTD Ad Sales</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-pending"><div class="kpi-label">Pending Orders</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+    </div>
+
+    <div class="ppc-card">
+      <div class="ppc-card-title">Ad Spend by Type</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+        <div style="width:280px;flex-shrink:0;position:relative;height:200px;">
+          <canvas id="ov-adtype-chart"></canvas>
+        </div>
+        <div style="flex:1;min-width:280px;overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Ad Type</th><th># Campaigns</th><th>ACOS</th><th>Spend</th><th>Sales</th></tr></thead>
+            <tbody id="ov-adtype-tbody"><tr><td colspan="5" style="color:var(--muted);">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="ppc-note" id="ov-adtype-note"></div>
     </div>
 
     <div class="card" style="margin-bottom:20px;">
@@ -1540,7 +1567,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;">
       <div class="kpi-card">
-        <div class="kpi-label">Shipped Website Orders • Last 30 Days</div>
+        <div class="kpi-label">Shipped Amazon Orders • Last 30 Days</div>
         <div class="kpi-value" id="ff-kpi-shipped30">—</div>
       </div>
       <div class="kpi-card">
@@ -1565,14 +1592,14 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     </div>
 
     <div class="ppc-card">
-      <div class="ppc-card-title">Website Orders Shipped by Date · Last 30 Days</div>
+      <div class="ppc-card-title">Amazon Orders Shipped by Date · Last 30 Days</div>
       <div style="position:relative;height:320px;"><canvas id="ff-shipped-chart"></canvas></div>
       <div class="ppc-note" id="ff-chart-footer">Loading…</div>
     </div>
 
     <div class="ppc-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div class="ppc-card-title" style="margin-bottom:0;">Website Orders by State · Last 30 Days</div>
+        <div class="ppc-card-title" style="margin-bottom:0;">Amazon Orders by State · Last 30 Days</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);">
           <span>Fewer</span>
           <div style="width:80px;height:7px;border-radius:4px;background:linear-gradient(to right,#dce6f5,#001F60);"></div>
@@ -1773,7 +1800,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
             <tbody id="bm-keyword-tbody"><tr><td colspan="3" style="color:var(--muted);">Loading…</td></tr></tbody>
           </table>
         </div>
-        <div class="ppc-note">ℹ Top 10 rows, keywords with real rank movement sorted first, then by rank ascending within each group.</div>
+        <div class="ppc-note">ℹ Top 20 rows, keywords with real rank movement sorted first, then by rank ascending within each group.</div>
       </div>
 
       <div class="ppc-card" style="background:var(--navy);border:none;">
@@ -1886,7 +1913,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;">
         <div class="kpi-card">
-          <div class="kpi-label" id="mfc-lbl-shipped">Shipped Website Orders</div>
+          <div class="kpi-label" id="mfc-lbl-shipped">Shipped Amazon Orders</div>
           <div class="kpi-value" id="mfc-kpi-shipped30">—</div>
         </div>
         <div class="kpi-card">
@@ -1911,7 +1938,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       </div>
 
       <div class="ppc-card">
-        <div class="ppc-card-title" id="mfc-lbl-chart">Website Orders Shipped by Date</div>
+        <div class="ppc-card-title" id="mfc-lbl-chart">Amazon Orders Shipped by Date</div>
         <div style="position:relative;height:170px;"><canvas id="mfc-shipped-chart"></canvas></div>
         <div class="ppc-note" id="mfc-chart-footer">Loading…</div>
       </div>
@@ -1937,7 +1964,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
       <div class="ppc-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div class="ppc-card-title" style="margin-bottom:0;">Website Orders by State · Last 30 Days</div>
+          <div class="ppc-card-title" style="margin-bottom:0;">Amazon Orders by State · Last 30 Days</div>
           <div style="display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);">
             <span>Fewer</span>
             <div style="width:80px;height:7px;border-radius:4px;background:linear-gradient(to right,#dce6f5,#001F60);"></div>
@@ -2031,6 +2058,28 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     </div>
     <div class="channel-page" id="m-opportunities">
 
+      <div class="card" style="margin-bottom:18px;padding:12px 20px;">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;">Show sections:</span>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
+            <input type="checkbox" id="m-opp-cb-subsave" checked style="margin:0;"
+              onchange="(function(cb){var s=document.getElementById('m-opp-subsave-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
+            Subscribe &amp; Save
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
+            <input type="checkbox" id="m-opp-cb-accomplished" checked style="margin:0;"
+              onchange="(function(cb){var s=document.getElementById('m-opp-accomplished-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
+            What's Been Accomplished
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
+            <input type="checkbox" id="m-opp-cb-future" checked style="margin:0;"
+              onchange="(function(cb){var s=document.getElementById('m-opp-future-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
+            Future Opportunities
+          </label>
+        </div>
+      </div>
+
+      <div id="m-opp-subsave-section">
       <div class="section-label">Subscribe &amp; Save</div>
       <div class="kpi-row" style="margin-bottom:20px;">
         <div class="kpi-card" id="kpi-active-subs"><div class="kpi-label">Active Subscriptions</div><div class="kpi-value" style="font-size:36px;">123</div><div class="kpi-mom flat">Loading…</div></div>
@@ -2043,7 +2092,51 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
         </div>
         <div style="position:relative;height:320px;"><canvas id="chart-sns"></canvas></div>
       </div>
+      </div>
 
+      <div id="m-opp-accomplished-section">
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="display:inline-block;background:var(--sand);border:1px solid rgba(200,125,47,.35);border-radius:4px;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--warn);">What's Been Accomplished</div>
+          <button class="btn-edit" id="acc-edit-btn">✏️ Edit</button>
+        </div>
+        <div class="opp-grid" id="acc-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="opp-card" id="acc-card-1" style="display:none;">
+            <div class="opp-title" id="acc-title-1"></div>
+            <div class="opp-subtitle" id="acc-subtitle-1"></div>
+            <div class="opp-body" id="acc-body-1"></div>
+            <div id="acc-images-1" style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;"></div>
+          </div>
+          <div class="opp-card" id="acc-card-2" style="display:none;">
+            <div class="opp-title" id="acc-title-2"></div>
+            <div class="opp-subtitle" id="acc-subtitle-2"></div>
+            <div class="opp-body" id="acc-body-2"></div>
+            <div id="acc-images-2" style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;"></div>
+          </div>
+          <div class="opp-card" id="acc-card-3" style="display:none;">
+            <div class="opp-title" id="acc-title-3"></div>
+            <div class="opp-subtitle" id="acc-subtitle-3"></div>
+            <div class="opp-body" id="acc-body-3"></div>
+          </div>
+          <div class="opp-card" id="acc-card-4" style="display:none;">
+            <div class="opp-title" id="acc-title-4"></div>
+            <div class="opp-subtitle" id="acc-subtitle-4"></div>
+            <div class="opp-body" id="acc-body-4"></div>
+          </div>
+        </div>
+        <div id="acc-empty-state" style="display:none;color:var(--muted);font-size:12px;padding:8px 0;">No accomplishments added yet — click Edit to add up to 4.</div>
+
+        <div id="acc-editor" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+          <div id="acc-editor-slots"></div>
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="btn-edit" id="acc-save-btn" style="background:var(--navy);color:#fff;">Save</button>
+            <button class="btn-edit" id="acc-cancel-btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div id="m-opp-future-section">
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
           <div style="display:inline-block;background:rgba(36,233,163,.12);border:1px solid rgba(36,233,163,.3);border-radius:4px;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);">Future Opportunities</div>
@@ -2072,6 +2165,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
           </div>
         </div>
         <div id="opp-empty-state" style="display:none;color:var(--muted);font-size:12px;padding:8px 0;">No opportunities added yet — click Edit to add up to 4.</div>
+      </div>
       </div>
       <div class="insight-editor" id="opp-editor">
         <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Up to 4 opportunity cards. Leave a card's Title blank to leave it out of the report entirely. Subtitle is optional — if left blank, the body text sits directly under the title.</div>
@@ -4126,6 +4220,22 @@ Paraben-free · Sulfate-free · Silicone-free · Phthalate-free · Color-safe ·
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div class="ppc-card">
+        <div class="ppc-card-title">Ad Spend by Type</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+          <div style="width:280px;flex-shrink:0;position:relative;height:200px;">
+            <canvas id="ppc-adtype-chart"></canvas>
+          </div>
+          <div style="flex:1;min-width:280px;overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr><th>Ad Type</th><th># Campaigns</th><th>ACOS</th><th>Spend</th><th>Sales</th></tr></thead>
+              <tbody id="ppc-adtype-tbody"><tr><td colspan="5" style="color:var(--muted);">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="ppc-note" id="ppc-adtype-note"></div>
       </div>
 
       <div class="ppc-card">
@@ -6853,26 +6963,14 @@ async function initSns() {
         return rows;
       }
 
-      let allChannelRevenue = amzRevenueThisMonth;
-      try {
-        const WEB_SHEET_ID_LOCAL = '1Wyc43am0EIk2OArL2EU8fP-EyHkhz-9-S5tcY3E60zw';
-        const WEB_REVENUE_GID_LOCAL = '7000599';
-        const WMT_REVENUE_SHEET_ID_LOCAL = '1QhKeOxKR0mEfSiM2pdYxrEBWsQdRSxbL8Q86MP6lpFE';
-        const WMT_REVENUE_GID_LOCAL = '812984298';
-        const [webRevCsv, wmtRevCsv] = await Promise.all([
-          fetch(sheetCsvUrl(WEB_SHEET_ID_LOCAL, WEB_REVENUE_GID_LOCAL) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
-          fetch(sheetCsvUrl(WMT_REVENUE_SHEET_ID_LOCAL, WMT_REVENUE_GID_LOCAL) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
-        ]);
-        const webRevRows = parseRevenueHistoryLocal(webRevCsv);
-        const wmtRevRows = parseRevenueHistoryLocal(wmtRevCsv);
-        console.log('[MiGuard][qa] % Revenue Invested — target year/month:', year, '/', month, '— webRevRows count:', webRevRows.length, '— last 4:', JSON.stringify(webRevRows.slice(-4)), '— first 4:', JSON.stringify(webRevRows.slice(0, 4)));
-        const webRevThisMonth = (webRevRows.find(r => r.year === year && r.month === month) || {}).revenue || 0;
-        const wmtRevThisMonth = (wmtRevRows.find(r => r.year === year && r.month === month) || {}).revenue || 0;
-        allChannelRevenue = amzRevenueThisMonth + webRevThisMonth + wmtRevThisMonth;
-        console.log('[MiGuard] % Revenue Invested — revenue by channel:', 'amazon=', amzRevenueThisMonth, 'website=', webRevThisMonth, 'walmart=', wmtRevThisMonth, 'total=', allChannelRevenue);
-      } catch (e) {
-        console.warn('[MiGuard] could not fetch Website/Walmart revenue for % Revenue Invested — falling back to Amazon-only revenue:', e.message);
-      }
+      // MiGuard is Amazon-only — this used to also fetch Website/Walmart
+      // revenue history from a generic, shared, non-brand-scoped workbook
+      // (the same one behind the Overview page's earlier cross-brand
+      // leak) and add it into the denominator here, which would have
+      // silently invented "Website/Walmart revenue" for a brand that
+      // sells on neither, understating % Revenue Invested. Amazon's own
+      // revenue (already fetched above) is the whole denominator now.
+      const allChannelRevenue = amzRevenueThisMonth;
 
       if (allChannelRevenue) {
         const pctRevenueInvested = Math.round((currInvestTotal / allChannelRevenue) * 100);
@@ -9649,35 +9747,16 @@ async function initSns() {
         return rows;
       }
 
-      let allChannelRevenue = amzRevenueThisMonth;
-      try {
-        const WEB_SHEET_ID_LOCAL = '1Wyc43am0EIk2OArL2EU8fP-EyHkhz-9-S5tcY3E60zw';
-        const WEB_REVENUE_GID_LOCAL = '7000599';
-        const WEB_ADS_GID_LOCAL = '219707263';
-        const WMT_REVENUE_SHEET_ID_LOCAL = '1QhKeOxKR0mEfSiM2pdYxrEBWsQdRSxbL8Q86MP6lpFE';
-        const WMT_REVENUE_GID_LOCAL = '812984298';
-        const [webRevCsv, wmtRevCsv, webAdsCsv] = await Promise.all([
-          fetch(sheetCsvUrl(WEB_SHEET_ID_LOCAL, WEB_REVENUE_GID_LOCAL) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
-          fetch(sheetCsvUrl(WMT_REVENUE_SHEET_ID_LOCAL, WMT_REVENUE_GID_LOCAL) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
-          fetch(sheetCsvUrl(WEB_SHEET_ID_LOCAL, WEB_ADS_GID_LOCAL) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
-        ]);
-        const webRevRows = parseRevenueHistoryLocal(webRevCsv);
-        const wmtRevRows = parseRevenueHistoryLocal(wmtRevCsv);
-        console.log('[MiGuard][qa] % Revenue Invested — target year/month:', year, '/', month, '— webRevRows count:', webRevRows.length, '— last 4:', JSON.stringify(webRevRows.slice(-4)), '— first 4:', JSON.stringify(webRevRows.slice(0, 4)));
-        const webRevThisMonth = (webRevRows.find(r => r.year === year && r.month === month) || {}).revenue || 0;
-        const wmtRevThisMonth = (wmtRevRows.find(r => r.year === year && r.month === month) || {}).revenue || 0;
-        allChannelRevenue = amzRevenueThisMonth + webRevThisMonth + wmtRevThisMonth;
-
-        const targetPrefix = `${year}-${String(month).padStart(2, '0')}`;
-        const webAdsRows = parseGenericCsvLocal(webAdsCsv);
-        const webAdsSpendThisMonth = webAdsRows
-          .filter(r => (r.date || '').substring(0, 7) === targetPrefix)
-          .reduce((s, r) => s + parseAmt(r.spend), 0);
-        currInvestTotal += webAdsSpendThisMonth;
-        console.log('[MiGuard] % Revenue Invested — revenue by channel:', 'amazon=', amzRevenueThisMonth, 'website=', webRevThisMonth, 'walmart=', wmtRevThisMonth, 'total=', allChannelRevenue, '— website Google Ads spend added to numerator:', webAdsSpendThisMonth);
-      } catch (e) {
-        console.warn('[MiGuard] could not fetch Website/Walmart revenue or Website Google Ads spend for % Revenue Invested — falling back to Amazon-only numerator/revenue:', e.message);
-      }
+      // MiGuard is Amazon-only — this used to also fetch Website/Walmart
+      // revenue AND Website Google Ads spend from generic, shared,
+      // non-brand-scoped workbooks (the same ones behind the Overview
+      // page's earlier cross-brand leak), adding invented "Website"
+      // figures into BOTH the numerator (currInvestTotal) and denominator
+      // (allChannelRevenue) of % Revenue Invested for a brand that has no
+      // Website channel at all. Amazon-only now — currInvestTotal stays
+      // exactly what it was computed as above (ads_spend + vine_total +
+      // promos_total from MiGuard's own pre-computed summary row).
+      const allChannelRevenue = amzRevenueThisMonth;
 
       if (allChannelRevenue) {
         const pctRevenueInvested = Math.round((currInvestTotal / allChannelRevenue) * 100);
@@ -12644,6 +12723,126 @@ document.addEventListener('DOMContentLoaded', function() {
     load();
   })();
 
+  // ── What's Been Accomplished: up to 4 cards, cards 1-2 also support up
+  // to 3/2 images respectively (plain hosted URLs for now, not a real
+  // upload). Mirrors wireOpportunities() above exactly — same underlying
+  // pattern (editable cards on the same monthly report_insights row),
+  // just a different field prefix (accomplished#_*) and the extra image
+  // inputs on cards 1-2. Ported from Skinside Seoul's build per Jaclyn.
+  (function wireAccomplished() {
+    const BRAND = 'miguard';
+    const editBtn = document.getElementById('acc-edit-btn');
+    const saveBtn = document.getElementById('acc-save-btn');
+    const cancelBtn = document.getElementById('acc-cancel-btn');
+    const editorEl = document.getElementById('acc-editor');
+    const slotsEl = document.getElementById('acc-editor-slots');
+    if (!editBtn || !saveBtn || !editorEl || !slotsEl) return;
+
+    const IMAGE_COUNTS = { 1: 3, 2: 2, 3: 0, 4: 0 };
+
+    slotsEl.innerHTML = [1, 2, 3, 4].map(n => {
+      const imgInputs = IMAGE_COUNTS[n]
+        ? Array.from({ length: IMAGE_COUNTS[n] }, (_, i) => i + 1).map(i => `
+        <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Image ${i} URL <span style="font-weight:400;">(optional — paste a hosted link)</span></div>
+        <input type="text" id="textarea-acc${n}-image${i}" style="width:100%;box-sizing:border-box;padding:6px 10px;border:1px solid rgba(0,31,96,.2);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;color:var(--navy);margin-bottom:8px;">`).join('')
+        : '';
+      return `
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px;">
+        <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:4px;">Accomplished ${n} — Title</div>
+        <textarea id="textarea-acc${n}-title" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid rgba(0,31,96,.2);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;color:var(--navy);resize:none;height:40px;margin-bottom:8px;"></textarea>
+        <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:4px;">Subtitle <span style="font-weight:400;color:var(--muted);">(optional)</span></div>
+        <textarea id="textarea-acc${n}-subtitle" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid rgba(0,31,96,.2);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;color:var(--navy);resize:none;height:40px;margin-bottom:8px;"></textarea>
+        <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:4px;">Body</div>
+        <textarea id="textarea-acc${n}-body" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid rgba(0,31,96,.2);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;color:var(--navy);resize:vertical;min-height:60px;margin-bottom:8px;"></textarea>
+        ${imgInputs}
+      </div>`;
+    }).join('');
+
+    function getLastFullMonthLocalAcc() {
+      const now = new Date();
+      let year = now.getFullYear(), month = now.getMonth();
+      if (month === 0) { month = 12; year--; }
+      return { year, month };
+    }
+
+    async function load() {
+      const { year, month } = getLastFullMonthLocalAcc();
+      const row = await window.reportInsightsFetchRow(BRAND, { year: String(year), month: String(month) });
+      let anyVisible = false;
+      [1, 2, 3, 4].forEach(n => {
+        const title    = row ? (row[`accomplished${n}_title`]    || '') : '';
+        const subtitle = row ? (row[`accomplished${n}_subtitle`] || '') : '';
+        const body     = row ? (row[`accomplished${n}_body`]     || '') : '';
+        const card = document.getElementById(`acc-card-${n}`);
+        if (title) {
+          anyVisible = true;
+          card.style.display = '';
+          document.getElementById(`acc-title-${n}`).textContent = title;
+          const subEl = document.getElementById(`acc-subtitle-${n}`);
+          if (subtitle) { subEl.textContent = subtitle; subEl.style.display = ''; }
+          else { subEl.textContent = ''; subEl.style.display = 'none'; }
+          document.getElementById(`acc-body-${n}`).textContent = body;
+        } else {
+          card.style.display = 'none';
+        }
+        const taTitle = document.getElementById(`textarea-acc${n}-title`);
+        const taSub   = document.getElementById(`textarea-acc${n}-subtitle`);
+        const taBody  = document.getElementById(`textarea-acc${n}-body`);
+        if (taTitle) taTitle.value = title;
+        if (taSub)   taSub.value = subtitle;
+        if (taBody)  taBody.value = body;
+
+        const imgCount = IMAGE_COUNTS[n] || 0;
+        const imagesEl = document.getElementById(`acc-images-${n}`);
+        if (imagesEl) {
+          const urls = [];
+          for (let i = 1; i <= imgCount; i++) {
+            const url = row ? (row[`accomplished${n}_image${i}`] || '') : '';
+            const taImg = document.getElementById(`textarea-acc${n}-image${i}`);
+            if (taImg) taImg.value = url;
+            if (url) urls.push(url);
+          }
+          imagesEl.innerHTML = urls.map(u => `<img src="${u}" style="width:56px;height:56px;object-fit:cover;border-radius:5px;border:1px solid var(--border);">`).join('');
+        }
+      });
+      document.getElementById('acc-empty-state').style.display = anyVisible ? 'none' : 'block';
+      return row;
+    }
+
+    editBtn.addEventListener('click', () => {
+      editorEl.style.display = editorEl.style.display === 'none' ? 'block' : 'none';
+    });
+    cancelBtn.addEventListener('click', () => { editorEl.style.display = 'none'; });
+
+    saveBtn.addEventListener('click', async () => {
+      const origLabel = saveBtn.textContent;
+      saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+      try {
+        const { year, month } = getLastFullMonthLocalAcc();
+        const fields = {};
+        [1, 2, 3, 4].forEach(n => {
+          fields[`accomplished${n}_title`]    = (document.getElementById(`textarea-acc${n}-title`).value || '').trim();
+          fields[`accomplished${n}_subtitle`] = (document.getElementById(`textarea-acc${n}-subtitle`).value || '').trim();
+          fields[`accomplished${n}_body`]     = (document.getElementById(`textarea-acc${n}-body`).value || '').trim();
+          const imgCount = IMAGE_COUNTS[n] || 0;
+          for (let i = 1; i <= imgCount; i++) {
+            const taImg = document.getElementById(`textarea-acc${n}-image${i}`);
+            if (taImg) fields[`accomplished${n}_image${i}`] = (taImg.value || '').trim();
+          }
+        });
+        await window.reportInsightsSaveFields({ scope: 'monthly', year, month, fields, action: 'save' });
+        await load();
+        editorEl.style.display = 'none';
+      } catch (e) {
+        alert('Save failed: ' + e.message);
+      } finally {
+        saveBtn.disabled = false; saveBtn.textContent = origLabel;
+      }
+    });
+
+    load();
+  })();
+
   // ── Overview hero date — real root cause found ───────────────────────────
   // #topbar-date (the global topbar element) was already being set correctly
   // by initAmazonLive() — but the Overview hero block had a SEPARATE element
@@ -14861,6 +15060,90 @@ function pbFindAdRow(rows, year, month) {
   return rows.find(r => parseInt(r.year, 10) === year && parseInt(r.month, 10) === month) || null;
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// AD SPEND BY TYPE (SP/SB/SD) — shared renderer for the doughnut +
+// campaign table, used identically on Overview and PPC. Safe to share
+// as a plain top-level function (unlike sheet ID constants, which get
+// re-declared locally in each page's own init function per the real
+// ReferenceError this feature hit once already — see call sites) since
+// this takes only plain numbers/element IDs as input, no cross-scope
+// sheet references of its own.
+//
+// chartVarKey must be a unique window.<name> per page this is called
+// from (e.g. '_ovAdTypeChart' on Overview, '_ppcAdTypeChart' on PPC) —
+// reusing one name across two pages would mean each page's own
+// destroy-before-recreate check clobbers the other page's chart
+// reference.
+// ═══════════════════════════════════════════════════════════════════
+function renderAdTypeBreakdown(cfg) {
+  const canvas = document.getElementById(cfg.canvasId);
+  if (canvas) {
+    if (window[cfg.chartVarKey]) { window[cfg.chartVarKey].destroy(); window[cfg.chartVarKey] = null; }
+    window[cfg.chartVarKey] = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['Sponsored Products', 'Sponsored Brands', 'Sponsored Display'],
+        datasets: [{ data: [cfg.spSpend, cfg.sbSpend, cfg.sdSpend], backgroundColor: ['#001f60', '#24e9a3', '#c87d2f'], borderWidth: 0 }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, color: '#48557a' } },
+          tooltip: {
+            backgroundColor: '#fff', borderColor: 'rgba(0,31,96,0.1)', borderWidth: 1,
+            titleColor: '#001F60', bodyColor: '#6B7BA2', padding: 12, boxWidth: 8, boxHeight: 8,
+            callbacks: { label: ctx => `  ${ctx.label}: $${ctx.parsed.toLocaleString(undefined, { maximumFractionDigits: 2 })}` },
+          },
+        },
+      },
+    });
+  }
+
+  const tbody = document.getElementById(cfg.tbodyId);
+  if (tbody) {
+    const rows = [
+      ['Sponsored Products', cfg.spCampaigns, cfg.spAcos, cfg.spSpend, cfg.spSales],
+      ['Sponsored Brands', cfg.sbCampaigns, cfg.sbAcos, cfg.sbSpend, cfg.sbSales],
+      ['Sponsored Display', cfg.sdCampaigns, cfg.sdAcos, cfg.sdSpend, cfg.sdSales],
+    ];
+    // ACOS shows as a dash when spend is zero — the sheet itself leaves
+    // that field blank when there's no spend to compute a rate from, so
+    // showing 0.0% would incorrectly imply a real calculated value
+    // exists. Confirmed from the real data, not assumed.
+    tbody.innerHTML = rows.map(([label, campaigns, acos, spend, sales]) => `
+      <tr>
+        <td>${label}</td>
+        <td>${campaigns || 0}</td>
+        <td>${acos > 0 ? acos.toFixed(1) + '%' : '<span class="tp-dash">—</span>'}</td>
+        <td>$${(spend || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+        <td>$${(sales || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Honest-note handling — kept as two distinct messages rather than one
+  // generic "no data" line, since they mean genuinely different things:
+  // true zero ad spend for the period vs. real spend concentrated in
+  // just one ad type (which would otherwise look like a loading failure
+  // — a single solid-color circle with two invisible legend entries).
+  const noteEl = document.getElementById(cfg.noteId);
+  if (noteEl) {
+    const totalSpend = (cfg.spSpend || 0) + (cfg.sbSpend || 0) + (cfg.sdSpend || 0);
+    const active = [
+      cfg.spSpend > 0 ? 'Sponsored Products' : null,
+      cfg.sbSpend > 0 ? 'Sponsored Brands' : null,
+      cfg.sdSpend > 0 ? 'Sponsored Display' : null,
+    ].filter(Boolean);
+    if (totalSpend === 0) {
+      noteEl.textContent = 'No ad spend recorded for this period yet.';
+    } else if (active.length === 1) {
+      noteEl.textContent = `ℹ 100% ${active[0]} this period — no active ${['Sponsored Products', 'Sponsored Brands', 'Sponsored Display'].filter(t => t !== active[0]).join(' or ')} spend.`;
+    } else {
+      noteEl.textContent = '';
+    }
+  }
+}
+
 async function ppcLoadBlendedPerformance(periodKey) {
   const cfg = pbBuildPeriodConfig(periodKey || 'lastFull');
 
@@ -14986,6 +15269,22 @@ async function ppcLoadBlendedPerformance(periodKey) {
     const webAd = pbFindAdRow(webAdRows, cfg.year, cfg.month) || {};
 
     const numOr0 = v => parseFloat(String(v || '0').replace(/[$,]/g, '')) || 0;
+
+    // Ad Spend by Type (SP/SB/SD) — reuses amzAd (already fetched/parsed
+    // above for this same page's Channel Breakdown table) rather than a
+    // new fetch. This split has no per-channel equivalent for Walmart/
+    // Website's ad summary sheets — Amazon-only, matching how this
+    // feature is built on Overview too. No per-product version exists
+    // either (Ad Orders Cache has no SP/SB/SD split at all), which is
+    // why this is the same brand-wide breakdown on both pages rather
+    // than something more granular here.
+    renderAdTypeBreakdown({
+      canvasId: 'ppc-adtype-chart', chartVarKey: '_ppcAdTypeChart',
+      tbodyId: 'ppc-adtype-tbody', noteId: 'ppc-adtype-note',
+      spSpend: numOr0(amzAd.sp_spend), spSales: numOr0(amzAd.sp_sales), spAcos: numOr0(amzAd.sp_acos), spCampaigns: parseInt(amzAd.sp_campaigns_running, 10) || 0,
+      sbSpend: numOr0(amzAd.sb_spend), sbSales: numOr0(amzAd.sb_sales), sbAcos: numOr0(amzAd.sb_acos), sbCampaigns: parseInt(amzAd.sb_campaigns_running, 10) || 0,
+      sdSpend: numOr0(amzAd.sd_spend), sdSales: numOr0(amzAd.sd_sales), sdAcos: numOr0(amzAd.sd_acos), sdCampaigns: parseInt(amzAd.sd_campaigns_running, 10) || 0,
+    });
 
     const adSpend     = numOr0(amzAd.spend) + numOr0(wmtAd.spend) + numOr0(webAd.spend);
     const adSales     = numOr0(amzAd.sales) + numOr0(wmtAd.sales) + numOr0(webAd.sales);
@@ -15307,7 +15606,7 @@ window.initBrandMomentum = async function () {
     });
     const kwTbody = document.getElementById('bm-keyword-tbody');
     if (kwTbody) {
-      const top10 = keywordRows.slice(0, 10);
+      const top10 = keywordRows.slice(0, 20); // variable name kept as-is; now shows 20 rows per Jaclyn (single-product brand)
       kwTbody.innerHTML = top10.length ? top10.map(r => {
         // Single merged cell: "#151 ▲ +155" for a ranking keyword with
         // real movement since first recorded, just "#151" if ranking but
@@ -15347,9 +15646,14 @@ window.initBrandMomentum = async function () {
       subBsrEl.querySelector('.kpi-value').textContent = currBsr != null ? '#' + currBsr.toLocaleString() : '—';
       const momEl = subBsrEl.querySelector('.kpi-mom');
       if (momEl && currBsr != null && prevBsr != null && prevBsr > 0) {
-        const pct = Math.round(((prevBsr - currBsr) / prevBsr) * 1000) / 10; // lower BSR = improvement
-        momEl.className = 'kpi-mom ' + (pct === 0 ? 'flat' : pct > 0 ? 'up' : 'dn');
-        momEl.textContent = (pct === 0 ? '' : pct > 0 ? '▲ ' : '▼ ') + Math.abs(pct) + '% vs prior month';
+        const spotChange = prevBsr - currBsr; // lower BSR = improvement, positive = moved toward #1
+        const pct = Math.round((spotChange / prevBsr) * 1000) / 10;
+        momEl.className = 'kpi-mom ' + (spotChange === 0 ? 'flat' : spotChange > 0 ? 'up' : 'dn');
+        // Spot count AND %, same inline arrow convention as the Targeted
+        // Keyword Indexing Progress table's Organic Rank column — the
+        // tracker has a weekly entry per ASIN, same as the keyword tab,
+        // so this reads change over time the same way.
+        momEl.textContent = spotChange === 0 ? '' : `${spotChange > 0 ? '▲' : '▼'} ${Math.abs(spotChange).toLocaleString()} spots (${Math.abs(pct)}%) vs prior month`;
       }
     }
 
@@ -16735,7 +17039,7 @@ async function mfcLoadKpis() {
     const { year, month, } = mfcGetLastFullMonth();
     const monthLabel = mfcMonthLabel(year, month);
     const lblShipped = document.getElementById('mfc-lbl-shipped');
-    if (lblShipped) lblShipped.textContent = `Shipped Website Orders • ${monthLabel}`;
+    if (lblShipped) lblShipped.textContent = `Shipped Amazon Orders • ${monthLabel}`;
 
     // Date-range subtitle, same format as the Sales page's own page-sub
     // ("Jun 1 – Jun 30, 2026 · Last full month").
@@ -16746,7 +17050,7 @@ async function mfcLoadKpis() {
       subEl.textContent = `${monthNamesShort[month-1]} 1 – ${monthNamesShort[month-1]} ${lastDay}, ${year} · Last month`;
     }
 
-    // Shipped Website Orders is recomputed from the daily raw data (same
+    // Shipped Amazon Orders is recomputed from the daily raw data (same
     // sheet/tab the chart below uses) filtered to last full month, rather
     // than read from the _kpis tab's shipped_orders_30d — that figure is a
     // rolling 30-day aggregate, not a calendar-month one, and doesn't line
@@ -16788,7 +17092,7 @@ async function mfcLoadShippedChart() {
     const { year, month } = mfcGetLastFullMonth();
     const monthLabel = mfcMonthLabel(year, month);
     const lblChart = document.getElementById('mfc-lbl-chart');
-    if (lblChart) lblChart.textContent = `Website Orders Shipped by Date • ${monthLabel}`;
+    if (lblChart) lblChart.textContent = `Amazon Orders Shipped by Date • ${monthLabel}`;
 
     const csv = await fetch(ovCsvUrl(OV_FULFILLMENT_DAILY_SHEET_ID, '636720419')).then(r => r.ok ? r.text() : '').catch(() => '');
     const rows = parseCsvToRows(csv).filter(r => {
@@ -16937,16 +17241,18 @@ function mfcNormalizeDate(val) {
   return s;
 }
 
-// Total orders, blended across all 3 channels, for a given calendar month
-// (year, 1-indexed month) — dedup by order_id, same convention used
-// everywhere else on this dashboard.
+// Total Amazon orders for a given calendar month (year, 1-indexed month)
+// — dedup by order_id, same convention used everywhere else on this
+// dashboard. MiGuard is Amazon-only: this used to also fetch and count
+// Website/Walmart orders for the Return Rate denominator, but with NO
+// brand filter on either (`() => true`), which meant every other brand's
+// Website/Walmart order volume was silently getting folded into MiGuard's
+// own return-rate math — same class of cross-brand leak found and fixed
+// elsewhere on this dashboard (Overview page, Ad Spend/Blended ACOS).
+// Amazon-only now, matching that same fix.
 async function getBlendedOrdersForMonth(year, month) {
   const prefix = `${year}-${String(month).padStart(2, '0')}`;
-  const [amzCsv, webCsv, wmtCsv] = await Promise.all([
-    fetch(ovCsvUrl(OV_ORDER_SYNC_SHEET_ID, OV_ORDER_SYNC_GID)).then(r => r.ok ? r.text() : '').catch(() => ''),
-    fetch(ovCsvUrl(OV_WEB_ORDERS_SHEET_ID, OV_WEB_ORDERS_GID)).then(r => r.ok ? r.text() : '').catch(() => ''),
-    fetch(ovCsvUrl(OV_WMT_ORDERS_SHEET_ID, OV_WMT_ORDERS_GID)).then(r => r.ok ? r.text() : '').catch(() => ''),
-  ]);
+  const amzCsv = await fetch(ovCsvUrl(OV_ORDER_SYNC_SHEET_ID, OV_ORDER_SYNC_GID)).then(r => r.ok ? r.text() : '').catch(() => '');
   function countOrdersForMonth(csv, miguardCheck, validFn) {
     const ids = new Set();
     parseCsvToRows(csv).filter(miguardCheck).forEach(r => {
@@ -16961,15 +17267,7 @@ async function getBlendedOrdersForMonth(year, month) {
     const status = (r.status || '').toLowerCase().trim();
     return status !== 'cancelled' && status !== 'pending';
   });
-  const webOrders = countOrdersForMonth(webCsv, () => true, r => {
-    const status = (r.financial_status || r.status || '').toLowerCase();
-    return status !== 'refunded' && status !== 'cancelled' && status !== 'canceled';
-  });
-  const wmtOrders = countOrdersForMonth(wmtCsv, () => true, r => {
-    const status = (r.status || '').toLowerCase().trim();
-    return status !== 'cancelled' && status !== 'canceled';
-  });
-  return amzOrders + webOrders + wmtOrders;
+  return amzOrders;
 }
 // (mfcLastFullMonthRange, which built a start/end Date range, was removed
 // 2026-07-28 — mfcLoadReturns now works directly off mfcGetLastFullMonth()'s
@@ -19228,6 +19526,36 @@ async function loadAuditResultsFromSheet() {
       '</div>';
   }
 
+  function pdfxAccomplishedBlock() {
+    const cards = [1, 2, 3, 4].map(function (n) {
+      const cardEl = document.getElementById('acc-card-' + n);
+      if (!cardEl) return '';
+      const title = pdfxText('.opp-title', cardEl);
+      if (!title) return ''; // blank Title = this slot is unused, same convention as Future Opportunities
+      const subtitle = pdfxText('.opp-subtitle', cardEl);
+      const body = pdfxText('.opp-body', cardEl);
+      const imagesEl = cardEl.querySelector('#acc-images-' + n);
+      const imgUrls = imagesEl ? Array.prototype.map.call(imagesEl.querySelectorAll('img'), function (img) { return img.getAttribute('src'); }) : [];
+      const imagesHtml = imgUrls.length
+        ? '<div class="pdfx-opp-images">' + imgUrls.map(function (u) { return '<img src="' + u + '" class="pdfx-opp-img">'; }).join('') + '</div>'
+        : '';
+      return '<div>' +
+        '<div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">' + pdfxEscape(title) + '</div>' +
+        (subtitle ? '<div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:8px;">' + pdfxEscape(subtitle) + '</div>' : '') +
+        '<div style="font-size:11.5px;color:#48557a;line-height:1.6;">' + pdfxEscape(body) + '</div>' +
+        imagesHtml +
+        '</div>';
+    }).join('');
+    if (!cards) return '';
+    // No box — border:none/padding:0 override on .pdfx-card, matching the
+    // Executive Summary / Future Opportunities pill pattern exactly.
+    // Ported from Skinside Seoul's build per Jaclyn.
+    return '<div class="pdfx-card" style="border:none;padding:0;margin-bottom:14px;">' +
+      '<span class="pdfx-pill pdfx-pill-sand" style="margin-bottom:16px;">What\'s Been Accomplished</span>' +
+      '<div class="pdfx-cover-cols">' + cards + '</div>' +
+      '</div>';
+  }
+
   function pdfxFutureOpportunitiesBlock() {
     const cards = Array.prototype.map.call(document.querySelectorAll('#m-opportunities .opp-card'), function (card) {
       const title = pdfxText('.opp-title', card);
@@ -19241,10 +19569,12 @@ async function loadAuditResultsFromSheet() {
         '</div>';
     }).join('');
     if (!cards) return '';
-    // Same pill-badge + headline pattern as Executive Summary on the cover
-    // page (.pdfx-pill / .pdfx-cover-cols), so the two sections match
-    // exactly as designed on the live dashboard. Per Jaclyn 2026-07-14.
-    return '<div class="pdfx-card" style="margin-top:14px;">' +
+    // border:none/padding:0 here strips .pdfx-card's own box so this reads
+    // as a plain section (matching the Executive Summary pill pattern),
+    // with border-top adding back a divider line when this section
+    // follows Accomplished — without reintroducing the full box. Matches
+    // Skinside Seoul's build per Jaclyn.
+    return '<div class="pdfx-card" style="border:none;padding:0;border-top:1px solid var(--border);padding-top:12px;">' +
       '<span class="pdfx-pill" style="margin-bottom:16px;">Future Opportunities</span>' +
       '<div class="pdfx-cover-cols">' + cards + '</div>' +
       '</div>';
@@ -19358,16 +19688,27 @@ async function loadAuditResultsFromSheet() {
   }
 
   function buildOpportunitiesPage(monthYear) {
+    // Show sections — same "checkboxes on the live tab, read at PDF-build
+    // time" pattern as Brand Momentum. Unchecking a section on the live
+    // tab excludes it from the exported PDF too, not just the on-screen
+    // view. Matches Skinside Seoul's build per Jaclyn.
+    const showSubsave = !!(document.getElementById('m-opp-cb-subsave') && document.getElementById('m-opp-cb-subsave').checked);
+    const showAccomplished = !!(document.getElementById('m-opp-cb-accomplished') && document.getElementById('m-opp-cb-accomplished').checked);
+    const showFuture  = !!(document.getElementById('m-opp-cb-future')  && document.getElementById('m-opp-cb-future').checked);
     const kpis = ['kpi-active-subs', 'kpi-retention'].map(pdfxKpi);
+    const subsaveHtml = showSubsave
+      ? '<div class="pdfx-chlabel">Subscribe &amp; Save</div>' +
+        '<div class="pdfx-kpis n2" style="margin-top:6px;">' + kpis.map(pdfxKpiCardHtml).join('') + '</div>' +
+        '<div class="pdfx-card"><div class="pdfx-card-title">Active Subscriptions by Month</div>' + pdfxChartBlock('_snsChart') + '</div>'
+      : '';
+    const accomplishedHtml = showAccomplished ? pdfxAccomplishedBlock() : '';
+    const futureHtml = showFuture ? pdfxFutureOpportunitiesBlock() : '';
     return '' +
       '<div class="pdfx-page">' +
         '<div class="pdfx-inner">' +
           pdfxHeaderBand(monthYear, 'Opportunities') +
-          '<div class="pdfx-chlabel">Subscribe &amp; Save</div>' +
-          '<div class="pdfx-kpis n2" style="margin-top:6px;">' + kpis.map(pdfxKpiCardHtml).join('') + '</div>' +
-          '<div class="pdfx-card"><div class="pdfx-card-title">Active Subscriptions by Month</div>' + pdfxChartBlock('_snsChart') + '</div>' +
-          pdfxFutureOpportunitiesBlock() +
-          pdfxFooter(monthYear) +
+          subsaveHtml + accomplishedHtml + futureHtml +
+          '<div class="pdfx-pin-bottom">' + pdfxFooter(monthYear) + '</div>' +
         '</div>' +
       '</div>';
   }
@@ -20049,6 +20390,15 @@ async function loadAuditResultsFromSheet() {
     const WEB_SHEET_ID    = '1Wyc43am0EIk2OArL2EU8fP-EyHkhz-9-S5tcY3E60zw'; const WEB_GID    = '597852778';
     const WMT_SHEET_ID    = '1oIZDxN0vSf4nRvE_K95lsNyBWQd4Ef2aARm0RUtvE0Y'; const WMT_GID    = '1844526926';
     const AD_ORDERS_SHEET_ID = window.SHEET_CFG.SHEET_AD_ORDERS?.fileId || ''; const AD_ORDERS_GID = window.SHEET_CFG.SHEET_AD_ORDERS?.gid || '';
+    // Advertising Cache (SP/SB/SD split) — declared locally here rather
+    // than reused from elsewhere in this file, even though the same
+    // constant name already exists in two other places (Amazon Sales
+    // page's own IIFE, Sales External Replica's own IIFE) — both of
+    // those are scoped inside separate, non-exported IIFEs and aren't
+    // reachable from this function. This exact assumption crashed the
+    // whole Overview page once already (ReferenceError, before this
+    // feature existed) — declaring it fresh here avoids repeating that.
+    const AD_SUMMARY_SHEET_ID = window.SHEET_CFG.SHEET_ADVERTISING?.fileId || ''; const AD_SUMMARY_GID = window.SHEET_CFG.SHEET_ADVERTISING?.gid || '';
     const AMZ_REVENUE_SHEET_ID = window.SHEET_CFG.SHEET_REVENUE?.fileId || ''; const AMZ_REVENUE_GID = window.SHEET_CFG.SHEET_REVENUE?.gid || '';
     const WEB_REVENUE_GID = '7000599';
     const WMT_REVENUE_SHEET_ID = '1QhKeOxKR0mEfSiM2pdYxrEBWsQdRSxbL8Q86MP6lpFE'; const WMT_REVENUE_GID = '812984298';
@@ -20106,7 +20456,7 @@ async function loadAuditResultsFromSheet() {
       // already declared globally further down this file (used by the
       // existing "Returns Processed" KPI on Marketing → Fulfillment & CS),
       // reused here rather than redeclared.
-      const [amzCsv, webCsv, wmtCsv, adOrdersCsv, amzReturnsCsv, wmtReturnsCsv, webReturnsCsv, namesCsv, webAdsCsv, webShoppingCsv, bizCsv] = await Promise.all([
+      const [amzCsv, webCsv, wmtCsv, adOrdersCsv, amzReturnsCsv, wmtReturnsCsv, webReturnsCsv, namesCsv, webAdsCsv, webShoppingCsv, bizCsv, adSummaryCsv] = await Promise.all([
         fetch(sheetCsvUrl(AMAZON_SHEET_ID, AMAZON_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
         fetch(sheetCsvUrl(WEB_SHEET_ID, WEB_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
         fetch(sheetCsvUrl(WMT_SHEET_ID, WMT_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
@@ -20141,8 +20491,28 @@ async function loadAuditResultsFromSheet() {
         // already confirmed and used elsewhere on this dashboard (PPC
         // Blended Context, Brand Momentum).
         fetch(ovCsvUrl(OV_BUSINESS_REPORT_SHEET_ID, OV_BUSINESS_REPORT_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
+        // Advertising Cache — for the Ad Spend by Type (SP/SB/SD) card.
+        // Amazon-only (no per-channel equivalent on Walmart/Website's own
+        // ad summary sheets).
+        fetch(sheetCsvUrl(AD_SUMMARY_SHEET_ID, AD_SUMMARY_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
       ]);
       const bizRows = parseCsvToRows(bizCsv);
+
+      // Ad Spend by Type (SP/SB/SD) — separate fetch from this page's own
+      // Ad Spend/Blended ACOS KPIs (those read AD_ORDERS_SHEET_ID, the
+      // ASIN-level cache, which has no SP/SB/SD split at all). Matches
+      // whichever period is currently toggled (MTD or Last Full Month),
+      // same as the rest of this page.
+      const adSummaryRows = parseCsvToRows(adSummaryCsv);
+      const ovAmzAd = pbFindAdRow(adSummaryRows, cfg.year, cfg.month) || {};
+      const ovNumOr0 = v => parseFloat(String(v || '0').replace(/[$,]/g, '')) || 0;
+      renderAdTypeBreakdown({
+        canvasId: 'ov-adtype-chart', chartVarKey: '_ovAdTypeChart',
+        tbodyId: 'ov-adtype-tbody', noteId: 'ov-adtype-note',
+        spSpend: ovNumOr0(ovAmzAd.sp_spend), spSales: ovNumOr0(ovAmzAd.sp_sales), spAcos: ovNumOr0(ovAmzAd.sp_acos), spCampaigns: parseInt(ovAmzAd.sp_campaigns_running, 10) || 0,
+        sbSpend: ovNumOr0(ovAmzAd.sb_spend), sbSales: ovNumOr0(ovAmzAd.sb_sales), sbAcos: ovNumOr0(ovAmzAd.sb_acos), sbCampaigns: parseInt(ovAmzAd.sb_campaigns_running, 10) || 0,
+        sdSpend: ovNumOr0(ovAmzAd.sd_spend), sdSales: ovNumOr0(ovAmzAd.sd_sales), sdAcos: ovNumOr0(ovAmzAd.sd_acos), sdCampaigns: parseInt(ovAmzAd.sd_campaigns_running, 10) || 0,
+      });
 
       const amzRows = isCsv(amzCsv) ? parseCsv(amzCsv).filter(isMiGuardRow) : [];
       // MiGuard is Amazon-only — never populate from the shared/unfiltered
