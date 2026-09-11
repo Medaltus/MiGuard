@@ -1762,30 +1762,36 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
         <div class="kpi-card" id="bm-kpi-reviews"><div class="kpi-label">Reviews Collected</div><div class="kpi-value">—</div></div>
         <div class="kpi-card" id="bm-kpi-ranked-keywords"><div class="kpi-label">Keywords with Organic Rank</div><div class="kpi-value">—</div></div>
         <div class="kpi-card" id="bm-kpi-sessions"><div class="kpi-label">Sessions</div><div class="kpi-value">—</div><div class="kpi-mom flat"></div></div>
-      </div>
-
-      <div class="ppc-card" id="bm-product-summary" style="padding:0;overflow:hidden;background:none;border:none;">
-        <div style="color:var(--muted);padding:20px;">Loading…</div>
+        <div class="kpi-card" id="bm-kpi-subbsr"><div class="kpi-label">Subcategory BSR</div><div class="kpi-value">—</div><div class="kpi-mom flat"></div></div>
       </div>
 
       <div class="ppc-card">
         <div class="ppc-card-title">Targeted Keyword Indexing Progress</div>
         <div style="overflow-x:auto;">
           <table class="data-table">
-            <thead><tr><th>Keyword</th><th>Product</th><th>Organic Rank</th><th>Change Since First Recorded</th><th>Search Volume</th></tr></thead>
-            <tbody id="bm-keyword-tbody"><tr><td colspan="5" style="color:var(--muted);">Loading…</td></tr></tbody>
+            <thead><tr><th>Keyword</th><th>Organic Rank</th><th>Search Volume</th></tr></thead>
+            <tbody id="bm-keyword-tbody"><tr><td colspan="3" style="color:var(--muted);">Loading…</td></tr></tbody>
           </table>
         </div>
         <div class="ppc-note">ℹ Top 10 rows, keywords with real rank movement sorted first, then by rank ascending within each group.</div>
       </div>
 
-      <div class="ppc-card">
-        <div class="ppc-card-title">What We're Tracking Next</div>
-        <ul style="margin:0;padding-left:20px;color:var(--text);font-size:13px;line-height:1.7;">
-          <li>Organic rank movement for our top-priority keyword set, month over month.</li>
-          <li>Subcategory BSR trends as a leading indicator of category-level momentum, independent of overall BSR.</li>
-          <li>Review velocity and rating trends as new products build up their own review base.</li>
-        </ul>
+      <div class="ppc-card" style="background:var(--navy);border:none;">
+        <div class="ppc-card-title" style="color:var(--green);">What We're Tracking Next</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+          <div style="background:rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:14px 16px;">
+            <div style="color:var(--green);font-weight:700;font-size:13px;margin-bottom:6px;">Organic Rank Movement</div>
+            <div style="color:rgba(255,255,255,0.65);font-size:12.5px;line-height:1.5;">Tracking organic rank movement for our top-priority keyword set, month over month.</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:14px 16px;">
+            <div style="color:var(--green);font-weight:700;font-size:13px;margin-bottom:6px;">Subcategory BSR Trends</div>
+            <div style="color:rgba(255,255,255,0.65);font-size:12.5px;line-height:1.5;">Subcategory BSR trends as a leading indicator of category-level momentum, independent of overall BSR.</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:14px 16px;">
+            <div style="color:var(--green);font-weight:700;font-size:13px;margin-bottom:6px;">Review Velocity &amp; Rating</div>
+            <div style="color:rgba(255,255,255,0.65);font-size:12.5px;line-height:1.5;">Review velocity and rating trends as new products build up their own review base.</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -15237,8 +15243,9 @@ window.initBrandMomentum = async function () {
         launchSessionsBySku[sku] = { ym, sessions };
       }
     });
-    // (Sessions-by-product rendering now lives in the combined product
-    // summary card below — see buildProductSummaryCards().)
+    // (currSessionsBySku/launchSessionsBySku above are currently unused —
+    // left in place since they're cheap to compute and may feed a future
+    // per-product sessions view; not rendered anywhere right now.)
 
     // ── Targeted Keyword Indexing Progress — top 10, real-movement keywords first, then rank ascending ──
     // Parses a rank cell for MATH purposes only — treats a "not yet
@@ -15284,19 +15291,14 @@ window.initBrandMomentum = async function () {
       const prevRankStr = prevRow ? String(prevRow.organic_rank || '').trim() : '';
       const prevRank = (prevRankStr && !prevRankStr.startsWith('>')) ? parseInt(prevRankStr.replace(/[^\d]/g, ''), 10) : null;
       const hasMovement = rank != null && prevRank != null && rank !== prevRank;
-      const entry = master.byAsin[(r.asin || '').trim().toUpperCase()];
-      // Change Since First Recorded — first-ever tracked value (this
-      // keyword's own earliest week, not just last week) vs the latest
-      // value, both read via parseRankForMath so a starting ">306" or
-      // similar counts as 306 rather than being skipped. A lower rank
-      // number is an improvement (moved toward #1), matching the same
-      // "lower is better" convention as the Subcategory BSR change math
-      // used elsewhere on this dashboard.
       const firstRow = pickFirstRankForKeyword(r.keyword.trim().toLowerCase(), (r.asin || '').trim().toUpperCase());
       const firstRankNum = firstRow ? parseRankForMath(firstRow.organic_rank) : null;
       const latestRankNum = parseRankForMath(r.organic_rank);
       const spotsChange = (firstRankNum != null && latestRankNum != null) ? firstRankNum - latestRankNum : null;
-      keywordRows.push({ keyword: r.keyword, product: entry ? entry.name : r.asin, rank, hasMovement, spotsChange, volume: parseInt(r.search_volume, 10) || 0 });
+      // rankDisplay — the raw not-ranking marker (">306", ">150", etc.)
+      // exactly as the tracker sheet has it, shown as-is for unranked
+      // keywords rather than a generic "Not ranking" label.
+      keywordRows.push({ keyword: r.keyword, rank, rankDisplay: rankStr, hasMovement, spotsChange, volume: parseInt(r.search_volume, 10) || 0 });
     });
     keywordRows.sort((a, b) => {
       if (a.hasMovement !== b.hasMovement) return a.hasMovement ? -1 : 1;
@@ -15307,125 +15309,54 @@ window.initBrandMomentum = async function () {
     if (kwTbody) {
       const top10 = keywordRows.slice(0, 10);
       kwTbody.innerHTML = top10.length ? top10.map(r => {
-        const changeHtml = r.spotsChange == null
-          ? '<span style="color:var(--muted);">—</span>'
-          : r.spotsChange === 0
-            ? '<span style="color:var(--muted);">flat</span>'
-            : `<span style="color:${r.spotsChange > 0 ? 'var(--green)' : 'var(--danger)'};">${r.spotsChange > 0 ? '▲' : '▼'} ${Math.abs(r.spotsChange)} spots</span>`;
-        return `<tr><td>${r.keyword}</td><td>${r.product}</td><td>${r.rank == null ? 'Not ranking' : '#' + r.rank}</td><td>${changeHtml}</td><td>${r.volume.toLocaleString()}</td></tr>`;
-      }).join('') : '<tr><td colspan="5" style="color:var(--muted);">No keyword data available</td></tr>';
+        // Single merged cell: "#151 ▲ +155" for a ranking keyword with
+        // real movement since first recorded, just "#151" if ranking but
+        // flat/no baseline, or the raw not-ranking marker (">306") as-is —
+        // no change shown at all for keywords that are still unranked.
+        let rankCell;
+        if (r.rank == null) {
+          rankCell = r.rankDisplay;
+        } else {
+          const changePart = r.spotsChange
+            ? ` <span style="color:${r.spotsChange > 0 ? 'var(--green)' : 'var(--danger)'};">${r.spotsChange > 0 ? '▲' : '▼'} ${r.spotsChange > 0 ? '+' : ''}${r.spotsChange}</span>`
+            : '';
+          rankCell = `#${r.rank}${changePart}`;
+        }
+        return `<tr><td>${r.keyword}</td><td>${rankCell}</td><td>${r.volume.toLocaleString()}</td></tr>`;
+      }).join('') : '<tr><td colspan="3" style="color:var(--muted);">No keyword data available</td></tr>';
     }
 
-    // ── Combined product summary card — Sessions, Organic Keywords,
-    // Subcategory BSR, and Reviews (count + star breakdown) all in one
-    // card per product, replacing the 3 separate one-row tables above.
-    // Built as "one card per ASIN" rather than assuming exactly one
-    // product, so this still works correctly for brands with more than
-    // one SKU — it just stacks additional cards.
-    buildProductSummaryCards({ master, miguardAsins, latestKwRows, kwSummaryRows, miguardReviewRows, currSessionsBySku, launchSessionsBySku, year, month });
+    // ── Subcategory BSR — top-level KPI card, MoM % change (last full
+    // month's snapshot vs the month before), pooled across all miguard
+    // ASINs (currently just one product, but this stays correct if a
+    // second SKU is ever added — "lower BSR = improvement" convention,
+    // same as everywhere else on this dashboard).
+    const miguardBsrRows = kwSummaryRows.filter(r => miguardAsins.has((r.asin || '').trim().toUpperCase()) && r.subcategory_bsr && r.date);
+    function bsrSnapshotForMonth(rows, y, m) {
+      const inMonth = rows.filter(r => {
+        const d = new Date(r.date + 'T00:00:00');
+        return !isNaN(d) && d.getFullYear() === y && (d.getMonth() + 1) === m;
+      }).sort((a, b) => a.date.localeCompare(b.date));
+      if (!inMonth.length) return null;
+      return Number(inMonth[inMonth.length - 1].subcategory_bsr) || null;
+    }
+    const currBsr = bsrSnapshotForMonth(miguardBsrRows, year, month);
+    const prevBsr = bsrSnapshotForMonth(miguardBsrRows, prevYear, prevMonth);
+    const subBsrEl = document.getElementById('bm-kpi-subbsr');
+    if (subBsrEl) {
+      subBsrEl.querySelector('.kpi-value').textContent = currBsr != null ? '#' + currBsr.toLocaleString() : '—';
+      const momEl = subBsrEl.querySelector('.kpi-mom');
+      if (momEl && currBsr != null && prevBsr != null && prevBsr > 0) {
+        const pct = Math.round(((prevBsr - currBsr) / prevBsr) * 1000) / 10; // lower BSR = improvement
+        momEl.className = 'kpi-mom ' + (pct === 0 ? 'flat' : pct > 0 ? 'up' : 'dn');
+        momEl.textContent = (pct === 0 ? '' : pct > 0 ? '▲ ' : '▼ ') + Math.abs(pct) + '% vs prior month';
+      }
+    }
 
   } catch (err) {
     console.warn('[BrandMomentum] failed:', err.message);
   }
 };
-
-// Builds the navy-header + review-stars/bars card described above, one
-// per ASIN. Pulls together data already fetched by initBrandMomentum
-// (passed in, not re-fetched) — Sessions by SKU, Subcategory BSR by ASIN
-// (first-vs-latest, same "lower is better" convention used elsewhere on
-// this dashboard), ranked-keyword count per ASIN, and review count/avg/
-// star distribution per ASIN (reusing the same green .star-bar-* CSS
-// already built for the Reviews page, so this matches that look exactly).
-function buildProductSummaryCards({ master, miguardAsins, latestKwRows, kwSummaryRows, miguardReviewRows, currSessionsBySku, launchSessionsBySku, year, month }) {
-  const container = document.getElementById('bm-product-summary');
-  if (!container) return;
-
-  const bsrByAsin = {};
-  kwSummaryRows.forEach(r => {
-    const asin = (r.asin || '').trim().toUpperCase();
-    if (!miguardAsins.has(asin)) return;
-    if (!bsrByAsin[asin]) bsrByAsin[asin] = [];
-    bsrByAsin[asin].push(r);
-  });
-
-  const cards = Array.from(miguardAsins).map(asin => {
-    const entry = master.byAsin[asin];
-    const name = entry ? entry.name : asin;
-    const sku = entry ? entry.sku : asin;
-
-    // Sessions + % vs launch (same math as the old Sessions by Product table).
-    const sessions = currSessionsBySku[sku] || 0;
-    const launch = launchSessionsBySku[sku];
-    const pctVsLaunch = (launch && launch.sessions > 0 && launch.ym !== `${year}-${String(month).padStart(2, '0')}`)
-      ? Math.round(((sessions - launch.sessions) / launch.sessions) * 1000) / 10
-      : null;
-
-    // Organic Keywords — this product's own count of keywords with a
-    // real numeric rank (not a ">" not-yet-ranking marker) as of the
-    // latest sync.
-    const rankedForThisAsin = latestKwRows.filter(r => (r.asin || '').trim().toUpperCase() === asin && r.organic_rank && !String(r.organic_rank).trim().startsWith('>'));
-    const rankedKeywordCount = new Set(rankedForThisAsin.map(r => r.keyword.trim().toLowerCase())).size;
-
-    // Subcategory BSR — first-vs-latest recorded value, same convention
-    // (lower = improvement) as everywhere else on this dashboard.
-    const bsrRows = (bsrByAsin[asin] || []).filter(r => r.subcategory_bsr).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-    let subBsr = null, subBsrChangePct = null, subcategory = '';
-    if (bsrRows.length) {
-      const first = bsrRows[0], latest = bsrRows[bsrRows.length - 1];
-      const firstBsr = Number(first.subcategory_bsr) || 0;
-      subBsr = Number(latest.subcategory_bsr) || 0;
-      subBsrChangePct = firstBsr > 0 ? Math.round(((firstBsr - subBsr) / firstBsr) * 1000) / 10 : 0;
-      subcategory = latest.subcategory || '';
-    }
-
-    // Reviews — count, average, and 1-5 star distribution for this ASIN.
-    const productReviews = miguardReviewRows.filter(r => (r.asin || '').trim().toUpperCase() === asin);
-    const starCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    let ratingSum = 0;
-    productReviews.forEach(r => {
-      const n = Math.max(1, Math.min(5, Math.round(parseFloat(r.star_rating) || 0)));
-      starCounts[n]++;
-      ratingSum += parseFloat(r.star_rating) || 0;
-    });
-    const reviewCount = productReviews.length;
-    const avgRating = reviewCount > 0 ? (ratingSum / reviewCount).toFixed(1) : null;
-
-    return { asin, name, sku, sessions, pctVsLaunch, rankedKeywordCount, subBsr, subBsrChangePct, subcategory, reviewCount, avgRating, starCounts };
-  });
-
-  if (!cards.length) {
-    container.innerHTML = '<div style="color:var(--muted);padding:20px;">No product data available</div>';
-    return;
-  }
-
-  container.innerHTML = cards.map(c => {
-    const sessionsSub = c.pctVsLaunch == null ? '' : `${c.pctVsLaunch > 0 ? '+' : ''}${c.pctVsLaunch}% vs launch`;
-    const subBsrValue = c.subBsr == null ? '—' : '#' + c.subBsr.toLocaleString();
-    const subBsrSub = c.subBsr == null ? '' : (c.subcategory || '') + (c.subBsrChangePct
-      ? ` · ${c.subBsrChangePct > 0 ? '▲' : '▼'} ${Math.abs(c.subBsrChangePct)}% since first recorded`
-      : '');
-    const starsHtml = c.avgRating == null ? '' : '★'.repeat(Math.round(parseFloat(c.avgRating))) + '☆'.repeat(5 - Math.round(parseFloat(c.avgRating)));
-    const barRows = [5, 4, 3, 2, 1].map(n => {
-      const pct = c.reviewCount ? Math.round((c.starCounts[n] / c.reviewCount) * 100) : 0;
-      return `<div class="star-bar-row"><div class="star-bar-lbl">${n} ★</div><div class="star-bar-track"><div class="star-bar-fill" style="width:${pct}%;"></div></div><div class="star-bar-count">${c.starCounts[n]}</div></div>`;
-    }).join('');
-
-    return `<div class="bm-product-block">
-      <div class="bm-product-hdr">
-        <div><span class="bm-product-hdr-name">${c.name}</span><span class="bm-product-hdr-sku">${c.sku}</span></div>
-        <div class="bm-hdr-stats">
-          <div><div class="bm-hdr-label">Sessions</div><div class="bm-hdr-value">${c.sessions.toLocaleString()}</div><div class="bm-hdr-sub">${sessionsSub}</div></div>
-          <div><div class="bm-hdr-label">Organic Keywords</div><div class="bm-hdr-value">${c.rankedKeywordCount.toLocaleString()}</div></div>
-          <div><div class="bm-hdr-label">Subcategory BSR</div><div class="bm-hdr-value">${subBsrValue}</div><div class="bm-hdr-sub">${subBsrSub}</div></div>
-          <div><div class="bm-hdr-label">Reviews</div><div class="bm-hdr-value">${c.reviewCount.toLocaleString()}</div></div>
-        </div>
-      </div>
-      <div class="bm-review-section">
-        ${c.reviewCount ? `<div class="bm-review-summary"><span class="bm-review-stars">${starsHtml}</span><span class="bm-review-avg">${c.avgRating} / 5</span><span class="bm-review-count">(${c.reviewCount.toLocaleString()} reviews)</span></div>${barRows}` : '<div style="color:var(--muted);font-size:12px;">No review data available</div>'}
-      </div>
-    </div>`;
-  }).join('');
-}
 
 // Shared getLastFullMonth logic, duplicated here per the established
 // pattern in this file (each scope keeps its own local copy rather than
