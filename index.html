@@ -125,8 +125,8 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
 
 
 /* ── Topbar ── */
-.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.topbar-title{font-size:14px;font-weight:600;color:var(--navy);letter-spacing:-.2px;}
+.topbar{background:var(--bg);border-bottom:none;padding:0 28px;height:52px;display:flex;align-items:center;justify-content:flex-end;flex-shrink:0;}
+.topbar-title{font-size:14px;font-weight:600;color:var(--navy);letter-spacing:-.2px;display:none;}
 .topbar-right{display:flex;align-items:center;gap:10px;}
 .topbar-date{font-size:11px;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 10px;}
 /* ── Clerk user button — ADDED 2026-08-21, ported from Cosmette's dashboard ── */
@@ -243,7 +243,7 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
 .home-kpi-sub{font-size:11px;color:var(--muted);margin-top:5px;}
 
 .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.home-card-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px;font-family:var(--font-subheader);}
+.home-card-title{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:4px;font-family:var(--font-subheader);}
 .home-card-sub{font-size:11.5px;color:var(--muted);margin-bottom:16px;}
 
 .home-team-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border2);}
@@ -1253,9 +1253,9 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       <div class="home-badges">
         <span class="home-badge">
           <svg viewBox="0 0 16 16"><path d="M8 1l6 2.5v4c0 4-2.6 6.8-6 7.5-3.4-.7-6-3.5-6-7.5v-4L8 1z"/></svg>
-          Amazon + Website Fulfillment
+          Brand Partner
         </span>
-        <span class="home-badge-channel">Amazon</span>
+        <span class="home-badge-channel">Amazon + Website Fulfillment</span>
       </div>
       <div class="home-hero-title">Welcome to Your Medaltus Dashboard</div>
       <div class="home-hero-sub">Your real-time view into sales, inventory, and brand performance &mdash; powered by Medaltus.</div>
