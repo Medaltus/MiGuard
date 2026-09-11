@@ -227,12 +227,12 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
 
 /* ── Home page (adapted from Cosmette's dashboard) ── */
 .home-hero{background:linear-gradient(135deg,var(--navy) 0%,#0d3494 100%);border-radius:var(--radius);padding:32px 36px;margin-bottom:20px;position:relative;}
-.home-hero-logo{height:42px;width:auto;margin-left:-32px;display:block;}
+.home-hero-logo{height:42px;width:auto;margin-left:0;display:block;}
 .home-badges{position:absolute;top:28px;right:32px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
 .home-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(36,233,163,0.16);border:1px solid rgba(36,233,163,0.35);color:var(--green);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:5px 12px;border-radius:20px;}
 .home-badge svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;}
 .home-badge-channel{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;}
-.home-hero-title{font-size:24px;font-weight:400;font-style:italic;font-family:var(--font-subheader);color:#fff;letter-spacing:-.2px;margin-top:18px;}
+.home-hero-title{font-size:24px;font-weight:700;font-style:italic;font-family:var(--font-subheader);color:#fff;letter-spacing:-.2px;margin-top:18px;}
 .home-hero-sub{font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.6;margin-top:8px;max-width:560px;}
 .home-hero-date{font-size:11px;color:rgba(255,255,255,.35);margin-top:14px;}
 
@@ -243,7 +243,7 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
 .home-kpi-sub{font-size:11px;color:var(--muted);margin-top:5px;}
 
 .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.home-card-title{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:4px;font-family:var(--font-subheader);}
+.home-card-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px;font-family:var(--font-subheader);}
 .home-card-sub{font-size:11.5px;color:var(--muted);margin-bottom:16px;}
 
 .home-team-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border2);}
@@ -1253,27 +1253,13 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       <div class="home-badges">
         <span class="home-badge">
           <svg viewBox="0 0 16 16"><path d="M8 1l6 2.5v4c0 4-2.6 6.8-6 7.5-3.4-.7-6-3.5-6-7.5v-4L8 1z"/></svg>
-          Brand Partner
+          Amazon + Website Fulfillment
         </span>
         <span class="home-badge-channel">Amazon</span>
       </div>
       <div class="home-hero-title">Welcome to Your Medaltus Dashboard</div>
       <div class="home-hero-sub">Your real-time view into sales, inventory, and brand performance &mdash; powered by Medaltus.</div>
       <div class="home-hero-date" id="home-date"></div>
-    </div>
-
-    <!-- KPI row -->
-    <div class="home-kpi-row">
-      <div class="home-kpi-card">
-        <div class="home-kpi-label">Total SKUs</div>
-        <div class="home-kpi-value" id="home-kpi-skus">&mdash;</div>
-        <div class="home-kpi-sub">In your catalog</div>
-      </div>
-      <div class="home-kpi-card">
-        <div class="home-kpi-label">Units On Hand</div>
-        <div class="home-kpi-value" id="home-kpi-units">&mdash;</div>
-        <div class="home-kpi-sub" id="home-kpi-units-sub">Consignment units</div>
-      </div>
     </div>
 
     <!-- Team + Resources -->
