@@ -1439,10 +1439,19 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     </div>
 
     <div class="ppc-card">
-      <div class="ppc-card-title">Ad Spend by Type</div>
+      <div class="ppc-card-title">Ad Spend &amp; Sales by Type</div>
       <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
-        <div style="width:280px;flex-shrink:0;position:relative;height:200px;">
-          <canvas id="ov-adtype-chart"></canvas>
+        <div style="flex-shrink:0;text-align:center;">
+          <div style="width:200px;height:180px;position:relative;">
+            <canvas id="ov-adtype-chart"></canvas>
+          </div>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-top:6px;">Spend</div>
+        </div>
+        <div style="flex-shrink:0;text-align:center;">
+          <div style="width:200px;height:180px;position:relative;">
+            <canvas id="ov-adtype-sales-chart"></canvas>
+          </div>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-top:6px;">Sales</div>
         </div>
         <div style="flex:1;min-width:280px;overflow-x:auto;">
           <table class="data-table">
@@ -1897,7 +1906,10 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
         <span class="insight-text" id="x-tp-insight-text"></span>
       </div>
     </div>
+  </div><!-- /page-sales-external -->
 
+  <!-- ══ MARKETING ══ -->
+  <div class="page" id="page-marketing">
     <div class="page-hd">
       <div><div class="page-title">Marketing</div><div class="page-sub">Brand stewardship · Growth opportunities</div></div>
     </div>
@@ -15076,14 +15088,19 @@ function pbFindAdRow(rows, year, month) {
 // reference.
 // ═══════════════════════════════════════════════════════════════════
 function renderAdTypeBreakdown(cfg) {
-  const canvas = document.getElementById(cfg.canvasId);
-  if (canvas) {
-    if (window[cfg.chartVarKey]) { window[cfg.chartVarKey].destroy(); window[cfg.chartVarKey] = null; }
-    window[cfg.chartVarKey] = new Chart(canvas, {
+  // Small internal helper so the Spend and (optional) Sales doughnuts
+  // share identical config/behavior — same destroy-before-recreate
+  // pattern, same colors, same tooltip format, just a different metric
+  // and a different window.<chartVarKey> per canvas.
+  function drawDoughnut(canvasId, chartVarKey, values, metricLabel) {
+    const canvasEl = document.getElementById(canvasId);
+    if (!canvasEl) return;
+    if (window[chartVarKey]) { window[chartVarKey].destroy(); window[chartVarKey] = null; }
+    window[chartVarKey] = new Chart(canvasEl, {
       type: 'doughnut',
       data: {
         labels: ['Sponsored Products', 'Sponsored Brands', 'Sponsored Display'],
-        datasets: [{ data: [cfg.spSpend, cfg.sbSpend, cfg.sdSpend], backgroundColor: ['#001f60', '#24e9a3', '#c87d2f'], borderWidth: 0 }],
+        datasets: [{ data: values, backgroundColor: ['#001f60', '#24e9a3', '#c87d2f'], borderWidth: 0 }],
       },
       options: {
         responsive: true, maintainAspectRatio: false,
@@ -15092,11 +15109,19 @@ function renderAdTypeBreakdown(cfg) {
           tooltip: {
             backgroundColor: '#fff', borderColor: 'rgba(0,31,96,0.1)', borderWidth: 1,
             titleColor: '#001F60', bodyColor: '#6B7BA2', padding: 12, boxWidth: 8, boxHeight: 8,
-            callbacks: { label: ctx => `  ${ctx.label}: $${ctx.parsed.toLocaleString(undefined, { maximumFractionDigits: 2 })}` },
+            callbacks: { label: ctx => `  ${ctx.label} ${metricLabel}: $${ctx.parsed.toLocaleString(undefined, { maximumFractionDigits: 2 })}` },
           },
         },
       },
     });
+  }
+
+  drawDoughnut(cfg.canvasId, cfg.chartVarKey, [cfg.spSpend, cfg.sbSpend, cfg.sdSpend], 'spend');
+  // Sales doughnut is optional — only Overview asked for it (Ad Spend
+  // alone is "only half the story," per Jaclyn); PPC's card is
+  // unchanged and doesn't pass these two keys.
+  if (cfg.salesCanvasId && cfg.salesChartVarKey) {
+    drawDoughnut(cfg.salesCanvasId, cfg.salesChartVarKey, [cfg.spSales, cfg.sbSales, cfg.sdSales], 'sales');
   }
 
   const tbody = document.getElementById(cfg.tbodyId);
@@ -20508,6 +20533,7 @@ async function loadAuditResultsFromSheet() {
       const ovNumOr0 = v => parseFloat(String(v || '0').replace(/[$,]/g, '')) || 0;
       renderAdTypeBreakdown({
         canvasId: 'ov-adtype-chart', chartVarKey: '_ovAdTypeChart',
+        salesCanvasId: 'ov-adtype-sales-chart', salesChartVarKey: '_ovAdTypeSalesChart',
         tbodyId: 'ov-adtype-tbody', noteId: 'ov-adtype-note',
         spSpend: ovNumOr0(ovAmzAd.sp_spend), spSales: ovNumOr0(ovAmzAd.sp_sales), spAcos: ovNumOr0(ovAmzAd.sp_acos), spCampaigns: parseInt(ovAmzAd.sp_campaigns_running, 10) || 0,
         sbSpend: ovNumOr0(ovAmzAd.sb_spend), sbSales: ovNumOr0(ovAmzAd.sb_sales), sbAcos: ovNumOr0(ovAmzAd.sb_acos), sbCampaigns: parseInt(ovAmzAd.sb_campaigns_running, 10) || 0,
@@ -21504,5 +21530,4 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
- 
  
