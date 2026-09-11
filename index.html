@@ -1424,34 +1424,20 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       </div>
     </div>
 
-    <div class="two-col" style="margin-bottom:22px;">
-      <div class="card" style="margin-top:0;">
-        <div class="card-title" id="ov-donut-title">Revenue by Channel — Month to Date</div>
-        <div style="position:relative;height:200px;"><canvas id="chart-ov-donut"></canvas></div>
-      </div>
-      <div class="card" style="margin-top:0;">
-        <div class="card-title">Monthly Revenue Trend</div>
-        <div style="position:relative;height:200px;"><canvas id="chart-ov-trend"></canvas></div>
-      </div>
-    </div>
-
     <div class="card" style="margin-bottom:20px;">
-      <div class="card-title">Top Selling Products <span style="font-weight:400;color:var(--muted);">(by Units, all channels, Month to Date)</span></div>
+      <div class="card-title">Top Selling Products <span style="font-weight:400;color:var(--muted);">(by Units, Month to Date)</span></div>
       <table class="tp-table" style="width:100%;border-collapse:collapse;font-size:12px;">
         <thead>
           <tr style="background:var(--navy);color:#fff;">
             <th style="text-align:left;padding:8px 10px;">#</th>
             <th style="text-align:left;padding:8px 10px;">Product</th>
-            <th style="text-align:left;padding:8px 10px;">Amazon</th>
-            <th style="text-align:left;padding:8px 10px;">Website</th>
-            <th style="text-align:left;padding:8px 10px;">Walmart</th>
-            <th style="text-align:left;padding:8px 10px;">Total Units</th>
-            <th style="text-align:left;padding:8px 10px;">Ads (Amazon)</th>
+            <th style="text-align:left;padding:8px 10px;">Units</th>
+            <th style="text-align:left;padding:8px 10px;">Ads</th>
             <th style="text-align:left;padding:8px 10px;">Organic</th>
-            <th style="text-align:left;padding:8px 10px;">Conv% (Amazon)</th>
+            <th style="text-align:left;padding:8px 10px;">Conv%</th>
           </tr>
         </thead>
-        <tbody id="ov-products-tbody"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr></tbody>
+        <tbody id="ov-products-tbody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr></tbody>
       </table>
     </div>
 
@@ -20108,9 +20094,6 @@ async function loadAuditResultsFromSheet() {
     const WEB_SHEET_ID    = '1Wyc43am0EIk2OArL2EU8fP-EyHkhz-9-S5tcY3E60zw'; const WEB_GID    = '597852778';
     const WMT_SHEET_ID    = '1oIZDxN0vSf4nRvE_K95lsNyBWQd4Ef2aARm0RUtvE0Y'; const WMT_GID    = '1844526926';
     const AD_ORDERS_SHEET_ID = window.SHEET_CFG.SHEET_AD_ORDERS?.fileId || ''; const AD_ORDERS_GID = window.SHEET_CFG.SHEET_AD_ORDERS?.gid || '';
-    // Added 2026-08-06 per Jaclyn — Walmart's ad data sheets.
-    const WALMART_AD_ORDERS_SHEET_ID   = '1PYUPePnhnBJp77n3HVSKeM824ZorAMkiJC8WFbyORCU'; const WALMART_AD_ORDERS_GID   = '664808652'; // miguard tab
-    const WALMART_ADVERTISING_SHEET_ID = '1H1mAYxu8udO7vuCPGs8u0iVzHaRh0wbHb4PyIka4pUU'; const WALMART_ADVERTISING_GID = '844750080'; // miguard tab
     const AMZ_REVENUE_SHEET_ID = window.SHEET_CFG.SHEET_REVENUE?.fileId || ''; const AMZ_REVENUE_GID = window.SHEET_CFG.SHEET_REVENUE?.gid || '';
     const WEB_REVENUE_GID = '7000599';
     const WMT_REVENUE_SHEET_ID = '1QhKeOxKR0mEfSiM2pdYxrEBWsQdRSxbL8Q86MP6lpFE'; const WMT_REVENUE_GID = '812984298';
@@ -20160,9 +20143,6 @@ async function loadAuditResultsFromSheet() {
     const heroRevLblEl = document.getElementById('ov-hero-revenue-lbl');
     if (heroRevLblEl) heroRevLblEl.textContent = cfg.isPartial ? 'Month-to-Date Revenue' : 'Last Month\u2019s Revenue';
 
-    const titleEl = document.getElementById('ov-donut-title');
-    if (titleEl) titleEl.textContent = `Revenue by Channel \u2014 ${monthNames[cfg.month - 1]} ${cfg.year}${cfg.isPartial ? ' MTD' : ''}`;
-
     try {
       // Added 2026-08-03 per Jaclyn: net MTD revenue/units against actual
       // returns rather than only gross order data. Returns sheets are
@@ -20210,8 +20190,16 @@ async function loadAuditResultsFromSheet() {
       const bizRows = parseCsvToRows(bizCsv);
 
       const amzRows = isCsv(amzCsv) ? parseCsv(amzCsv).filter(isMiGuardRow) : [];
-      const webRows = isCsv(webCsv) ? parseCsv(webCsv) : [];
-      const wmtRows = isCsv(wmtCsv) ? parseCsv(wmtCsv) : [];
+      // MiGuard is Amazon-only — never populate from the shared/unfiltered
+      // Website (Shopify) or Walmart sheets. Those sheet IDs above are
+      // still generic/évolis's own (not brand-scoped), so leaving these as
+      // real parses would silently pull other brands' orders into this
+      // page's Top Selling Products table and blended KPIs. Confirmed via
+      // a live screenshot showing évolis SKUs (Reverse Activator, etc.)
+      // appearing under MiGuard's Website column — this is the fix for
+      // that, not just a cosmetic column removal.
+      const webRows = [];
+      const wmtRows = [];
       console.log('[MiGuard][overview] row counts \u2014 amazon:', amzRows.length, 'web:', webRows.length, 'walmart:', wmtRows.length, '\u2014 MTD range:', mtdStartStr, 'to', mtdEndStr);
 
       // Product names + SKU→ASIN crosswalk (see fetch comment above).
@@ -20270,8 +20258,11 @@ async function loadAuditResultsFromSheet() {
       // details. Both tabs are real day-level data (unlike Amazon's
       // month-bucketed ad_orders sheet), so true MTD sums are possible
       // directly — no proration needed on the Website side.
-      const webAdsRows = isCsv(webAdsCsv) ? parseCsv(webAdsCsv) : [];
-      const webShoppingRows = isCsv(webShoppingCsv) ? parseCsv(webShoppingCsv) : [];
+      // MiGuard is Amazon-only — no Website channel, so never populate from
+      // this shared/unfiltered Google Ads workbook (same leak pattern as
+      // webRows/wmtRows above).
+      const webAdsRows = [];
+      const webShoppingRows = [];
 
       // Sums spend/revenue/conversions from the "ads" tab within a date
       // range. `conversions` can be fractional (Google's attribution model
@@ -20484,17 +20475,12 @@ async function loadAuditResultsFromSheet() {
       // Walmart's sheet only ever contains rows with real spend
       // (zero-spend rows filtered server-side), so every unit here
       // reflects genuine ad activity.
-      let walmartAdUnitsThisMonth = 0;
-      try {
-        const wmtAdOrdersCsvForOrders = await fetch(sheetCsvUrl(WALMART_AD_ORDERS_SHEET_ID, WALMART_AD_ORDERS_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
-        if (isCsv(wmtAdOrdersCsvForOrders)) {
-          walmartAdUnitsThisMonth = parseCsv(wmtAdOrdersCsvForOrders)
-            .filter(r => parseInt(r.year, 10) === refYear && parseInt(r.month, 10) === refMonth)
-            .reduce((s, r) => s + (parseInt(r.ad_units, 10) || 0), 0);
-        }
-      } catch (e) { console.warn('[MiGuard][overview] Walmart ad units (for Ad-Driven Orders) lookup failed:', e.message); }
+      // MiGuard is Amazon-only — no Walmart channel, so this stays 0
+      // rather than fetching évolis's own Walmart ad-orders tab (the gid
+      // hardcoded here has no MiGuard equivalent in the Dashboard Mapping).
+      const walmartAdUnitsThisMonth = 0;
 
-      setKpiPlain('ov-kpi-ad-orders', (adDrivenOrders + Math.round(webAdsMtd.conversions) + walmartAdUnitsThisMonth).toLocaleString(), (cfg.isPartial ? 'This month' : 'Last month') + ' (Amazon + Google Ads + Walmart ad units)');
+      setKpiPlain('ov-kpi-ad-orders', adDrivenOrders.toLocaleString(), (cfg.isPartial ? 'This month' : 'Last month') + ' (Amazon)');
       // NOTE: this card's own MOM/"Organic Orders" companion logic moved
       // further down — see "MTD Organic Units" below, after per-ASIN net
       // units and ad-attributed units are available. Per Jaclyn
@@ -20586,26 +20572,11 @@ async function loadAuditResultsFromSheet() {
       // ad sheet only ever contains rows with real spend (zero-spend rows
       // filtered server-side by upload-walmart-ads.js), so every row here
       // is genuine ad activity.
-      let wmtAdUnitsByAsin = {};
-      let wmtAdUnitsByAsinPrev = {};
-      try {
-        const wmtAdOrdersCsv2 = await fetch(sheetCsvUrl(WALMART_AD_ORDERS_SHEET_ID, WALMART_AD_ORDERS_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
-        if (isCsv(wmtAdOrdersCsv2)) {
-          const wmtAdRows2All = parseCsv(wmtAdOrdersCsv2);
-          wmtAdRows2All.filter(r => parseInt(r.year, 10) === refYear && parseInt(r.month, 10) === refMonth)
-            .forEach(r => {
-              const asin = walmartItemIdToAsinMap[(r.item_id || '').trim()];
-              if (!asin) return; // no Walmart Item ID -> ASIN mapping for this row — skipped, not guessed
-              wmtAdUnitsByAsin[asin] = (wmtAdUnitsByAsin[asin] || 0) + (parseInt(r.ad_units, 10) || 0);
-            });
-          wmtAdRows2All.filter(r => parseInt(r.year, 10) === lastMonthYear && parseInt(r.month, 10) === lastMonthNum)
-            .forEach(r => {
-              const asin = walmartItemIdToAsinMap[(r.item_id || '').trim()];
-              if (!asin) return;
-              wmtAdUnitsByAsinPrev[asin] = (wmtAdUnitsByAsinPrev[asin] || 0) + (parseInt(r.ad_units, 10) || 0);
-            });
-        }
-      } catch (e) { console.warn('[MiGuard][overview] Walmart per-ASIN ad units lookup failed:', e.message); }
+      // MiGuard is Amazon-only — no Walmart channel, so these stay empty
+      // rather than fetching évolis's own Walmart ad-orders tab (same gid
+      // as the Ad-Driven Units block above, no MiGuard equivalent exists).
+      const wmtAdUnitsByAsin = {};
+      const wmtAdUnitsByAsinPrev = {};
 
       // -- MTD Organic Units (net of returns, net of BOTH Amazon + Website ads) --
       // Changed 2026-08-05 per Jaclyn: this card used to be "MTD Organic
@@ -20672,32 +20643,27 @@ async function loadAuditResultsFromSheet() {
         return `<span class="tp-units">${curr.toLocaleString()}</span>${momBadge(curr, prevVal)}`;
       }
 
+      // MiGuard is Amazon-only — webUnitsByAsin/wmtUnitsByAsin are always
+      // empty (see webRows/wmtRows above), so total collapses to Amazon's
+      // own units. Table simplified to match (no Website/Walmart columns).
       const productRows = Array.from(allAsins).map(asin => {
-        const a = amzUnitsByAsin[asin] || 0, w = webUnitsByAsin[asin] || 0, m = wmtUnitsByAsin[asin] || 0;
-        const aPrev = amzPrevUnitsByAsin[asin] || 0, wPrev = webPrevUnitsByAsin[asin] || 0, mPrev = wmtPrevUnitsByAsin[asin] || 0;
-        const total = a + w + m, totalPrev = aPrev + wPrev + mPrev;
-        // Ad units = Amazon Ads (capped at Amazon's own net units) + Google
-        // Ads via the "shopping" tab (capped at Website's own net units)
-        // + Walmart Ads (capped at Walmart's own net units, added
-        // 2026-08-06 per Jaclyn).
-        const adUnits = Math.min(adUnitsByAsin[asin] || 0, a) + Math.min(webShopUnitsByAsin[asin] || 0, w) + Math.min(wmtAdUnitsByAsin[asin] || 0, m);
-        const orgUnits = total - adUnits;
-        return { asin, name: asinNameMap[asin] || asin, amazon: a, amazonPrev: aPrev, website: w, websitePrev: wPrev, walmart: m, walmartPrev: mPrev, total, totalPrev, adUnits, orgUnits };
-      }).sort((x, y) => y.total - x.total).slice(0, 15);
+        const a = amzUnitsByAsin[asin] || 0;
+        const aPrev = amzPrevUnitsByAsin[asin] || 0;
+        const adUnits = Math.min(adUnitsByAsin[asin] || 0, a);
+        const orgUnits = a - adUnits;
+        return { asin, name: asinNameMap[asin] || asin, amazon: a, amazonPrev: aPrev, adUnits, orgUnits };
+      }).sort((x, y) => y.amazon - x.amazon).slice(0, 15);
 
       const tbody = document.getElementById('ov-products-tbody');
       if (tbody) {
         if (!productRows.length) {
-          tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted);">No sales yet this month.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">No sales yet this month.</td></tr>';
         } else {
           tbody.innerHTML = productRows.map((r, i) => `
             <tr>
               <td style="padding:7px 10px;">${i + 1}.</td>
               <td style="padding:7px 10px;">${r.name}</td>
               <td style="padding:7px 10px;"><div class="tp-cell">${unitCell(r.amazon, r.amazonPrev)}</div></td>
-              <td style="padding:7px 10px;"><div class="tp-cell">${unitCell(r.website, r.websitePrev)}</div></td>
-              <td style="padding:7px 10px;"><div class="tp-cell">${unitCell(r.walmart, r.walmartPrev)}</div></td>
-              <td style="padding:7px 10px;"><div class="tp-cell">${unitCell(r.total, r.totalPrev)}</div></td>
               <td style="padding:7px 10px;">${r.adUnits > 0 ? `<span class="tp-units">${r.adUnits.toLocaleString()}</span>` : '<span class="tp-dash">—</span>'}</td>
               <td style="padding:7px 10px;">${r.orgUnits > 0 ? `<span class="tp-units">${r.orgUnits.toLocaleString()}</span>` : '<span class="tp-dash">—</span>'}</td>
               <td style="padding:7px 10px;">${convCell(r.amazon, r.asin)}</td>
@@ -20705,65 +20671,6 @@ async function loadAuditResultsFromSheet() {
         }
       }
 
-      // -- Donut: revenue share by channel (real MTD revenue, net of returns) --
-      // Switched to the net figures 2026-08-03 — using gross here while the
-      // hero KPI above uses net would make the donut's total silently not
-      // match the hero number, which is worse than either being wrong alone.
-      const donutTotal = amzMtdNetRevenue + webMtdNetRevenue + wmtMtdNetRevenue;
-      if (donutTotal > 0) {
-        // FIXED 2026-09-01 — confirmed live: "Canvas is already in use.
-        // Chart with ID 'X' must be destroyed before the canvas ... can
-        // be reused." This function used to run once per page load; now
-        // it can run again on every toggle click, and nothing was ever
-        // destroying the prior instance before creating a new one on the
-        // same canvas. window._ovDonutChart was already being assigned
-        // (tracked), just never actually used to clean up — same failure
-        // class as the PDF export canvas-reuse bug documented earlier.
-        if (window._ovDonutChart) { window._ovDonutChart.destroy(); window._ovDonutChart = null; }
-        const fmtDollar = n => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        // ADDED 2026-09-04 per Jaclyn — "show totals" on this chart.
-        // Center-text plugin for the grand total (a real doughnut has no
-        // built-in center-text support in Chart.js), plus a custom
-        // tooltip formatter so hovering a segment shows a real dollar
-        // figure ("$2,496.47") instead of Chart.js's default raw,
-        // unformatted number. This is a live-dashboard-only plugin, not
-        // part of any PDF export capture path — the custom-plugin-text-
-        // invisible-to-font-scaling risk documented in the PDF export
-        // playbook doesn't apply here, but worth remembering if this
-        // chart is ever added to a PDF export later.
-        const centerTextPlugin = {
-          id: 'ovDonutCenterText',
-          afterDraw(chart) {
-            const { ctx, chartArea: { left, right, top, bottom } } = chart;
-            const cx = (left + right) / 2, cy = (top + bottom) / 2;
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = '700 15px var(--font-subheader, sans-serif)';
-            ctx.fillStyle = '#001f60';
-            ctx.fillText(fmtDollar(donutTotal), cx, cy - 8);
-            ctx.font = '600 10px sans-serif';
-            ctx.fillStyle = '#6b7ba2';
-            ctx.fillText('TOTAL', cx, cy + 10);
-            ctx.restore();
-          }
-        };
-        window._ovDonutChart = new Chart(document.getElementById('chart-ov-donut'), {
-          type: 'doughnut',
-          data: {
-            labels: ['Amazon', 'Website', 'Walmart'],
-            datasets: [{ data: [amzMtdNetRevenue, webMtdNetRevenue, wmtMtdNetRevenue], backgroundColor: ['#001f60', '#24e9a3', '#6b7ba2'], borderWidth: 0 }]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10, font: { size: 12 } } },
-              tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmtDollar(ctx.parsed)}` } },
-            }
-          },
-          plugins: [centerTextPlugin],
-        });
-      }
 
       // ═══════════════════════════════════════════════════════════════
       // GOALS TRACKER — added 2026-09-04 per Jaclyn (évolis original);
@@ -21034,18 +20941,10 @@ async function loadAuditResultsFromSheet() {
       // data (Amazon, Website) and a snapshot up to ~6 days stale
       // (Walmart) — flagging rather than presenting all three as equally
       // fresh.
-      let walmartSpendThisMonth = 0, walmartSalesThisMonth = 0, walmartSpendLastMonth = 0, walmartSalesLastMonth = 0;
-      try {
-        const walmartAdvCsv = await fetch(sheetCsvUrl(WALMART_ADVERTISING_SHEET_ID, WALMART_ADVERTISING_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
-        if (isCsv(walmartAdvCsv)) {
-          const wmtAdvRows = parseCsv(walmartAdvCsv);
-          const wmtThisMonth = wmtAdvRows.find(r => parseInt(r.year, 10) === refYear && parseInt(r.month, 10) === refMonth);
-          const wmtLastMonth = wmtAdvRows.find(r => parseInt(r.year, 10) === lastMonthYear && parseInt(r.month, 10) === lastMonthNum);
-          if (wmtThisMonth) { walmartSpendThisMonth = parseAmt(wmtThisMonth.spend); walmartSalesThisMonth = parseAmt(wmtThisMonth.sales); }
-          if (wmtLastMonth) { walmartSpendLastMonth = parseAmt(wmtLastMonth.spend); walmartSalesLastMonth = parseAmt(wmtLastMonth.sales); }
-          console.log('[MiGuard][overview] Walmart ad spend added — this month:', walmartSpendThisMonth, 'last month:', walmartSpendLastMonth);
-        }
-      } catch (e) { console.warn('[MiGuard][overview] Walmart Advertising Cache lookup failed:', e.message); }
+      // MiGuard is Amazon-only — no Walmart channel, so these stay 0
+      // rather than fetching évolis's own Walmart Advertising tab (the gid
+      // hardcoded here has no MiGuard equivalent in the Dashboard Mapping).
+      const walmartSpendThisMonth = 0, walmartSalesThisMonth = 0, walmartSpendLastMonth = 0, walmartSalesLastMonth = 0;
 
       const blendedSpend = proratedSpend + webAdsMtd.spend + walmartSpendThisMonth;
       const blendedSpendPrev = proratedSpendPrev + webAdsPrevMtd.spend + walmartSpendLastMonth;
@@ -21069,92 +20968,6 @@ async function loadAuditResultsFromSheet() {
       setKpi('ov-kpi-ad-sales', '$' + blendedSales.toLocaleString(undefined, { maximumFractionDigits: 0 }), pctChange(blendedSales, blendedSalesPrev), ovMomSuffix);
       setKpi('ov-kpi-organic-sales', '$' + organicSales.toLocaleString(undefined, { maximumFractionDigits: 0 }), pctChange(organicSales, organicSalesPrev), ovMomSuffix);
 
-      // -- Trend: trailing 6 COMPLETED months, blended revenue across channels --
-      // ROOT CAUSE of the blank chart: these revenue-history sheets use
-      // UPPERCASE positional headers (MONTH/YEAR/REVENUE), the same
-      // convention already confirmed working in buildRevenueChart() /
-      // buildWebChart() elsewhere in this file. My generic lowercase-keyed
-      // parseCsv() was looking up row.year/row.month/row.revenue against a
-      // sheet whose real keys are YEAR/MONTH/REVENUE -- every lookup
-      // silently returned undefined -> 0, so "no non-zero months" fired
-      // for the wrong reason. Parsing by column index now, matching the
-      // already-proven pattern exactly.
-      function parseRevenueHistory(csvText) {
-        if (!isCsv(csvText)) return [];
-        const lines = csvText.trim().split('\n');
-        if (lines.length < 2) return [];
-        const headers = parseCsvLine(lines[0]).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase());
-        const monthIdx = headers.indexOf('MONTH');
-        const yearIdx = headers.indexOf('YEAR');
-        const revenueIdx = headers.indexOf('REVENUE');
-        if (monthIdx < 0 || yearIdx < 0 || revenueIdx < 0) {
-          console.warn('[MiGuard][overview] revenue sheet missing MONTH/YEAR/REVENUE columns -- found:', headers);
-          return [];
-        }
-        const rows = [];
-        for (let i = 1; i < lines.length; i++) {
-          const cols = parseCsvLine(lines[i]);
-          const yr = parseInt((cols[yearIdx] || '').replace(/^"|"$/g, ''), 10);
-          const mo = parseInt((cols[monthIdx] || '').replace(/^"|"$/g, ''), 10);
-          const rev = parseAmt((cols[revenueIdx] || '').replace(/^"|"$/g, ''));
-          if (yr && mo >= 1 && mo <= 12) {
-            if (yr < 2015 || yr > 2035) {
-              console.warn('[revenue-history] implausible year', yr, 'for month', mo, '— skipping row (likely corrupted YEAR cell at the source). Revenue was:', rev);
-            } else {
-              rows.push({ year: yr, month: mo, revenue: rev });
-            }
-          }
-        }
-        return rows;
-      }
-
-      const [amzRevCsv, webRevCsv, wmtRevCsv] = await Promise.all([
-        fetch(sheetCsvUrl(AMZ_REVENUE_SHEET_ID, AMZ_REVENUE_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
-        fetch(sheetCsvUrl(WEB_SHEET_ID, WEB_REVENUE_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
-        fetch(sheetCsvUrl(WMT_REVENUE_SHEET_ID, WMT_REVENUE_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
-      ]);
-      const amzRevRows = parseRevenueHistory(amzRevCsv);
-      const webRevRows = parseRevenueHistory(webRevCsv);
-      const wmtRevRows = parseRevenueHistory(wmtRevCsv);
-      console.log('[MiGuard][overview] revenue-history row counts -- amazon:', amzRevRows.length, 'web:', webRevRows.length, 'walmart:', wmtRevRows.length);
-
-      function monthlyRevenue(rows, y, m) {
-        const row = rows.find(r => r.year === y && r.month === m);
-        return row ? row.revenue : 0;
-      }
-      const trendLabels = [], amzTrend = [], webTrend = [], wmtTrend = [];
-      let ty = now.getFullYear(), tm = now.getMonth();
-      for (let i = 0; i < 6; i++) {
-        tm -= 1; if (tm === 0) { tm = 12; ty--; }
-        trendLabels.unshift(`${monthNames[tm - 1]} '${String(ty).slice(2)}`);
-        amzTrend.unshift(monthlyRevenue(amzRevRows, ty, tm));
-        webTrend.unshift(monthlyRevenue(webRevRows, ty, tm));
-        wmtTrend.unshift(monthlyRevenue(wmtRevRows, ty, tm));
-      }
-      if ([...amzTrend, ...webTrend, ...wmtTrend].some(v => v > 0)) {
-        // FIXED 2026-09-01 — same canvas-reuse bug as the donut chart
-        // above, same root cause (this function can now run repeatedly
-        // on toggle clicks).
-        if (window._ovTrendChart) { window._ovTrendChart.destroy(); window._ovTrendChart = null; }
-        window._ovTrendChart = new Chart(document.getElementById('chart-ov-trend'), {
-          type: 'line',
-          data: {
-            labels: trendLabels,
-            datasets: [
-              { label: 'Amazon', data: amzTrend, borderColor: '#001f60', backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
-              { label: 'Website', data: webTrend, borderColor: '#24e9a3', backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
-              { label: 'Walmart', data: wmtTrend, borderColor: '#6b7ba2', backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
-            ]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'top', align: 'start', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 24, padding: 12, font: { size: 13 }, generateLabels: bigLegendLabels } } },
-            scales: { y: { ticks: { callback: v => '$' + (v / 1000).toFixed(0) + 'K' } } }
-          }
-        });
-      } else {
-        console.warn('[MiGuard][overview] no non-zero months found for trend chart — check revenue-history sheet gids (expects UPPERCASE columns: MONTH, YEAR, REVENUE).');
-      }
     } catch (err) {
       console.error('[MiGuard][overview] fetch/parse failed:', err);
     }
