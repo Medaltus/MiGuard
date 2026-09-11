@@ -1,29 +1,48 @@
 <!DOCTYPE html>
 <!--
-  ARCHITECTURE NOTE — added 2026-08-10 per Jaclyn.
+  ARCHITECTURE NOTE — this dashboard was ported from évolis's index.html.
 
-  This dashboard hardcodes every Google Sheet's file ID and gid directly
-  in this file (search for any `const X_SHEET_ID = '...'` / `const
-  X_GID = '...'` pattern throughout). Newer brand dashboards (starting
-  with Skinuva, built 2026-08-10) use a different, more secure pattern
-  instead: a server-side SHEET_CONFIG Vercel env var + api/sheet-
-  config.js endpoint, injected as window.SHEET_CFG before any other
-  script runs, so sheet IDs never appear in this file's source at all.
+  évolis's own file hardcodes every Google Sheet's file ID and gid directly
+  in source (its own deliberate legacy exception — Jaclyn chose not to
+  refactor a working production dashboard). MiGuard, as a new brand build,
+  was converted to the newer pattern instead: a server-side SHEET_CONFIG
+  Vercel env var + api/sheet-config.js endpoint, injected as window.SHEET_CFG
+  before any other script runs, so sheet IDs live in Vercel config rather
+  than in this file's source.
 
-  This is a DELIBERATE, KNOWN divergence, not an oversight: Jaclyn opted
-  to leave miguard on its current hardcoded pattern since it's already
-  working, rather than risk a large mechanical refactor (dozens of
-  constants across this file) on a production dashboard. All FUTURE
-  brand dashboards should be built on the SHEET_CONFIG pattern from the
-  start. If miguard is ever migrated to match, see the Skinuva build's
-  own api/sheet-config.js as the reference implementation — it's brand-
-  agnostic already.
+  A handful of genuinely brand-agnostic, shared-tab values (the ASN/Inbound
+  Shipments tracker, its copy-template link, and three shared per-SKU tabs
+  riding on the Insights/Master-SKU-List/Keyword-Tracker workbooks — PPC
+  Strategy, Events, Keyword Tracker Summary) are intentionally left as
+  hardcoded literals rather than routed through SHEET_CFG, since they don't
+  vary by brand at all.
 -->
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MiGuard — Internal Dashboard · Medaltus</title>
+<!-- SHEET_CFG bootstrap — MUST run before any other script. Synchronous
+     fetch of /api/sheet-config (backed by the SHEET_CONFIG Vercel env var)
+     so every `window.SHEET_CFG.<KEY>?.fileId / ?.gid` lookup later in this
+     file has data available immediately, matching api/sheet-config.js's
+     own documented contract. Falls back to an empty object on any failure
+     — every consumer already uses `?.` + `|| ''`, so a missing/failed
+     fetch degrades to "nothing to fetch yet" empty states, not a crash. -->
+<script>
+(function () {
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/sheet-config', false); // synchronous, intentional — see comment above
+    xhr.send(null);
+    window.SHEET_CFG = (xhr.status === 200) ? JSON.parse(xhr.responseText) : {};
+  } catch (e) {
+    console.error('[SHEET_CFG] bootstrap fetch failed:', e.message);
+    window.SHEET_CFG = {};
+  }
+})();
+</script>
 <!-- This key is the shared Medaltus Clerk account's real publishable key, used
      identically across every brand dashboard — NOT a placeholder needing a
      brand-specific value. Per-brand distinction happens via the email-domain
@@ -5063,10 +5082,10 @@ async function initSns() {
   }
 
   // Same spreadsheet as initStewardshipLive's SUMMARY_SHEET_ID, different tab.
-  const TOTALS_SHEET_ID    = '16QNnDh7-dTDzI-O7UI-WlzMtOmovssV23nd-quiYPR0'; // Stewardship Summary
-  const TOTALS_GID         = '1342008125';                                   // miguard tab — corrected per Jaclyn 2026-07-14 (was 346552515, wrong tab)
-  const RETENTION_SHEET_ID = '1i94keQYY21aSh8KP-ZpvqO1MF2g0nX5ThMD93y3wU48';  // Subscriptions cache — confirmed correct directly from Jaclyn's own URL text 2026-07-28 (my prior 'KR' correction was wrong — misread a screenshot; P and R look nearly identical in that font). The real bug was ONLY the gid below, which pointed at a tab with pbj's data instead of miguard's.
-  const RETENTION_GID      = '109542443';                                   // 'miguard' tab, confirmed directly from Jaclyn's screenshot 2026-07-28 (previous gid 1742224413 was also wrong — different tab in the wrong file entirely)
+  const TOTALS_SHEET_ID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.fileId || ''; // Stewardship Summary
+  const TOTALS_GID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.gid || '';                                   // miguard tab — corrected per Jaclyn 2026-07-14 (was 346552515, wrong tab)
+  const RETENTION_SHEET_ID = window.SHEET_CFG.SHEET_SUBSCRIPTIONS?.fileId || '';  // Subscriptions cache — confirmed correct directly from Jaclyn's own URL text 2026-07-28 (my prior 'KR' correction was wrong — misread a screenshot; P and R look nearly identical in that font). The real bug was ONLY the gid below, which pointed at a tab with pbj's data instead of miguard's.
+  const RETENTION_GID = window.SHEET_CFG.SHEET_SUBSCRIPTIONS?.gid || '';                                   // 'miguard' tab, confirmed directly from Jaclyn's screenshot 2026-07-28 (previous gid 1742224413 was also wrong — different tab in the wrong file entirely)
 
   const kpiValues = document.querySelectorAll('#m-opportunities .kpi-value');
   const subsKpiEl = kpiValues[0] || null;
@@ -5278,14 +5297,14 @@ async function initSns() {
   'use strict';
 
   // ── Sheet IDs ─────────────────────────────────────────────────────────────
-  const SYNC_SHEET_ID       = '1SiYu8e2-Pfi14Aiuf6SAFytWVXb4_dtdNFT6wvLFPok'; // sync-orders (MOM)
-  const HISTORICAL_SHEET_ID = '1T5y-EOs21s9evwR4SR58EYsM2Vyk0awBqpE-kEnBlQU'; // historical cache (YOY)
-  const REVENUE_SHEET_ID    = '1equxdiqpzonA5TgsrKzbrpq92QHyJP8kQ2RoUiYmank'; // revenue history
-  const REVENUE_GID         = '279508185';                                     // MiGuard tab
-  const AD_SUMMARY_SHEET_ID = '13cN301QZxkEGy6-8LfdzB8zmsHhUKwZqz6lsXKUJcnI'; // advertising cache
-  const AD_SUMMARY_GID      = '1828047583';                                     // MiGuard tab
-  const AD_ORDERS_SHEET_ID  = '1N30haUFZkdv9rrvYuWwUhxEm0z7MGp1bz9F462aF-QI'; // ad orders cache
-  const AD_ORDERS_GID       = '862206070';                                      // MiGuard tab
+  const SYNC_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS?.fileId || ''; // sync-orders (MOM)
+  const HISTORICAL_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS_HISTORICAL?.fileId || ''; // historical cache (YOY)
+  const REVENUE_SHEET_ID = window.SHEET_CFG.SHEET_REVENUE?.fileId || ''; // revenue history
+  const REVENUE_GID = window.SHEET_CFG.SHEET_REVENUE?.gid || '';                                     // MiGuard tab
+  const AD_SUMMARY_SHEET_ID = window.SHEET_CFG.SHEET_ADVERTISING?.fileId || ''; // advertising cache
+  const AD_SUMMARY_GID = window.SHEET_CFG.SHEET_ADVERTISING?.gid || '';                                     // MiGuard tab
+  const AD_ORDERS_SHEET_ID = window.SHEET_CFG.SHEET_AD_ORDERS?.fileId || ''; // ad orders cache
+  const AD_ORDERS_GID = window.SHEET_CFG.SHEET_AD_ORDERS?.gid || '';                                      // MiGuard tab
   const BRAND               = 'miguard';
 
   // Derive the last FULL month from today
@@ -5529,8 +5548,8 @@ async function initSns() {
 
     try {
       // FIXED 2026-08-10 per Jaclyn -- was hardcoded to Skinuva's historical-orders gid ('1249281379'), not miguard's own ('1459847077', confirmed via Dashboard Mapping). Found while building Skinuva's dashboard from this same codebase.
-      const SYNC_GID = '1608462008';
-      const HIST_GID = '1459847077';
+      const SYNC_GID = window.SHEET_CFG.SHEET_ORDERS?.gid || '';
+      const HIST_GID = window.SHEET_CFG.SHEET_ORDERS_HISTORICAL?.gid || '';
 
       console.log('[MiGuard] Starting fetch...');
       const [syncCsv, histCsv, adSummaryCsv, adOrdersCsv, amzReturnsCsv] = await Promise.all([
@@ -5853,8 +5872,8 @@ async function initSns() {
 
   // ── Top Products Table ────────────────────────────────────────────────────
   // Product name lookup: sheet 1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA, gid 164358627
-  const PRODUCT_NAMES_SHEET_ID = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const PRODUCT_NAMES_GID      = '164358627';
+  const PRODUCT_NAMES_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const PRODUCT_NAMES_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || '';
 
   async function buildTopProductsTable(allRows, targetYear, targetMonth, adOrderRows = [], prevYear = null, prevMonth = null, prevAdOrderRows = [], returnsByAsin = {}, returnsByAsinPrev = {}) {
     const prefix = `${targetYear}-${String(targetMonth).padStart(2,'0')}`;
@@ -6026,8 +6045,8 @@ async function initSns() {
   const SHOPIFY_SHOPPING_GID  = '1841786277'; // shopping tab (per-SKU, Shopping/PMax only — new 2026-07-28)
 
   // Product name lookup: col A = ASIN (unused here), col B = SKU, col C = Name
-  const PRODUCT_NAMES_SHEET_ID = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const PRODUCT_NAMES_GID      = '164358627';
+  const PRODUCT_NAMES_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const PRODUCT_NAMES_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || '';
 
   function getLastFullMonth() {
     const now = new Date();
@@ -6586,8 +6605,8 @@ async function initSns() {
   // values below. Update or delete entries here as live coverage catches up.
   // ────────────────────────────────────────────────────────────────────────
 
-  const VINE_SHEET_ID    = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const VINE_GID         = '164358627'; // "Product Short Name" tab — col F = Date Enrolled in Vine
+  const VINE_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const VINE_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || ''; // "Product Short Name" tab — col F = Date Enrolled in Vine
   const VINE_COST_PER_ENROLLMENT = 200;
 
   // Investments chart fallback — keyed 'YYYY-MM'. Ported from the original
@@ -6760,8 +6779,8 @@ async function initSns() {
     // sheets (orders sync+historical, AD_SUMMARY, revenue, master SKU list)
     // on every single page load — that work now happens once, server-side,
     // overnight. This function just looks values up in the small result.
-    const SUMMARY_SHEET_ID = '16QNnDh7-dTDzI-O7UI-WlzMtOmovssV23nd-quiYPR0';
-    const SUMMARY_GID      = '1342008125'; // miguard tab
+    const SUMMARY_SHEET_ID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.fileId || '';
+    const SUMMARY_GID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.gid || ''; // miguard tab
 
     try {
       const summaryCsv = await fetch(sheetCsvUrl(SUMMARY_SHEET_ID, SUMMARY_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
@@ -6934,8 +6953,8 @@ async function initSns() {
   const WALMART_GID              = '1844526926';
   const WALMART_REVENUE_SHEET_ID = '1QhKeOxKR0mEfSiM2pdYxrEBWsQdRSxbL8Q86MP6lpFE';
   const WALMART_REVENUE_GID      = '812984298';                                      // MiGuard tab
-  const PRODUCT_NAMES_SHEET_ID   = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const PRODUCT_NAMES_GID        = '164358627';
+  const PRODUCT_NAMES_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const PRODUCT_NAMES_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || '';
   // Added 2026-08-06 per Jaclyn — Walmart's ad data.
   const WALMART_AD_ORDERS_SHEET_ID = '1PYUPePnhnBJp77n3HVSKeM824ZorAMkiJC8WFbyORCU';
   const WALMART_AD_ORDERS_GID      = '664808652'; // miguard tab
@@ -7462,14 +7481,14 @@ async function initSns() {
   'use strict';
 
   // ── Sheet IDs ─────────────────────────────────────────────────────────────
-  const SYNC_SHEET_ID       = '1SiYu8e2-Pfi14Aiuf6SAFytWVXb4_dtdNFT6wvLFPok'; // sync-orders (MOM)
-  const HISTORICAL_SHEET_ID = '1T5y-EOs21s9evwR4SR58EYsM2Vyk0awBqpE-kEnBlQU'; // historical cache (YOY)
-  const REVENUE_SHEET_ID    = '1equxdiqpzonA5TgsrKzbrpq92QHyJP8kQ2RoUiYmank'; // revenue history
-  const REVENUE_GID         = '279508185';                                     // MiGuard tab
-  const AD_SUMMARY_SHEET_ID = '13cN301QZxkEGy6-8LfdzB8zmsHhUKwZqz6lsXKUJcnI'; // advertising cache
-  const AD_SUMMARY_GID      = '1828047583';                                     // MiGuard tab
-  const AD_ORDERS_SHEET_ID  = '1N30haUFZkdv9rrvYuWwUhxEm0z7MGp1bz9F462aF-QI'; // ad orders cache
-  const AD_ORDERS_GID       = '862206070';                                      // MiGuard tab
+  const SYNC_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS?.fileId || ''; // sync-orders (MOM)
+  const HISTORICAL_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS_HISTORICAL?.fileId || ''; // historical cache (YOY)
+  const REVENUE_SHEET_ID = window.SHEET_CFG.SHEET_REVENUE?.fileId || ''; // revenue history
+  const REVENUE_GID = window.SHEET_CFG.SHEET_REVENUE?.gid || '';                                     // MiGuard tab
+  const AD_SUMMARY_SHEET_ID = window.SHEET_CFG.SHEET_ADVERTISING?.fileId || ''; // advertising cache
+  const AD_SUMMARY_GID = window.SHEET_CFG.SHEET_ADVERTISING?.gid || '';                                     // MiGuard tab
+  const AD_ORDERS_SHEET_ID = window.SHEET_CFG.SHEET_AD_ORDERS?.fileId || ''; // ad orders cache
+  const AD_ORDERS_GID = window.SHEET_CFG.SHEET_AD_ORDERS?.gid || '';                                      // MiGuard tab
   const BRAND               = 'miguard';
 
   // External replica: month is locked to the latest Approved report
@@ -7705,8 +7724,8 @@ async function initSns() {
       // sync-orders sheet has the most recent MOM data
       // historical sheet has everything else
       // FIXED 2026-08-10 per Jaclyn -- was hardcoded to Skinuva's historical-orders gid ('1249281379'), not miguard's own ('1459847077', confirmed via Dashboard Mapping). Found while building Skinuva's dashboard from this same codebase.
-      const SYNC_GID = '1608462008';
-      const HIST_GID = '1459847077';
+      const SYNC_GID = window.SHEET_CFG.SHEET_ORDERS?.gid || '';
+      const HIST_GID = window.SHEET_CFG.SHEET_ORDERS_HISTORICAL?.gid || '';
 
       console.log('[MiGuard] Starting fetch...');
       const [syncCsv, histCsv, adSummaryCsv, adOrdersCsv, amzReturnsCsv] = await Promise.all([
@@ -7910,8 +7929,8 @@ async function initSns() {
 
   // ── Top Products Table ────────────────────────────────────────────────────
   // Product name lookup: sheet 1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA, gid 164358627
-  const PRODUCT_NAMES_SHEET_ID = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const PRODUCT_NAMES_GID      = '164358627';
+  const PRODUCT_NAMES_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const PRODUCT_NAMES_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || '';
 
   async function buildTopProductsTable(allRows, targetYear, targetMonth, adOrderRows = [], prevYear = null, prevMonth = null, prevAdOrderRows = [], returnsByAsin = {}, returnsByAsinPrev = {}) {
     const prefix = `${targetYear}-${String(targetMonth).padStart(2,'0')}`;
@@ -8076,8 +8095,8 @@ async function initSns() {
   const SHOPIFY_SHOPPING_GID  = '1841786277'; // shopping tab (per-SKU, Shopping/PMax only — new 2026-07-28)
 
   // Product name lookup: col A = ASIN (unused here), col B = SKU, col C = Name
-  const PRODUCT_NAMES_SHEET_ID = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const PRODUCT_NAMES_GID      = '164358627';
+  const PRODUCT_NAMES_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const PRODUCT_NAMES_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || '';
 
   // External replica: month is locked to the latest Approved report.
   function getLastFullMonth() {
@@ -8583,8 +8602,8 @@ async function initSns() {
   const WALMART_GID              = '1844526926';
   const WALMART_REVENUE_SHEET_ID = '1QhKeOxKR0mEfSiM2pdYxrEBWsQdRSxbL8Q86MP6lpFE';
   const WALMART_REVENUE_GID      = '812984298';                                      // MiGuard tab
-  const PRODUCT_NAMES_SHEET_ID   = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const PRODUCT_NAMES_GID        = '164358627';
+  const PRODUCT_NAMES_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const PRODUCT_NAMES_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || '';
   // Added 2026-08-06 per Jaclyn — Walmart's ad data.
   const WALMART_AD_ORDERS_SHEET_ID = '1PYUPePnhnBJp77n3HVSKeM824ZorAMkiJC8WFbyORCU';
   const WALMART_AD_ORDERS_GID      = '664808652'; // miguard tab
@@ -9075,7 +9094,7 @@ async function initSns() {
 // ══════════════════════════════════════════════════════════════════════════════
 (function () {
   'use strict';
-  const REPORT_INSIGHTS_SHEET_ID = '1Fz0bEArdx54vTSGMGj-m6TYec1kizKyPubJOZNWBaLg';
+  const REPORT_INSIGHTS_SHEET_ID = window.SHEET_CFG.SHEET_REPORT_INSIGHTS?.fileId || '';
 
   function gvizCsvUrl(tabName) {
     return `https://docs.google.com/spreadsheets/d/${REPORT_INSIGHTS_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}&_cb=${Date.now()}`;
@@ -9334,8 +9353,8 @@ async function initSns() {
   // values below. Update or delete entries here as live coverage catches up.
   // ────────────────────────────────────────────────────────────────────────
 
-  const VINE_SHEET_ID    = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const VINE_GID         = '164358627'; // "Product Short Name" tab — col F = Date Enrolled in Vine
+  const VINE_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const VINE_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || ''; // "Product Short Name" tab — col F = Date Enrolled in Vine
   const VINE_COST_PER_ENROLLMENT = 200;
 
   // Investments chart fallback — keyed 'YYYY-MM'. Ported from the original
@@ -9509,8 +9528,8 @@ async function initSns() {
     // sheets (orders sync+historical, AD_SUMMARY, revenue, master SKU list)
     // on every single page load — that work now happens once, server-side,
     // overnight. This function just looks values up in the small result.
-    const SUMMARY_SHEET_ID = '16QNnDh7-dTDzI-O7UI-WlzMtOmovssV23nd-quiYPR0';
-    const SUMMARY_GID      = '1342008125'; // miguard tab
+    const SUMMARY_SHEET_ID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.fileId || '';
+    const SUMMARY_GID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.gid || ''; // miguard tab
 
     try {
       const summaryCsv = await fetch(sheetCsvUrl(SUMMARY_SHEET_ID, SUMMARY_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
@@ -9935,10 +9954,10 @@ async function initSnsExternal() {
   }
 
   // Same spreadsheet as initStewardshipLive's SUMMARY_SHEET_ID, different tab.
-  const TOTALS_SHEET_ID    = '16QNnDh7-dTDzI-O7UI-WlzMtOmovssV23nd-quiYPR0'; // Stewardship Summary
-  const TOTALS_GID         = '1342008125';                                   // miguard tab — corrected per Jaclyn 2026-07-14 (was 346552515, wrong tab)
-  const RETENTION_SHEET_ID = '1i94keQYY21aSh8KP-ZpvqO1MF2g0nX5ThMD93y3wU48';  // Subscriptions cache — confirmed correct directly from Jaclyn's own URL text 2026-07-28 (my prior 'KR' correction was wrong — misread a screenshot; P and R look nearly identical in that font). The real bug was ONLY the gid below, which pointed at a tab with pbj's data instead of miguard's.
-  const RETENTION_GID      = '109542443';                                   // 'miguard' tab, confirmed directly from Jaclyn's screenshot 2026-07-28 (previous gid 1742224413 was also wrong — different tab in the wrong file entirely)
+  const TOTALS_SHEET_ID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.fileId || ''; // Stewardship Summary
+  const TOTALS_GID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.gid || '';                                   // miguard tab — corrected per Jaclyn 2026-07-14 (was 346552515, wrong tab)
+  const RETENTION_SHEET_ID = window.SHEET_CFG.SHEET_SUBSCRIPTIONS?.fileId || '';  // Subscriptions cache — confirmed correct directly from Jaclyn's own URL text 2026-07-28 (my prior 'KR' correction was wrong — misread a screenshot; P and R look nearly identical in that font). The real bug was ONLY the gid below, which pointed at a tab with pbj's data instead of miguard's.
+  const RETENTION_GID = window.SHEET_CFG.SHEET_SUBSCRIPTIONS?.gid || '';                                   // 'miguard' tab, confirmed directly from Jaclyn's screenshot 2026-07-28 (previous gid 1742224413 was also wrong — different tab in the wrong file entirely)
 
   const kpiValues = document.querySelectorAll('#mx-opportunities .kpi-value');
   const subsKpiEl = kpiValues[0] || null;
@@ -10236,15 +10255,15 @@ async function initSnsExternal() {
 (function () {
   'use strict';
 
-  const CONSIGNMENT_SHEET_ID = '1tdNibpi_RAwz2TuHcp4ef-eJ65jwNlcgE2GYQnHMWAE';
-  const CONSIGNMENT_GID      = '1545117142';
+  const CONSIGNMENT_SHEET_ID = window.SHEET_CFG.SHEET_CONSIGNMENT_INVENTORY?.fileId || '';
+  const CONSIGNMENT_GID = window.SHEET_CFG.SHEET_CONSIGNMENT_INVENTORY?.gid || '';
   const TRACKER_SHEET_ID     = '1Pb50CzCb0fouNsaewQATEY_c3IpgRVPu5FoppNg19_A';
   const TRACKER_TAB          = 'Inbound_Shipments';
   const ASN_TEMPLATE_ID      = '12wOeZryBrUKsWFrPr6SzHadwEti1SI1hEEv1X2vjHkk';
   // Same master Product Short Name sheet used elsewhere on this dashboard
   // (col A=ASIN, col B=SKU (base, no -SF), col C=Product Short Name).
-  const PRODUCT_NAMES_SHEET_ID = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const PRODUCT_NAMES_GID      = '164358627';
+  const PRODUCT_NAMES_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const PRODUCT_NAMES_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || '';
 
   function gvizCsvUrl(sheetId, tabName) {
     return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}&_cb=${Date.now()}`;
@@ -10855,8 +10874,8 @@ async function initSnsExternal() {
 (function () {
   'use strict';
 
-  const KW_TRACKER_SHEET_ID = '1geNDQgd_1ensLDyZOuXZBnvQrFT_RC85l9rHHGpgJe4';
-  const KW_TRACKER_GID = '909417903'; // 'miguard' tab, confirmed from the sheet URL directly
+  const KW_TRACKER_SHEET_ID = window.SHEET_CFG.SHEET_KEYWORD_TRACKER?.fileId || '';
+  const KW_TRACKER_GID = window.SHEET_CFG.SHEET_KEYWORD_TRACKER?.gid || ''; // 'miguard' tab, confirmed from the sheet URL directly
 
   // GENERALIZED 2026-08-08 per Jaclyn — was hardcoded to the 3 Activator
   // ASINs only ("Rank Tracker" tab didn't exist on the other 4 category
@@ -11020,10 +11039,10 @@ async function initSnsExternal() {
   // Declared locally (not reusing the same-named consts declared later in
   // this file for the Listing Audit / PPC pages) to avoid any fragile
   // cross-scope assumption — same confirmed IDs either way.
-  const RT_LISTINGS_SHEET_ID = '1cdqKzqaUFr8MFDWkskpGJ5NQSv9QjVv64ab8P_PPr6s'; // FIXED 2026-08-07 — was still pointing at the old deprecated Listings sheet ('142l0fEr7TnNCLfqbxfK3PoS4gREaoqfXevqjB1_dB-M'), same one SHEET_LISTINGS_ID was already corrected away from earlier. Now the Products Cache sheet, matching that fix.
-  const RT_LISTINGS_GID      = '939329311';
-  const RT_PPC_SHEET_ID      = '1N1OwnBLJ_KUZrz1kq5itQO9qKG0KaXhMmY6FFfdBo3o';
-  const RT_PPC_GID           = '2037252984'; // miguard tab
+  const RT_LISTINGS_SHEET_ID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.fileId || ''; // FIXED 2026-08-07 — was still pointing at the old deprecated Listings sheet ('142l0fEr7TnNCLfqbxfK3PoS4gREaoqfXevqjB1_dB-M'), same one SHEET_LISTINGS_ID was already corrected away from earlier. Now the Products Cache sheet, matching that fix.
+  const RT_LISTINGS_GID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.gid || '';
+  const RT_PPC_SHEET_ID = window.SHEET_CFG.SHEET_AD_SEARCH_TERMS?.fileId || '';
+  const RT_PPC_GID = window.SHEET_CFG.SHEET_AD_SEARCH_TERMS?.gid || ''; // miguard tab
 
   function rtCsvUrl(sheetId, gid) {
     return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&_cb=${Date.now()}`;
@@ -11090,8 +11109,8 @@ async function initSnsExternal() {
   // Confirmed the same sheet run-analysis.js writes to and loadInsightsFromSheet()
   // already reads back — same ID/gid, declared locally here (not reusing that
   // function's own INSIGHTS_SHEET_ID const) to avoid any cross-scope assumption.
-  const RT_INSIGHTS_SHEET_ID = '1FPy4Upzf8-S8TovDwPEPul2CHxzK8MGOYtRPOohTPwg';
-  const RT_INSIGHTS_GID      = '1069613491';
+  const RT_INSIGHTS_SHEET_ID = window.SHEET_CFG.SHEET_INSIGHTS?.fileId || '';
+  const RT_INSIGHTS_GID = window.SHEET_CFG.SHEET_INSIGHTS?.gid || '';
 
   let _aiRecommendations = null; // Map<keyword lowercase, {recommended_action, asOfDate}>
 
@@ -11417,7 +11436,7 @@ async function initSnsExternal() {
 // Draft. Approval is a single separate action per scope (once per month on
 // the Sales Overview tab, once per event on that event's own tab).
 (function () {
-  const REPORT_INSIGHTS_SHEET_ID = '1Fz0bEArdx54vTSGMGj-m6TYec1kizKyPubJOZNWBaLg';
+  const REPORT_INSIGHTS_SHEET_ID = window.SHEET_CFG.SHEET_REPORT_INSIGHTS?.fileId || '';
   const BRAND = 'miguard';
 
   // gviz/tq (not the usual export?format=csv&gid=N) because these tabs get
@@ -11487,7 +11506,7 @@ async function initSnsExternal() {
   // Finds the Events-tab row for `eventName` with the most recent start_date,
   // same lookup already used to build the Prime Day report itself.
   async function getLatestEventYear(eventName) {
-    const EVENTS_SHEET_ID = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
+    const EVENTS_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
     const EVENTS_GID = '347530381';
     try {
       const csv = await fetch(`https://docs.google.com/spreadsheets/d/${EVENTS_SHEET_ID}/export?format=csv&gid=${EVENTS_GID}&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
@@ -11653,14 +11672,14 @@ async function initSnsExternal() {
 // Jaclyn's request that the report itself — not just the tab label —
 // make the actual event dates clear.
 (function () {
-  const EVENTS_SHEET_ID       = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
+  const EVENTS_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
   const EVENTS_GID            = '347530381';
-  const PD_ORDERS_SHEET_ID    = '1SiYu8e2-Pfi14Aiuf6SAFytWVXb4_dtdNFT6wvLFPok';
+  const PD_ORDERS_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS?.fileId || '';
   const PD_ORDERS_GID         = '893121583';  // "Prime Day" tab — already event-date-scoped, both years
-  const PD_AD_ORDERS_SHEET_ID = '1N30haUFZkdv9rrvYuWwUhxEm0z7MGp1bz9F462aF-QI';
+  const PD_AD_ORDERS_SHEET_ID = window.SHEET_CFG.SHEET_AD_ORDERS?.fileId || '';
   const PD_AD_ORDERS_GID      = '1513774721'; // "Prime Day" tab on the ad orders sheet
-  const PRODUCT_NAMES_SHEET_ID = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const PRODUCT_NAMES_GID      = '164358627';
+  const PRODUCT_NAMES_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const PRODUCT_NAMES_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || '';
   const BRAND = 'miguard';
 
   function sheetCsvUrl(id, gid) {
@@ -12084,11 +12103,11 @@ async function initSnsExternal() {
 // generically, so PBDD/BFCM correctly land on 2025-vs-2024 without any
 // special-casing — it just reflects whatever rows actually exist.
 (function () {
-  const EVENTS_SHEET_ID       = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
+  const EVENTS_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
   const EVENTS_GID            = '347530381';
-  const AD_ORDERS_SHEET_ID    = '1N30haUFZkdv9rrvYuWwUhxEm0z7MGp1bz9F462aF-QI';
-  const PRODUCT_NAMES_SHEET_ID = '1NNRTRQxQl2r4XivAvH700CC39p49GD2xfZlyRNqahGA';
-  const PRODUCT_NAMES_GID      = '164358627';
+  const AD_ORDERS_SHEET_ID = window.SHEET_CFG.SHEET_AD_ORDERS?.fileId || '';
+  const PRODUCT_NAMES_SHEET_ID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.fileId || '';
+  const PRODUCT_NAMES_GID = window.SHEET_CFG.SHEET_MASTER_SKU_LIST?.gid || '';
   const BRAND = 'miguard';
   const TOP_SELLERS_COUNT = 7;
 
@@ -12691,28 +12710,28 @@ document.addEventListener('DOMContentLoaded', function() {
 // INSIGHTS ENGINE v3 — 4 report types: KW Tracker, Business, H10 Ads, SQP
 // ═══════════════════════════════════════════════════════════════════
 
-const INSIGHTS_SHEET_ID   = '1FPy4Upzf8-S8TovDwPEPul2CHxzK8MGOYtRPOohTPwg';
-const INSIGHTS_MIGUARD_GID = '1069613491';
+const INSIGHTS_SHEET_ID = window.SHEET_CFG.SHEET_INSIGHTS?.fileId || '';
+const INSIGHTS_MIGUARD_GID = window.SHEET_CFG.SHEET_INSIGHTS?.gid || '';
 const PPC_STRATEGY_GID = '1273080018'; // "ppc_strategy" tab on the same SHEET_INSIGHTS workbook — shared across all brands, one row per SKU, written by run-ppc-strategy-analysis.js
-const UPLOADS_SHEET_ID    = '1FWpevQar1-v-C60xJeWL1i9cll7y4PvzJxgd3et0-cQ';
-const UPLOADS_MIGUARD_GID  = '1714211650';
+const UPLOADS_SHEET_ID = window.SHEET_CFG.SHEET_UPLOADS?.fileId || '';
+const UPLOADS_MIGUARD_GID = window.SHEET_CFG.SHEET_UPLOADS?.gid || '';
 const INSIGHTS_BRAND_TAB  = 'miguard';
-const LISTING_AUDIT_SHEET_ID  = '1NrCQPR7vuuHKgG6nVnh3hGnHGHD6txjXGdhrIn63w-M';
-const SHEET_LISTINGS_ID       = '1cdqKzqaUFr8MFDWkskpGJ5NQSv9QjVv64ab8P_PPr6s'; // changed 2026-08-07 per Jaclyn — was '142l0fEr7TnNCLfqbxfK3PoS4gREaoqfXevqjB1_dB-M'
+const LISTING_AUDIT_SHEET_ID = window.SHEET_CFG.SHEET_LISTING_AUDIT?.fileId || '';
+const SHEET_LISTINGS_ID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.fileId || ''; // changed 2026-08-07 per Jaclyn — was '142l0fEr7TnNCLfqbxfK3PoS4gREaoqfXevqjB1_dB-M'
 // Added 2026-07-17: source of "current listing" data for the AUDIT specifically.
 // loadListingsFromSheet() (the Active Title/etc. display cards) still correctly
 // reads SHEET_LISTINGS above — that data is current and accurate. Only the
 // audit backend call needs the new sheet, since run-listing-audit.js was
 // rewritten to expect SHEET_PRODUCT_INVENTORY's column layout.
-const SHEET_PRODUCT_INVENTORY_ID = '1cdqKzqaUFr8MFDWkskpGJ5NQSv9QjVv64ab8P_PPr6s';
-const SHEET_LISTINGS_GID      = '939329311'; // changed 2026-08-07 per Jaclyn — was '1253931757' (the old dedicated Listings sheet); this is the "miguard" tab on the Products Cache sheet, same one already used server-side as the audit's own input
-const KEYWORD_STRATEGY_SHEET_ID = '1B50P142KObEcwtgxzNzofRAidZ9efePts0_8RSnt5mg';
+const SHEET_PRODUCT_INVENTORY_ID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.fileId || '';
+const SHEET_LISTINGS_GID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.gid || ''; // changed 2026-08-07 per Jaclyn — was '1253931757' (the old dedicated Listings sheet); this is the "miguard" tab on the Products Cache sheet, same one already used server-side as the audit's own input
+const KEYWORD_STRATEGY_SHEET_ID = window.SHEET_CFG.SHEET_KEYWORD_STRATEGY?.fileId || '';
 const SKU_KW_GID_MAP = {
   'EVO0001': '363437774',
   'EVO0005': '473016522',
   'EVO0009': '1211203597',
 };
-const LISTING_AUDIT_MIGUARD_GID = '2075287627';
+const LISTING_AUDIT_MIGUARD_GID = window.SHEET_CFG.SHEET_LISTING_AUDIT?.gid || '';
 
 // ═══════════════════════════════════════════════════════════════════
 // INSIGHTS OVERVIEW — units chart, Active/Peak/Total SKU KPIs, and
@@ -12735,25 +12754,25 @@ const LISTING_AUDIT_MIGUARD_GID = '2075287627';
 // to the listing audit cron).
 // ═══════════════════════════════════════════════════════════════════
 
-const OV_SUMMARY_SHEET_ID        = '16QNnDh7-dTDzI-O7UI-WlzMtOmovssV23nd-quiYPR0';
-const OV_SUMMARY_GID             = '1342008125';  // miguard tab
-const OV_PRODUCTS_CACHE_SHEET_ID = '1cdqKzqaUFr8MFDWkskpGJ5NQSv9QjVv64ab8P_PPr6s';
-const OV_PRODUCTS_CACHE_GID      = '939329311';  // miguard tab
+const OV_SUMMARY_SHEET_ID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.fileId || '';
+const OV_SUMMARY_GID = window.SHEET_CFG.SHEET_STEWARDSHIP_SUMMARY?.gid || '';  // miguard tab
+const OV_PRODUCTS_CACHE_SHEET_ID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.fileId || '';
+const OV_PRODUCTS_CACHE_GID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.gid || '';  // miguard tab
 // Consignment Inventory sheet — ShipStation-sourced brands (miguard,
 // prohibition, high-on-love) have real tabs today. MiGuard's own
 // consignment inventory is on Cin7 Core, not yet built (email-based
 // pipeline, scoped but not started as of 2026-07-20) — fetched by TAB
 // NAME below (not gid) specifically so this starts working automatically
 // the moment that tab exists, with no further code changes.
-const OV_CONSIGNMENT_SHEET_ID = '1tdNibpi_RAwz2TuHcp4ef-eJ65jwNlcgE2GYQnHMWAE';
+const OV_CONSIGNMENT_SHEET_ID = window.SHEET_CFG.SHEET_CONSIGNMENT_INVENTORY?.fileId || '';
 
 function ovGvizCsvUrlByName(sheetId, tabName) {
   return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}&_cb=${Date.now()}`;
 }
-const OV_BUSINESS_REPORT_SHEET_ID = '1Jkx7Ztnt59eniYtvTnpXB8D7xMnCyjC8b49xB4J59ww';
-const OV_BUSINESS_REPORT_GID      = '1307492114';  // miguard tab — one row per ASIN per month
-const OV_ORDER_SYNC_SHEET_ID     = '1SiYu8e2-Pfi14Aiuf6SAFytWVXb4_dtdNFT6wvLFPok'; // sync-orders (same sheet the Sales tab uses)
-const OV_ORDER_SYNC_GID          = '1608462008';
+const OV_BUSINESS_REPORT_SHEET_ID = window.SHEET_CFG.SHEET_BUSINESS_REPORT?.fileId || '';
+const OV_BUSINESS_REPORT_GID = window.SHEET_CFG.SHEET_BUSINESS_REPORT?.gid || '';  // miguard tab — one row per ASIN per month
+const OV_ORDER_SYNC_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS?.fileId || ''; // sync-orders (same sheet the Sales tab uses)
+const OV_ORDER_SYNC_GID = window.SHEET_CFG.SHEET_ORDERS?.gid || '';
 
 function ovCsvUrl(id, gid) {
   return 'https://docs.google.com/spreadsheets/d/' + id + '/export?format=csv&gid=' + gid + '&_cb=' + Date.now();
@@ -13205,8 +13224,8 @@ async function ovLoadSessionsAndConversion(year, month) {
 // not row count, to avoid inflating the number for keywords tracked
 // across many ASINs (e.g. the brand-name keyword "miguard" appears once
 // per product in the raw data).
-const OV_KEYWORD_TRACKER_SHEET_ID = '1geNDQgd_1ensLDyZOuXZBnvQrFT_RC85l9rHHGpgJe4';
-const OV_KEYWORD_TRACKER_GID      = '909417903'; // miguard tab
+const OV_KEYWORD_TRACKER_SHEET_ID = window.SHEET_CFG.SHEET_KEYWORD_TRACKER?.fileId || '';
+const OV_KEYWORD_TRACKER_GID = window.SHEET_CFG.SHEET_KEYWORD_TRACKER?.gid || ''; // miguard tab
 async function ovLoadTop50Organic(year, month) {
   const el = document.getElementById('ms-top50-organic');
   if (!year || !month) { if (el) el.querySelector('.ms-sub').textContent = 'No data'; return; }
@@ -13505,8 +13524,8 @@ function getBundleProducts() {
 // cut off in the screenshot this was built from) is NOT confirmed —
 // not used here, flagging in case it turns out to matter for how
 // bundles_sold should be interpreted.
-const BUNDLE_SALES_SHEET_ID = '1le4ABxViZqTnuVP2BitKrPcNuxPQwvWD-Gw5y_3cicc';
-const BUNDLE_SALES_GID = '1006822834'; // "bundle_sales" tab
+const BUNDLE_SALES_SHEET_ID = window.SHEET_CFG.SHEET_BUNDLES_SALES_REPORT?.fileId || '';
+const BUNDLE_SALES_GID = window.SHEET_CFG.SHEET_BUNDLES_SALES_REPORT?.gid || ''; // "bundle_sales" tab
 async function fetchBundleSalesByAsin() {
   const map = {};
   try {
@@ -13652,9 +13671,9 @@ function getItemTypeBySku() {
   return _itemTypeBySkuPromise;
 }
 
-const KEYWORD_TRACKER_SUMMARY_SHEET_ID = '1geNDQgd_1ensLDyZOuXZBnvQrFT_RC85l9rHHGpgJe4';
+const KEYWORD_TRACKER_SUMMARY_SHEET_ID = window.SHEET_CFG.SHEET_KEYWORD_TRACKER?.fileId || '';
 const KEYWORD_TRACKER_SUMMARY_GID      = '579593778';
-const KEYWORD_TRACKER_MIGUARD_GID       = '909417903'; // per-keyword tab: date, asin, sku, keyword, organic_rank, sponsored_rank, search_volume, keyword_sales, boosted, last_synced
+const KEYWORD_TRACKER_MIGUARD_GID = window.SHEET_CFG.SHEET_KEYWORD_TRACKER?.gid || ''; // per-keyword tab: date, asin, sku, keyword, organic_rank, sponsored_rank, search_volume, keyword_sales, boosted, last_synced
 
 // Returns today's (or the current) most recent Monday as YYYY-MM-DD.
 // Added 2026-08-06 per Jaclyn: the Keyword Tracker syncs weekly on
@@ -14009,7 +14028,7 @@ window.initInsightsOverview = async function() {
 // the dashboard only ever displays a handful.
 // ═══════════════════════════════════════════════════════════════════
 
-const SHEET_COMPETITOR_ID = '19SfYJ99fMtqXna4VKGr8TtNMNxg6z52b0yDQPm7yI9M';
+const SHEET_COMPETITOR_ID = window.SHEET_CFG.SHEET_COMPETITOR?.fileId || '';
 const COMPETITOR_GID_BY_PRODUCT_TYPE = {
   activators:   '486436437',
   shampoos:     '506089487',
@@ -14473,8 +14492,8 @@ window.renderSimpleKeywordStrategy = renderSimpleKeywordStrategy;
 // those by the standard Amazon-documented header names and logs the
 // full header list to the console for verification.
 // Per Jaclyn: shows only the MOST RECENT month present in the sheet.
-const SHEET_SQP_ID = '1naEu4kADM0PBjM-lntqUU8IbI7s5ENhRmc72Q7_pVrc'; // corrected 2026-08-07 — original was mistranscribed from a screenshot (a/A, I/l, N/n look-alikes); this exact value is copy-pasted from Jaclyn's own browser URL bar, not re-read from an image
-const SHEET_SQP_MIGUARD_GID = '27800966';
+const SHEET_SQP_ID = window.SHEET_CFG.SHEET_SEARCH_QUERY_PERFORMANCE?.fileId || ''; // corrected 2026-08-07 — original was mistranscribed from a screenshot (a/A, I/l, N/n look-alikes); this exact value is copy-pasted from Jaclyn's own browser URL bar, not re-read from an image
+const SHEET_SQP_MIGUARD_GID = window.SHEET_CFG.SHEET_SEARCH_QUERY_PERFORMANCE?.gid || '';
 async function renderSearchQueryPerformance(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -14564,7 +14583,7 @@ window.renderSearchQueryPerformance = renderSearchQueryPerformance;
 // here — categorizing review text into positive/negative/gap themes is
 // a real analysis step, not a mechanical data pull, so faking it across
 // 5 categories would be worse than just leaving it out for now.
-const SHEET_AMAZON_REVIEWS_ID = '1COergq71E4nqjdupLQx6kRDg-MrjY5TEuppCj7TfgQo';
+const SHEET_AMAZON_REVIEWS_ID = window.SHEET_CFG.SHEET_AMAZON_REVIEWS?.fileId || '';
 const SHEET_AMAZON_REVIEWS_GID = '2039993638';
 
 const REVIEW_CATEGORY_PRODUCTS = {
@@ -14723,8 +14742,8 @@ window.renderReviewsTab = renderReviewsTab;
 // literal 30-day rolling window isn't what the data actually supports.
 // ═══════════════════════════════════════════════════════════════════
 
-const PPC_SEARCH_TERMS_SHEET_ID = '1N1OwnBLJ_KUZrz1kq5itQO9qKG0KaXhMmY6FFfdBo3o';
-const PPC_SEARCH_TERMS_GID      = '2037252984'; // miguard tab
+const PPC_SEARCH_TERMS_SHEET_ID = window.SHEET_CFG.SHEET_AD_SEARCH_TERMS?.fileId || '';
+const PPC_SEARCH_TERMS_GID = window.SHEET_CFG.SHEET_AD_SEARCH_TERMS?.gid || ''; // miguard tab
 
 // ═══════════════════════════════════════════════════════════════════
 // BLENDED PERFORMANCE — ALL CHANNELS — added 2026-08-12 per Jaclyn.
@@ -14741,14 +14760,14 @@ const PPC_SEARCH_TERMS_GID      = '2037252984'; // miguard tab
 // PPC scope. Keep in sync if any of these ever change on the Sales
 // pages themselves.
 // ═══════════════════════════════════════════════════════════════════
-const PB_SYNC_SHEET_ID       = '1SiYu8e2-Pfi14Aiuf6SAFytWVXb4_dtdNFT6wvLFPok';
-const PB_SYNC_GID            = '1608462008';
+const PB_SYNC_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS?.fileId || '';
+const PB_SYNC_GID = window.SHEET_CFG.SHEET_ORDERS?.gid || '';
 const PB_WALMART_SHEET_ID    = '1oIZDxN0vSf4nRvE_K95lsNyBWQd4Ef2aARm0RUtvE0Y';
 const PB_WALMART_GID         = '1844526926';
 const PB_SHOPIFY_SHEET_ID    = '1Wyc43am0EIk2OArL2EU8fP-EyHkhz-9-S5tcY3E60zw';
 const PB_SHOPIFY_ORDERS_GID  = '597852778';
-const PB_AD_SUMMARY_SHEET_ID = '13cN301QZxkEGy6-8LfdzB8zmsHhUKwZqz6lsXKUJcnI';
-const PB_AD_SUMMARY_GID      = '1828047583';
+const PB_AD_SUMMARY_SHEET_ID = window.SHEET_CFG.SHEET_ADVERTISING?.fileId || '';
+const PB_AD_SUMMARY_GID = window.SHEET_CFG.SHEET_ADVERTISING?.gid || '';
 const PB_SHOPIFY_ADS_GID     = '219707263';
 // UNCONFIRMED 2026-08-12 — first-ever fetch of this sheet in this
 // codebase. It's existed only as a human-facing link ("Walmart
@@ -16409,8 +16428,8 @@ window.initOosLog = async function() {
 // risk of corrupting dense path-string data by hand.
 // ═══════════════════════════════════════════════════════════════════
 
-const OV_FULFILLMENT_DAILY_SHEET_ID = '17ZTBMaZrZ6avFoHte8M_Zi1a_xhE3nZUnbn21EtRRRY'; // SHEET_FULFILLMENT_DAILY_SHIPMENTS
-const OV_FULFILLMENT_STATES_SHEET_ID = '1YYhGDwFqHb0wo0D_YzpsPemh5qX-lfv1aQYxTK9bgug'; // SHEET_FULFILLMENT_STATES
+const OV_FULFILLMENT_DAILY_SHEET_ID = window.SHEET_CFG.SHEET_FULFILLMENT_DAILY_SHIPMENTS?.fileId || ''; // SHEET_FULFILLMENT_DAILY_SHIPMENTS
+const OV_FULFILLMENT_STATES_SHEET_ID = window.SHEET_CFG.SHEET_FULFILLMENT_STATES?.fileId || ''; // SHEET_FULFILLMENT_STATES
 
 const FF_SP = {
   WA:"M102,7.6L106.4,9L116.1,11.8L124.7,13.7L144.7,19.4L167.7,25L182.9,28.2L169.2,91.8L156.8,88.3L141.3,84.7L126.1,84.8L125.6,83.4L120,85.6L115.4,84.8L113.3,83.3L112,83.9L107.2,83.8L105.5,82.4L100.3,80.3L99.5,80.5L95.1,78.9L93.2,80.8L87,80.5L81,76.3L81.8,75.4L81.9,67.7L79.7,63.9L75.6,63.3L74.9,60.8L72.6,60.3L69,61.5L66.8,58.3L67.1,55.4L69.9,55.1L71.5,51L68.9,49.9L69,46.2L73.4,45.6L70.7,42.8L69.2,35.7L69.9,32.8L69.9,24.9L68.1,21.6L70.3,12.2L72.4,12.7L74.9,15.6L77.6,18.2L80.8,20.2L85.4,22.3L88.4,22.9L91.4,24.4L94.7,25.3L97,25.2L97,22.8L98.3,21.6L100.4,20.3L100.7,21.5L101.1,23.2L98.8,23.7L98.5,25.8L100.2,27.3L101.4,29.7L102,31.6L103.5,31.5L103.6,30.2L102.7,28.9L102.2,25.7L103,23.9L102.3,22.4L102.3,20.2L104.1,16.6L103,14L100.6,9.2L100.9,8.4L102,7.6Z",
@@ -16747,8 +16766,8 @@ async function ffLoadInventoryPrepped() {
 // Returns Processed IS wired — that's a different, already-known sheet.
 // ═══════════════════════════════════════════════════════════════════
 
-const OV_RETURNS_SHEET_ID = '16mnFaFkTfXS4FzZ2mI5aoDKNrw8FWe8R8IUDnv3FHVs';
-const OV_RETURNS_MIGUARD_GID = '267551179';
+const OV_RETURNS_SHEET_ID = window.SHEET_CFG.SHEET_RETURNS?.fileId || '';
+const OV_RETURNS_MIGUARD_GID = window.SHEET_CFG.SHEET_RETURNS?.gid || '';
 
 let mfcShippedChartInstance = null;
 
@@ -16909,8 +16928,8 @@ async function mfcLoadStates() {
 // other 30-day figure on this tab) — stated explicitly since "return
 // rate" could reasonably mean returns/units-sold instead; this is a
 // judgment call, not a given definition.
-const OV_CUSTOMER_SERVICE_SHEET_ID = '14CETE7Qo5PpYrbDqF9TQFoz4b1Uzw3hECIztWmy_VYA';
-const OV_CUSTOMER_SERVICE_MIGUARD_GID = '947362282';
+const OV_CUSTOMER_SERVICE_SHEET_ID = window.SHEET_CFG.SHEET_CUSTOMER_SERVICE?.fileId || '';
+const OV_CUSTOMER_SERVICE_MIGUARD_GID = window.SHEET_CFG.SHEET_CUSTOMER_SERVICE?.gid || '';
 
 // Compliance Cases Resolved/Open + Reviews Requested — most recent
 // (year, month) row in the miguard tab. Reviews Requested is now wired up
@@ -20084,14 +20103,14 @@ async function loadAuditResultsFromSheet() {
 
     const cfg = getOverviewPeriodConfig(activeKey);
 
-    const AMAZON_SHEET_ID = '1SiYu8e2-Pfi14Aiuf6SAFytWVXb4_dtdNFT6wvLFPok'; const AMAZON_GID = '1608462008';
+    const AMAZON_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS?.fileId || ''; const AMAZON_GID = window.SHEET_CFG.SHEET_ORDERS?.gid || '';
     const WEB_SHEET_ID    = '1Wyc43am0EIk2OArL2EU8fP-EyHkhz-9-S5tcY3E60zw'; const WEB_GID    = '597852778';
     const WMT_SHEET_ID    = '1oIZDxN0vSf4nRvE_K95lsNyBWQd4Ef2aARm0RUtvE0Y'; const WMT_GID    = '1844526926';
-    const AD_ORDERS_SHEET_ID = '1N30haUFZkdv9rrvYuWwUhxEm0z7MGp1bz9F462aF-QI'; const AD_ORDERS_GID = '862206070';
+    const AD_ORDERS_SHEET_ID = window.SHEET_CFG.SHEET_AD_ORDERS?.fileId || ''; const AD_ORDERS_GID = window.SHEET_CFG.SHEET_AD_ORDERS?.gid || '';
     // Added 2026-08-06 per Jaclyn — Walmart's ad data sheets.
     const WALMART_AD_ORDERS_SHEET_ID   = '1PYUPePnhnBJp77n3HVSKeM824ZorAMkiJC8WFbyORCU'; const WALMART_AD_ORDERS_GID   = '664808652'; // miguard tab
     const WALMART_ADVERTISING_SHEET_ID = '1H1mAYxu8udO7vuCPGs8u0iVzHaRh0wbHb4PyIka4pUU'; const WALMART_ADVERTISING_GID = '844750080'; // miguard tab
-    const AMZ_REVENUE_SHEET_ID = '1equxdiqpzonA5TgsrKzbrpq92QHyJP8kQ2RoUiYmank'; const AMZ_REVENUE_GID = '279508185';
+    const AMZ_REVENUE_SHEET_ID = window.SHEET_CFG.SHEET_REVENUE?.fileId || ''; const AMZ_REVENUE_GID = window.SHEET_CFG.SHEET_REVENUE?.gid || '';
     const WEB_REVENUE_GID = '7000599';
     const WMT_REVENUE_SHEET_ID = '1QhKeOxKR0mEfSiM2pdYxrEBWsQdRSxbL8Q86MP6lpFE'; const WMT_REVENUE_GID = '812984298';
     // Website (Google) ads data — same workbook as Website orders/returns.
