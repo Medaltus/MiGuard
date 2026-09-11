@@ -74,6 +74,7 @@
   --font-header:'GT Walsheim Pro Medium','DM Sans',system-ui,sans-serif;
   --font-bold:'GT Walsheim Pro Bold','DM Sans',system-ui,sans-serif;
   --font-subheader:'Plantin MT Pro Italic',Georgia,'Times New Roman',serif;
+  --font-numbers:Georgia,'Times New Roman',serif;
   --font-body-light:'GT Walsheim Pro Light','DM Sans',system-ui,sans-serif;
   --radius:10px; --radius-sm:6px;
 }
@@ -174,7 +175,7 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
    ever show one badge and are already sized correctly for that. */
 .kpi-card.kpi-card-tall{min-height:148px;height:auto;}
 .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:11px;}
-.kpi-value{font-size:30px;font-weight:600;letter-spacing:-1px;line-height:1;color:var(--navy);font-family:var(--font-subheader);}
+.kpi-value{font-size:30px;font-weight:600;letter-spacing:-1px;line-height:1;color:var(--navy);font-family:var(--font-numbers);}
 .kpi-value.sm{font-size:30px;}
 .kpi-mom{font-size:14px;margin-top:5px;}
 .kpi-mom.up{color:#1db88a;}
@@ -238,7 +239,7 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
 .home-kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
 .home-kpi-card{background:var(--white);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius);padding:18px 20px;}
 .home-kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
-.home-kpi-value{font-size:28px;font-weight:700;color:var(--navy);letter-spacing:-1px;line-height:1;font-family:var(--font-subheader);}
+.home-kpi-value{font-size:28px;font-weight:700;color:var(--navy);letter-spacing:-1px;line-height:1;font-family:var(--font-numbers);}
 .home-kpi-sub{font-size:11px;color:var(--muted);margin-top:5px;}
 
 .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
@@ -359,7 +360,7 @@ table.data-table tbody td{padding:9px 12px;font-size:12px;color:var(--navy);font
 .brand-hero-left .brand-tagline{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;}
 .brand-hero-right{display:flex;gap:20px;}
 .hero-stat{text-align:center;}
-.hero-stat-val{font-size:28px;font-weight:700;color:var(--green);line-height:1;font-family:var(--font-subheader);}
+.hero-stat-val{font-size:28px;font-weight:700;color:var(--green);line-height:1;font-family:var(--font-numbers);}
 .hero-stat-lbl{font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.07em;margin-top:3px;}
 
 /* ── Responsive ── */
@@ -397,7 +398,7 @@ table.data-table tbody td{padding:9px 12px;font-size:12px;color:var(--navy);font
 .metric-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;}
 .metric-strip-card{background:var(--white);padding:14px 16px;}
 .ms-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px;}
-.ms-value{font-size:22px;font-weight:700;color:var(--navy);line-height:1;font-family:var(--font-subheader);}
+.ms-value{font-size:22px;font-weight:700;color:var(--navy);line-height:1;font-family:var(--font-numbers);}
 .ms-sub{font-size:10px;color:var(--muted);margin-top:4px;}
 
 /* Chart section */
@@ -577,7 +578,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
 .tier-hd2{display:flex;align-items:center;gap:10px;margin:22px 0 10px;}
 .tier-hd2:first-of-type{margin-top:0;}
-.tier-hd2 .tier-num{font-family:var(--font-subheader);font-size:19px;font-weight:700;color:var(--border);line-height:1;}
+.tier-hd2 .tier-num{font-family:var(--font-numbers);font-size:19px;font-weight:700;color:var(--border);line-height:1;}
 .tier-hd2.tier-1 .tier-num{color:var(--navy);}
 .tier-hd2.tier-2 .tier-num{color:var(--warn);}
 .tier-hd2.tier-3 .tier-num{color:var(--muted);}
@@ -1003,7 +1004,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 .pdfx-kpi{border:1px solid var(--border);border-radius:0;padding:20px 16px;background:#fbfbfd;margin-left:-1px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;}
 .pdfx-kpi:first-child{margin-left:0;}
 .pdfx-kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin-bottom:9px;white-space:nowrap;}
-.pdfx-kpi-val{font-size:29px;font-weight:700;font-family:var(--font-subheader);color:var(--navy);letter-spacing:-.5px;line-height:1;}
+.pdfx-kpi-val{font-size:29px;font-weight:700;font-family:var(--font-numbers);color:var(--navy);letter-spacing:-.5px;line-height:1;}
 .pdfx-kpi-mom{font-size:13px;margin-top:6px;font-weight:400;font-family:var(--font-body-light);min-height:16px;}
 .pdfx-kpi-mom.up{color:var(--green);}
 .pdfx-kpi-mom.dn{color:var(--danger);}
@@ -1027,7 +1028,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 .pdfx-check-title{font-size:11.5px;font-weight:700;color:var(--navy);}
 .pdfx-check-status{font-size:10px;color:var(--muted);}
 .pdfx-ltd{margin-top:10px;}
-.pdfx-ltd-val{font-size:19px;font-weight:700;color:var(--navy);font-family:var(--font-subheader);}
+.pdfx-ltd-val{font-size:19px;font-weight:700;color:var(--navy);font-family:var(--font-numbers);}
 .pdfx-ltd-lbl{font-size:9.5px;color:var(--muted);}
 .pdfx-footer{display:flex;justify-content:space-between;align-items:center;margin-top:36px;padding-top:16px;border-top:1px solid var(--border);}
 .pdfx-footer-brand{font-size:13px;font-weight:700;color:var(--navy);}
@@ -1067,7 +1068,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 .asn-stat{flex:1;padding:11px 14px;text-align:center;border-right:1px solid var(--border);}
 .asn-stat:last-child{border-right:none;}
 .asn-stat-label{display:block;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
-.asn-stat-value{display:block;font-family:var(--font-subheader);font-size:19px;font-weight:700;color:var(--navy);}
+.asn-stat-value{display:block;font-family:var(--font-numbers);font-size:19px;font-weight:700;color:var(--navy);}
 .asn-stat-value[data-disc="yes"]{color:var(--danger);}
 .asn-stat-value[data-disc="no"]{color:#0F6E56;}
 .asn-meta{padding:11px 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:40px;}
@@ -1100,7 +1101,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 .asn-modal-error{background:rgba(219,55,45,0.08);border:1px solid rgba(219,55,45,0.25);color:var(--danger);font-size:12.5px;padding:9px 13px;border-radius:var(--radius-sm);}
 .asn-review-stats{display:flex;gap:14px;}
 .asn-review-stat{flex:1;background:var(--navy);border-radius:var(--radius-sm);padding:14px;text-align:center;}
-.asn-review-stat span{display:block;font-size:24px;font-weight:700;color:var(--white);margin-bottom:3px;font-family:var(--font-subheader);}
+.asn-review-stat span{display:block;font-size:24px;font-weight:700;color:var(--white);margin-bottom:3px;font-family:var(--font-numbers);}
 .asn-review-stat label{font-size:10px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
 .asn-preview-table{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:auto;max-height:200px;}
 .asn-preview-table table{width:100%;border-collapse:collapse;font-size:12px;}
