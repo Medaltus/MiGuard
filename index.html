@@ -311,6 +311,10 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
 table.data-table{width:100%;border-collapse:collapse;}
 table.data-table thead tr{background:var(--navy);}
 table.data-table thead th{padding:8px 12px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--white);text-align:left;}
+table.data-table thead th.sortable{cursor:pointer;user-select:none;}
+table.data-table thead th.sortable:hover{color:var(--green);}
+table.data-table thead th .rt-sort-arrow{opacity:.5;margin-left:3px;font-size:9px;}
+table.data-table thead th.sort-active .rt-sort-arrow{opacity:1;color:var(--green);}
 table.data-table tbody tr{border-bottom:1px solid var(--border2);}
 table.data-table tbody tr:nth-child(odd){background:var(--bg);}
 table.data-table tbody tr:last-child{border-bottom:none;}
@@ -2070,6 +2074,42 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     </div>
     <div class="channel-page" id="m-opportunities">
 
+      <div class="card" style="margin-bottom:18px;padding:12px 20px;">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;">Show sections:</span>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
+            <input type="checkbox" id="m-opp-cb-subsave" checked style="margin:0;"
+              onchange="(function(cb){var s=document.getElementById('m-opp-subsave-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
+            Subscribe &amp; Save
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
+            <input type="checkbox" id="m-opp-cb-accomplished" checked style="margin:0;"
+              onchange="(function(cb){var s=document.getElementById('m-opp-accomplished-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
+            What's Been Accomplished
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
+            <input type="checkbox" id="m-opp-cb-future" checked style="margin:0;"
+              onchange="(function(cb){var s=document.getElementById('m-opp-future-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
+            Opportunities
+          </label>
+        </div>
+      </div>
+
+      <div id="m-opp-subsave-section">
+      <div class="section-label">Subscribe &amp; Save</div>
+      <div class="kpi-row" style="margin-bottom:20px;">
+        <div class="kpi-card" id="kpi-active-subs"><div class="kpi-label">Active Subscriptions</div><div class="kpi-value" style="font-size:36px;">—</div><div class="kpi-mom flat">Loading…</div></div>
+        <div class="kpi-card" id="kpi-retention"><div class="kpi-label">Subscribe &amp; Save Retention (90 Days)</div><div class="kpi-value" style="font-size:36px;">—</div><div class="kpi-mom flat">Loading…</div></div>
+      </div>
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div class="card-title" style="margin-bottom:0;">Active Subscriptions by Month</div>
+          <div id="legend-sns" style="display:flex;align-items:center;"></div>
+        </div>
+        <div style="position:relative;height:320px;"><canvas id="chart-sns"></canvas></div>
+      </div>
+      </div>
+
       <div id="m-opp-accomplished-section">
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -3587,9 +3627,13 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
           <div style="overflow-x:auto;">
             <table class="data-table">
               <thead><tr>
-                <th>Product</th><th>Keyword</th><th>Vol/mo</th>
-                <th id="oa-rt-col-older">Earlier</th><th id="oa-rt-col-newer">Latest</th>
-                <th>Change</th><th>Where in Listing</th><th>PPC (Spend · Sales · ACoS)</th><th>Recommended Action</th>
+                <th class="sortable" onclick="window.sortRankTracker('product')">Product <span class="rt-sort-arrow" id="oa-rt-sort-product"></span></th>
+                <th class="sortable" onclick="window.sortRankTracker('keyword')">Keyword <span class="rt-sort-arrow" id="oa-rt-sort-keyword"></span></th>
+                <th class="sortable" onclick="window.sortRankTracker('volume')">Vol/mo <span class="rt-sort-arrow" id="oa-rt-sort-volume"></span></th>
+                <th class="sortable" onclick="window.sortRankTracker('older')" id="oa-rt-col-older">Earlier <span class="rt-sort-arrow" id="oa-rt-sort-older"></span></th>
+                <th class="sortable" onclick="window.sortRankTracker('newer')" id="oa-rt-col-newer">Latest <span class="rt-sort-arrow" id="oa-rt-sort-newer"></span></th>
+                <th class="sortable sort-active" onclick="window.sortRankTracker('change')">Change <span class="rt-sort-arrow" id="oa-rt-sort-change">▼</span></th>
+                <th>Where in Listing</th><th>PPC (Spend · Sales · ACoS)</th><th>Recommended Action</th>
               </tr></thead>
               <tbody id="oa-rt-tbody"><tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);font-style:italic;">Loading…</td></tr></tbody>
             </table>
@@ -10168,6 +10212,16 @@ async function initSnsExternal() {
       const changeMagnitude = (olderRank && newerRank && olderRank.ranked && newerRank.ranked)
         ? Math.abs(olderRank.numeric - newerRank.numeric)
         : (olderObs ? 9999 : -1); // dropped-out/newly-ranking sort first; no-history sorts last
+      // Signed version, used for the default "improvements first" sort —
+      // positive = improved (rank number went down). Newly-ranking counts
+      // as a strong improvement, dropped-out as a strong decline; rows
+      // with no prior observation yet (nothing to compare) sit at 0,
+      // same tier as a genuinely flat/steady keyword, rather than being
+      // forced to either extreme.
+      let changeValueSigned = 0;
+      if (olderRank && newerRank && olderRank.ranked && newerRank.ranked) changeValueSigned = olderRank.numeric - newerRank.numeric;
+      else if (olderObs && !olderRank?.ranked && newerRank?.ranked) changeValueSigned = 10000;
+      else if (olderObs && olderRank?.ranked && !newerRank?.ranked) changeValueSigned = -10000;
 
       // ── Listing placement + PPC performance, and a combined priority
       // score driving sort order and row color. Rank-change signal (from
@@ -10189,65 +10243,25 @@ async function initSnsExternal() {
 
       tableRows.push({
         asin, keyword, olderObs, newerObs, olderRank, newerRank, action, aiRecommendation,
+        product: asinMap[asin] ? asinMap[asin].label : asin,
         searchVolume: parseInt(newerObs.search_volume, 10) || 0,
-        changeMagnitude, whereInListing, ppc, urgent, priorityScore,
+        changeMagnitude, changeValueSigned, whereInListing, ppc, urgent, priorityScore,
       });
     });
 
-    // Important/urgent rows always float to the top regardless of
-    // everything else; below that, best-performing to worst-performing
-    // (priorityScore descending); changeMagnitude only breaks remaining
-    // ties, it no longer drives the primary sort.
-    tableRows.sort((a, b) => {
-      if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
-      if (a.priorityScore !== b.priorityScore) return b.priorityScore - a.priorityScore;
-      return b.changeMagnitude - a.changeMagnitude;
-    });
+    // Default sort: improvements first (per Jaclyn) — biggest positive
+    // rank change at the top. "Urgent"/PPC-tier signals stay as pure
+    // visual highlighting on the row (background/border below), they no
+    // longer force sort order the way the old default did. Clicking any
+    // sortable column header re-sorts via window.sortRankTracker below,
+    // reusing these same computed rows rather than recomputing.
+    tableRows.sort((a, b) => b.changeValueSigned - a.changeValueSigned);
+    window._rtRowsByPrefix = window._rtRowsByPrefix || {};
+    window._rtRowsByPrefix[prefix] = tableRows;
+    window._rtSortStateByPrefix = window._rtSortStateByPrefix || {};
+    window._rtSortStateByPrefix[prefix] = { key: 'change', dir: 'desc' };
 
-    if (tbody) {
-      tbody.innerHTML = tableRows.map(r => {
-        const product = asinMap[r.asin] ? asinMap[r.asin].label : r.asin;
-        let changeCell = '<span style="color:var(--muted);">—</span>';
-        if (r.olderObs && r.olderRank && r.newerRank) {
-          if (r.olderRank.ranked && r.newerRank.ranked) {
-            const change = r.olderRank.numeric - r.newerRank.numeric;
-            changeCell = change > 0 ? `<span style="color:#1db88a;font-weight:600;">▲ +${change}</span>`
-              : change < 0 ? `<span style="color:var(--danger);font-weight:600;">▼ ${change}</span>`
-              : '<span style="color:var(--muted);">→ 0</span>';
-          } else if (!r.olderRank.ranked && r.newerRank.ranked) {
-            changeCell = '<span style="color:#1db88a;font-weight:600;">🆕 New</span>';
-          } else if (r.olderRank.ranked && !r.newerRank.ranked) {
-            changeCell = '<span style="color:var(--danger);font-weight:600;">⚠️ Dropped</span>';
-          }
-        }
-        // Row background follows the same tier driving the sort — urgent
-        // rows are visibly flagged, not just floated to the top.
-        const rowBg = r.urgent ? 'rgba(219,55,45,0.06)'
-          : r.ppc.tier === 'good' ? 'var(--green-dim)'
-          : r.ppc.tier === 'warn' ? 'rgba(244,223,208,0.55)'
-          : '';
-        const rowBorder = r.urgent ? 'border-left:3px solid var(--danger);' : (r.ppc.tier === 'good' ? 'border-left:3px solid var(--green);' : '');
-        const rowStyle = (rowBg || rowBorder) ? ` style="background:${rowBg};${rowBorder}"` : '';
-        // AI recommendation (from Run Analysis, factors in PPC + listing
-        // placement together) takes priority over the local rank-only rule
-        // when available for this keyword — visually distinguished so it's
-        // clear which kind of recommendation this is, not just guessable.
-        const actionCell = r.aiRecommendation
-          ? `<span style="color:var(--navy);font-weight:600;">✨ ${escapeHtml(r.aiRecommendation)}</span>`
-          : `<span style="${r.action.cls ? `color:${r.action.cls === 'rank-top' ? '#1db88a' : r.action.cls === 'rank-low' ? 'var(--danger)' : 'var(--navy)'};` : ''}">${escapeHtml(r.action.text)}</span>`;
-        return `<tr${rowStyle}>
-          <td>${escapeHtml(product)}</td>
-          <td>${escapeHtml(r.keyword)}</td>
-          <td>${r.searchVolume.toLocaleString()}</td>
-          <td>${rankPillHtml(r.olderRank)}</td>
-          <td>${rankPillHtml(r.newerRank)}</td>
-          <td>${changeCell}</td>
-          <td style="font-size:11.5px;">${escapeHtml(r.whereInListing)}</td>
-          <td style="font-size:11.5px;">${r.ppc.label}</td>
-          <td style="font-size:11.5px;">${actionCell}</td>
-        </tr>`;
-      }).join('');
-    }
+    renderRtTbody(prefix, tableRows);
 
     if (bannerText) {
       const total = tableRows.length;
@@ -10264,6 +10278,94 @@ async function initSnsExternal() {
         `${steady} holding steady, ${notRanking} still not ranking (>306 both periods).` + aiFreshness;
     }
     if (banner) banner.style.borderColor = urgentCount > 0 ? 'rgba(219,55,45,.4)' : (declined + droppedOut > improved + newlyRanking ? 'rgba(219,55,45,.3)' : 'rgba(36,233,163,.3)');
+  };
+
+  // Extracted so both the initial render above and window.sortRankTracker
+  // below (re-sorting on a header click, no recompute) share one
+  // rendering path. Deliberately takes ONLY prefix+tableRows — no access
+  // to renderRankTracker's own locals (bannerText, asinMap, counts, etc),
+  // since a header-click re-sort only needs to redraw rows, not rebuild
+  // the summary banner.
+  function renderRtTbody(prefix, tableRows) {
+    const tbody = document.getElementById(prefix + '-rt-tbody');
+    if (tbody) {
+      tbody.innerHTML = tableRows.map(r => {
+        const product = r.product;
+        let changeCell = '<span style="color:var(--muted);">—</span>';
+        if (r.olderObs && r.olderRank && r.newerRank) {
+          if (r.olderRank.ranked && r.newerRank.ranked) {
+            const change = r.olderRank.numeric - r.newerRank.numeric;
+            changeCell = change > 0 ? `<span style="color:#1db88a;font-weight:600;">▲ +${change}</span>`
+              : change < 0 ? `<span style="color:var(--danger);font-weight:600;">▼ ${change}</span>`
+              : '<span style="color:var(--muted);">→ 0</span>';
+          } else if (!r.olderRank.ranked && r.newerRank.ranked) {
+            changeCell = '<span style="color:#1db88a;font-weight:600;">🆕 New</span>';
+          } else if (r.olderRank.ranked && !r.newerRank.ranked) {
+            changeCell = '<span style="color:var(--danger);font-weight:600;">⚠️ Dropped</span>';
+          }
+        }
+        const rowBg = r.urgent ? 'rgba(219,55,45,0.06)'
+          : r.ppc.tier === 'good' ? 'var(--green-dim)'
+          : r.ppc.tier === 'warn' ? 'rgba(244,223,208,0.55)'
+          : '';
+        const rowBorder = r.urgent ? 'border-left:3px solid var(--danger);' : (r.ppc.tier === 'good' ? 'border-left:3px solid var(--green);' : '');
+        const rowStyle = (rowBg || rowBorder) ? ` style="background:${rowBg};${rowBorder}"` : '';
+        const actionCell = r.aiRecommendation
+          ? `<span style="color:var(--navy);font-weight:600;">✨ ${escapeHtml(r.aiRecommendation)}</span>`
+          : `<span style="${r.action.cls ? `color:${r.action.cls === 'rank-top' ? '#1db88a' : r.action.cls === 'rank-low' ? 'var(--danger)' : 'var(--navy)'};` : ''}">${escapeHtml(r.action.text)}</span>`;
+        return `<tr${rowStyle}>
+          <td>${escapeHtml(product)}</td>
+          <td>${escapeHtml(r.keyword)}</td>
+          <td>${r.searchVolume.toLocaleString()}</td>
+          <td>${rankPillHtml(r.olderRank)}</td>
+          <td>${rankPillHtml(r.newerRank)}</td>
+          <td>${changeCell}</td>
+          <td style="font-size:11.5px;">${escapeHtml(r.whereInListing)}</td>
+          <td style="font-size:11.5px;">${r.ppc.label}</td>
+          <td style="font-size:11.5px;">${actionCell}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  // Click handler for sortable column headers — toggles asc/desc on the
+  // same column, defaults to desc on a newly-clicked one. Re-sorts the
+  // already-computed rows cached by renderRankTracker above; doesn't
+  // refetch or recompute anything.
+  window.sortRankTracker = function (key) {
+    const prefix = 'oa'; // MiGuard is single-product — only one Rank Tracker table exists.
+    const rows = window._rtRowsByPrefix && window._rtRowsByPrefix[prefix];
+    if (!rows) return;
+    const state = (window._rtSortStateByPrefix && window._rtSortStateByPrefix[prefix]) || { key: null, dir: 'desc' };
+    const dir = (state.key === key && state.dir === 'desc') ? 'asc' : 'desc';
+    window._rtSortStateByPrefix[prefix] = { key, dir };
+
+    const getVal = {
+      product: r => r.product.toLowerCase(),
+      keyword: r => r.keyword.toLowerCase(),
+      volume: r => r.searchVolume,
+      older: r => r.olderRank && r.olderRank.ranked ? r.olderRank.numeric : Infinity, // unranked sorts last regardless of direction
+      newer: r => r.newerRank && r.newerRank.ranked ? r.newerRank.numeric : Infinity,
+      change: r => r.changeValueSigned,
+    }[key];
+    if (!getVal) return;
+
+    rows.sort((a, b) => {
+      const va = getVal(a), vb = getVal(b);
+      if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+      return dir === 'asc' ? va - vb : vb - va;
+    });
+
+    renderRtTbody(prefix, rows);
+
+    // Update header arrow indicators — only the clicked column shows an
+    // active arrow, matching typical sortable-table conventions.
+    ['product', 'keyword', 'volume', 'older', 'newer', 'change'].forEach(k => {
+      const arrowEl = document.getElementById(prefix + '-rt-sort-' + k);
+      const thEl = arrowEl ? arrowEl.closest('th') : null;
+      if (arrowEl) arrowEl.textContent = k === key ? (dir === 'asc' ? '▲' : '▼') : '';
+      if (thEl) thEl.classList.toggle('sort-active', k === key);
+    });
   };
   // Backward-compatible alias.
   window.renderRankTrackerActivators = function () { return window.renderRankTracker('miguard'); };
@@ -18454,18 +18556,27 @@ async function loadAuditResultsFromSheet() {
   }
 
   function buildOpportunitiesPage(monthYear) {
-    // No Subscribe & Save section and no show/hide toggles on this page —
-    // matches Vivian Valenty Skincare's build per Jaclyn (S&S lives
-    // elsewhere on VVS's dashboard, not on its Opportunities tab; this
-    // page just always shows both Accomplished and Opportunities, no
-    // checkbox gating either).
-    const accomplishedHtml = pdfxAccomplishedBlock();
-    const futureHtml = pdfxFutureOpportunitiesBlock();
+    // Show sections — checkboxes on the live tab, read at PDF-build time.
+    // Unchecking a section on the live tab excludes it from the exported
+    // PDF too, not just the on-screen view. Re-added per Jaclyn (Subscribe
+    // & Save came back to this page after briefly following VVS's layout,
+    // which keeps S&S elsewhere on its own dashboard instead).
+    const showSubsave = !!(document.getElementById('m-opp-cb-subsave') && document.getElementById('m-opp-cb-subsave').checked);
+    const showAccomplished = !!(document.getElementById('m-opp-cb-accomplished') && document.getElementById('m-opp-cb-accomplished').checked);
+    const showFuture  = !!(document.getElementById('m-opp-cb-future')  && document.getElementById('m-opp-cb-future').checked);
+    const kpis = ['kpi-active-subs', 'kpi-retention'].map(pdfxKpi);
+    const subsaveHtml = showSubsave
+      ? '<div class="pdfx-chlabel">Subscribe &amp; Save</div>' +
+        '<div class="pdfx-kpis n2" style="margin-top:6px;">' + kpis.map(pdfxKpiCardHtml).join('') + '</div>' +
+        '<div class="pdfx-card"><div class="pdfx-card-title">Active Subscriptions by Month</div>' + pdfxChartBlock('_snsChart') + '</div>'
+      : '';
+    const accomplishedHtml = showAccomplished ? pdfxAccomplishedBlock() : '';
+    const futureHtml = showFuture ? pdfxFutureOpportunitiesBlock() : '';
     return '' +
       '<div class="pdfx-page">' +
         '<div class="pdfx-inner">' +
           pdfxHeaderBand(monthYear, 'Opportunities') +
-          accomplishedHtml + futureHtml +
+          subsaveHtml + accomplishedHtml + futureHtml +
           '<div class="pdfx-pin-bottom">' + pdfxFooter(monthYear) + '</div>' +
         '</div>' +
       '</div>';
