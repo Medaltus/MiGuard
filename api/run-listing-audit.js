@@ -453,10 +453,25 @@ async function getToken() {
 }
 
 // Sanitize a cell value for sending to Claude — remove smart quotes, em dashes,
-// HTML entities, extra whitespace. Truncate to maxLen.
+// HTML entities, extra whitespace. Truncate to maxLen, but never mid-word:
+// FIXED 2026-09-14 per Jaclyn — a hard .slice(0, maxLen) was cutting real
+// content off mid-word (e.g. "...headache and migraine relief supplements
+// and headac") and, worse, silently handing Claude a corrupted "current
+// bullet" — which it would then dutifully echo back as the "rewrite" when
+// it judged the (already-garbled) text clean, since it has no way to know
+// the text it was given wasn't the real thing. Confirmed directly against
+// MiGuard's live sheet: every bullet (458-464 real chars vs a 300 cap),
+// the description (2248 real chars vs a 400 cap!), and backend_keywords
+// (493 vs 300) were all being truncated before Claude ever saw them — not
+// a MiGuard-only issue, a systemic one affecting every brand's audit.
+// Two-part fix: caps raised below to real headroom above both observed
+// content and each field's own REWRITE max, AND this function now backs
+// off to the last word boundary when it does have to cut, so any future
+// unexpectedly-long content degrades gracefully instead of corrupting
+// input silently.
 function san(s, maxLen) {
   if (!s) return '';
-  return String(s)
+  const cleaned = String(s)
     .replace(/&amp;/g, 'and').replace(/&nbsp;/g, ' ').replace(/&[a-z]+;/g, ' ')
     .replace(/[\u2018\u2019\u0060\u00b4]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
@@ -464,8 +479,15 @@ function san(s, maxLen) {
     .replace(/\u2026/g, '...')
     .replace(/\r?\n|\r/g, ' ')
     .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, maxLen || 400);
+    .trim();
+  const cap = maxLen || 400;
+  if (cleaned.length <= cap) return cleaned;
+  const cut = cleaned.slice(0, cap);
+  const lastSpace = cut.lastIndexOf(' ');
+  // Only back off to the word boundary if there's a reasonable one nearby
+  // (avoids returning a near-empty string for one extremely long word) —
+  // otherwise fall back to the hard cut rather than lose almost everything.
+  return (lastSpace > cap * 0.7) ? cut.slice(0, lastSpace) : cut;
 }
 
 // Parse Claude's plain-text delimited response into a result object.
@@ -829,7 +851,7 @@ BULLET FORMATTING RULES (apply to all bullet rewrites):
 - Flag any bullet that does NOT follow this ALL-CAPS header: detail format as a violation.
 - Across the catalog, align parallel bullets by position where products are related: B1 = hero claim/clinical proof, B2 = science/mechanism, B3 = key ingredients, B4 = who it is for/hair types, B5 = brand credentials/clean formula. Rewrites should follow this structure consistently.
 - Within a single SKU, bullet headers should not repeat the same keyword root — vary to maximize keyword coverage.
-- Bullet rewrites must be max 200 chars including the ALL-CAPS header.
+- Bullet rewrite LENGTH — per Jaclyn 2026-09-14: Amazon does not truncate bullets on the product page, they just wrap, so length is entirely on us to manage. Aim for 200-300 chars including the ALL-CAPS header — that's the target range, not a hard ceiling. Content preservation still wins when the two goals conflict: if trimming to the 200-300 range would mean cutting a real compliance-relevant claim, a target keyword phrase, or a named ingredient/benefit, let the bullet run longer rather than cut real content — but 500 chars is the hard ceiling either way. Getting close to 500 chars routinely is itself a signal the bullet needs tightening, not evidence it's fine.
 
 HOLD STEADY vs. PROCEED — read the LISTING AGE line in the user message, if present:
 - Rankings take time to reflect any change we ship — re-editing a listing every audit cycle means we're never actually measuring what we last shipped, only ever reacting to noise.
@@ -855,11 +877,11 @@ TITLE_REWRITE: [compliant rewrite, max 75 chars. If clean, repeat original trimm
 IH_NOTES: [violations found, generated if missing, or exactly "No violations" if clean and already present — nothing else, no explanation of why it's clean. Max 300 chars.]
 IH_REWRITE: [compliant rewrite or new copy, max 125 chars. If no violation was found, this must be the ORIGINAL text unchanged (trimmed to 125 only if it genuinely exceeds that) — do not rephrase, shorten, or "polish" clean copy, and never drop a word that matches a target keyword (e.g. "amino acids") just to tighten wording.]
 BULLETS_NOTES: [key violations across all bullets, noted by bullet number. Max 500 chars. Empty string if travel SKU.]
-BULLET_1_REWRITE: [compliant rewrite of bullet 1, max 350 chars. Empty string if travel SKU. If the only issue is the ALL-CAPS header format, reformat the header ONLY and keep every other word of the original bullet exactly as-is — do not also shorten, rephrase, or drop content while fixing the header. If there is no violation at all, this must be the ORIGINAL text unchanged aside from the header-case fix. Never remove a phrase that matches a target keyword (e.g. "marine collagen peptides," "protein shakes") or a named ingredient/benefit (e.g. calcium, recipe/use-case mentions) unless it is factually wrong or a genuine compliance violation — brevity alone is never a reason to cut real keyword or brand-value content.]
-BULLET_2_REWRITE: [compliant rewrite of bullet 2, max 350 chars. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
-BULLET_3_REWRITE: [compliant rewrite of bullet 3, max 350 chars. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
-BULLET_4_REWRITE: [compliant rewrite of bullet 4, max 350 chars. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
-BULLET_5_REWRITE: [compliant rewrite of bullet 5, max 350 chars. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
+BULLET_1_REWRITE: [compliant rewrite of bullet 1 — see the bullet-length rule above (target 200-300 chars, hard ceiling 500). Empty string if travel SKU. If the only issue is the ALL-CAPS header format, reformat the header ONLY and keep every other word of the original bullet exactly as-is — do not also shorten, rephrase, or drop content while fixing the header. If there is no compliance violation AND the bullet is already within the 200-300 target range, this must be the ORIGINAL text unchanged aside from the header-case fix. If the bullet has no compliance violation but runs well outside the 200-300 target, that length itself is worth tightening — trim toward the target range without cutting real keyword or brand-value content, don't leave it unchanged just because nothing else was wrong. Never remove a phrase that matches a target keyword (e.g. "marine collagen peptides," "protein shakes") or a named ingredient/benefit (e.g. calcium, recipe/use-case mentions) unless it is factually wrong or a genuine compliance violation — brevity alone is never a reason to cut real keyword or brand-value content.]
+BULLET_2_REWRITE: [compliant rewrite of bullet 2 — see the bullet-length rule above. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
+BULLET_3_REWRITE: [compliant rewrite of bullet 3 — see the bullet-length rule above. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
+BULLET_4_REWRITE: [compliant rewrite of bullet 4 — see the bullet-length rule above. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
+BULLET_5_REWRITE: [compliant rewrite of bullet 5 — see the bullet-length rule above. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
 DESC_NOTES: [violations found in description, or exactly "No violations" if clean — nothing else, no explanation of why it's clean. Max 300 chars. Empty string if travel SKU.]
 DESC_REWRITE: [compliant rewrite of description, max 2000 chars, plain sentences no bullets. Empty string if travel SKU. This field is hidden from the customer-facing page whenever A+ Content is present (true for most of this catalog) — treat it primarily as keyword-indexing real estate, not customer-facing prose to keep short and tidy. If no violation exists, this must be the ORIGINAL text unchanged — do not shorten, condense, or "clean up" a keyword-rich description just for brevity or style; a longer description that covers more real keywords and use cases (recipes, meal/drink pairings, etc.) is strictly preferable to a shorter one, since nobody reads this field, they only get matched by it.]
 BACKEND_NOTES: [violations found, or exactly "No violations" if clean — nothing else, no explanation of why it's clean. Max 300 chars.]
@@ -884,15 +906,15 @@ Write nothing else. No preamble. No explanation after the last line. Start immed
     const travel = isTravel(row);
 
     try {
-      const title     = san(row[COL.title], 400);
-      const ih        = san(row[COL.item_highlights], 200) || 'MISSING';
-      const b1        = san(row[COL.bullet_1], 300);
-      const b2        = san(row[COL.bullet_2], 300);
-      const b3        = san(row[COL.bullet_3], 300);
-      const b4        = san(row[COL.bullet_4], 300);
-      const b5        = san(row[COL.bullet_5], 300);
-      const desc      = san(row[COL.description], 400);
-      const backend      = san(row[COL.backend_keywords], 300);
+      const title     = san(row[COL.title], 500);
+      const ih        = san(row[COL.item_highlights], 300) || 'MISSING';
+      const b1        = san(row[COL.bullet_1], 600);
+      const b2        = san(row[COL.bullet_2], 600);
+      const b3        = san(row[COL.bullet_3], 600);
+      const b4        = san(row[COL.bullet_4], 600);
+      const b5        = san(row[COL.bullet_5], 600);
+      const desc      = san(row[COL.description], 3000);
+      const backend      = san(row[COL.backend_keywords], 800);
       const ingredients  = san(row[COL.ingredients], 600);
 
       let userPrompt;
