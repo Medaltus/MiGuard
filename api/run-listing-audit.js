@@ -838,10 +838,21 @@ HOLD STEADY vs. PROCEED — read the LISTING AGE line in the user message, if pr
 - State your reasoning explicitly in TITLE_NOTES when holding steady, e.g. "Current title is only 9 days old — holding steady, no changes recommended pending more ranking data."
 
 OUTPUT FORMAT — use exactly these labels, one per line, no JSON, no markdown:
+NOTES FIELDS vs. REWRITE FIELDS — keep these two jobs separate. A NOTES field
+explains your reasoning in your own words (what you checked, what you found,
+why). It must NEVER quote or restate the current field's full text back —
+not with quotation marks, not paraphrased at length. That's what the
+matching REWRITE field is for, and it's the ONLY place the actual candidate
+copy — whether that's a genuine rewrite or the original text confirmed
+clean — should appear. Per Jaclyn: notes that open with '[Field] reads:
+"..."' are duplicating the rewrite field's job and make it unclear which
+field to actually paste from. Reference specific words or phrases only when
+necessary to explain a violation (e.g. "the phrase 'without side effects'
+in bullet 4 is compliance risk"), not to reproduce the whole field.
 RECOMMENDATION: [HOLD_STEADY or PROCEED — see the HOLD STEADY vs. PROCEED rules above.]
-TITLE_NOTES: [violations found, or "No violations" if clean. Max 300 chars.]
+TITLE_NOTES: [violations found, or exactly "No violations" if clean — nothing else, no explanation of why it's clean. Max 300 chars.]
 TITLE_REWRITE: [compliant rewrite, max 75 chars. If clean, repeat original trimmed to 75.]
-IH_NOTES: [violations found, or generated if missing. Max 300 chars.]
+IH_NOTES: [violations found, generated if missing, or exactly "No violations" if clean and already present — nothing else, no explanation of why it's clean. Max 300 chars.]
 IH_REWRITE: [compliant rewrite or new copy, max 125 chars. If no violation was found, this must be the ORIGINAL text unchanged (trimmed to 125 only if it genuinely exceeds that) — do not rephrase, shorten, or "polish" clean copy, and never drop a word that matches a target keyword (e.g. "amino acids") just to tighten wording.]
 BULLETS_NOTES: [key violations across all bullets, noted by bullet number. Max 500 chars. Empty string if travel SKU.]
 BULLET_1_REWRITE: [compliant rewrite of bullet 1, max 350 chars. Empty string if travel SKU. If the only issue is the ALL-CAPS header format, reformat the header ONLY and keep every other word of the original bullet exactly as-is — do not also shorten, rephrase, or drop content while fixing the header. If there is no violation at all, this must be the ORIGINAL text unchanged aside from the header-case fix. Never remove a phrase that matches a target keyword (e.g. "marine collagen peptides," "protein shakes") or a named ingredient/benefit (e.g. calcium, recipe/use-case mentions) unless it is factually wrong or a genuine compliance violation — brevity alone is never a reason to cut real keyword or brand-value content.]
@@ -849,9 +860,9 @@ BULLET_2_REWRITE: [compliant rewrite of bullet 2, max 350 chars. Empty string if
 BULLET_3_REWRITE: [compliant rewrite of bullet 3, max 350 chars. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
 BULLET_4_REWRITE: [compliant rewrite of bullet 4, max 350 chars. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
 BULLET_5_REWRITE: [compliant rewrite of bullet 5, max 350 chars. Empty string if travel SKU. Same content-preservation rule as bullet 1 above.]
-DESC_NOTES: [violations found in description, or "No violations" if clean. Max 300 chars. Empty string if travel SKU.]
+DESC_NOTES: [violations found in description, or exactly "No violations" if clean — nothing else, no explanation of why it's clean. Max 300 chars. Empty string if travel SKU.]
 DESC_REWRITE: [compliant rewrite of description, max 2000 chars, plain sentences no bullets. Empty string if travel SKU. This field is hidden from the customer-facing page whenever A+ Content is present (true for most of this catalog) — treat it primarily as keyword-indexing real estate, not customer-facing prose to keep short and tidy. If no violation exists, this must be the ORIGINAL text unchanged — do not shorten, condense, or "clean up" a keyword-rich description just for brevity or style; a longer description that covers more real keywords and use cases (recipes, meal/drink pairings, etc.) is strictly preferable to a shorter one, since nobody reads this field, they only get matched by it.]
-BACKEND_NOTES: [violations found, or "No violations" if clean. Max 300 chars.]
+BACKEND_NOTES: [violations found, or exactly "No violations" if clean — nothing else, no explanation of why it's clean. Max 300 chars.]
 BACKEND_REWRITE: [compliant backend keywords, max 200 chars, spaces only no commas. If no violation exists, this must be the ORIGINAL terms unchanged. Backend keywords are invisible to the customer and are not a representation about the product the way title/bullets/description are — do not delete a keyword just because it names an ingredient/attribute (e.g. "organic") that isn't confirmed in the ingredient list; instead leave it in place and raise it in BACKEND_NOTES as needing human verification. A backend term that is adjacent to the product but not literally accurate (e.g. "vegan collagen" on a fish-derived product) may still be kept for search coverage at the brand's discretion — note the inaccuracy in BACKEND_NOTES rather than silently removing the term.]
 
 Write nothing else. No preamble. No explanation after the last line. Start immediately with RECOMMENDATION:`;
