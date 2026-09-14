@@ -17122,7 +17122,26 @@ async function runListingAudit() {
       '&gid=' + SHEET_LISTINGS_GID + '&_cb=' + Date.now();
     const srcRes = await fetch(srcUrl);
     if (!srcRes.ok) throw new Error('Could not read source listings sheet');
-    const srcRows = parseCsvToRows(await srcRes.text());
+    const allSrcRows = parseCsvToRows(await srcRes.text());
+
+    // FIXED 2026-09-14 per Jaclyn — this is a daily-snapshot sheet (one row
+    // per SKU per sync date, same as every other Products Cache read on
+    // this dashboard), but this function was grouping every historical
+    // row as if each date were its own product. For MiGuard specifically
+    // that meant MIG0001's single real SKU (74 daily snapshots and
+    // counting) got pushed into its item_type_keyword group 74 times,
+    // split into 15 batches of "5 SKUs" that were actually 5 copies of
+    // the same one — 15 real Claude calls auditing the identical SKU on
+    // one run. Collapsed to latest-date-per-SKU first, same pattern
+    // already used by loadListingsFromSheet() for this exact sheet.
+    const latestDateBySku = {};
+    allSrcRows.forEach(row => {
+      const sku = (row['sku'] || '').trim();
+      if (!sku) return;
+      const date = row['date'] || '';
+      if (!latestDateBySku[sku] || date > latestDateBySku[sku]) latestDateBySku[sku] = date;
+    });
+    const srcRows = allSrcRows.filter(row => (row['sku'] || '').trim() && row['date'] === latestDateBySku[(row['sku'] || '').trim()]);
 
     // Group SKUs by item_type_keyword (col 14 = index 14, 0-based)
     // Travel SKUs grouped with their parent type by stripping "travel" from name
@@ -17550,8 +17569,17 @@ function updateCard(pageEl, labelText, sublabelText, newValue) {
 // ── Load most recent audit results from sheet and re-inject ───────
 async function loadAuditResultsFromSheet() {
   try {
+    // FIXED 2026-09-14 per Jaclyn — was fetching by gid (LISTING_AUDIT_
+    // MIGUARD_GID), which is blank in the deployed SHEET_CONFIG. A blank
+    // gid in a Sheets export URL doesn't error — it just silently returns
+    // garbage (confirmed directly: not even valid CSV). The write side
+    // (run-listing-audit.js) never used a gid at all — it writes to the
+    // tab literally named after the brand ("miguard"), via the Sheets
+    // API by tab name. Switched the read side to match: gviz/tq by
+    // sheet name, same pattern already used for Report Insights, so this
+    // no longer depends on a gid being configured correctly at all.
     const url = 'https://docs.google.com/spreadsheets/d/' + LISTING_AUDIT_SHEET_ID +
-      '/export?format=csv&gid=' + LISTING_AUDIT_MIGUARD_GID + '&_cb=' + Date.now();
+      '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(INSIGHTS_BRAND_TAB) + '&_cb=' + Date.now();
     const res = await fetch(url);
     if (!res.ok) return;
     const rows = parseCsvToRows(await res.text());
@@ -17596,7 +17624,7 @@ async function loadAuditResultsFromSheet() {
     if (results.length) {
       console.log('[audit-debug] results[0]:', JSON.stringify(results[0]));
       console.log('[audit-debug] SKU_TO_PAGE_ID keys:', Object.keys(SKU_TO_PAGE_ID));
-      console.log('[audit-debug] el for EVO0001:', document.getElementById(SKU_TO_PAGE_ID['EVO0001']));
+      console.log('[audit-debug] el for MIG0001:', document.getElementById(SKU_TO_PAGE_ID['MIG0001']));
       injectAuditResults(results);
       console.log('[listings] Loaded audit results for', results.length, 'SKUs (most recent per SKU by audited_at)');
     }
