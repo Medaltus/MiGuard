@@ -11836,11 +11836,21 @@ const SHEET_LISTINGS_ID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.fileId || ''
 // rewritten to expect SHEET_PRODUCT_INVENTORY's column layout.
 const SHEET_PRODUCT_INVENTORY_ID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.fileId || '';
 const SHEET_LISTINGS_GID = window.SHEET_CFG.SHEET_PRODUCT_INVENTORY?.gid || ''; // changed 2026-08-07 per Jaclyn — was '1253931757' (the old dedicated Listings sheet); this is the "miguard" tab on the Products Cache sheet, same one already used server-side as the audit's own input
-const KEYWORD_STRATEGY_SHEET_ID = window.SHEET_CFG.SHEET_KEYWORD_STRATEGY?.fileId || '';
+// MIGUARD-SPECIFIC — updated 2026-09-14 per Jaclyn. Was still pointing at
+// évolis's own dedicated Keyword Strategy workbook (fileId
+// 1B50P142KObEcwtgxzNzofRAidZ9efePts0_8RSnt5mg, one tab per évolis SKU) —
+// MiGuard was never given its own tab there, so run-listing-audit.js's
+// keyword-tier lookup silently found nothing for MIG0001 every run.
+// MiGuard's real Top 20 / Opportunity / Reach keyword lists already exist
+// in the right shape (row 2 headers, row 3+ data, newline-separated
+// cells — confirmed directly against run-listing-audit.js's own parsing
+// logic) on the Competitor Research workbook's own "2.1 Refine" tab —
+// same file/gid already used elsewhere on this dashboard
+// (SHEET_COMPETITOR_ID / COMPETITOR_GID_BY_PRODUCT_TYPE.miguard). Pointed
+// directly at it instead of copying the data into a second sheet.
+const KEYWORD_STRATEGY_SHEET_ID = '19SfYJ99fMtqXna4VKGr8TtNMNxg6z52b0yDQPm7yI9M';
 const SKU_KW_GID_MAP = {
-  'EVO0001': '363437774',
-  'EVO0005': '473016522',
-  'EVO0009': '1211203597',
+  'MIG0001': '1255461233',
 };
 const LISTING_AUDIT_MIGUARD_GID = window.SHEET_CFG.SHEET_LISTING_AUDIT?.gid || '';
 
