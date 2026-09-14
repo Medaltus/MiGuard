@@ -10102,7 +10102,22 @@ async function initSnsExternal() {
             // as a possible cause of "Where in Listing" coming up empty
             // even when the underlying listing content and matching
             // logic are both confirmed correct.
-            fetch(`https://docs.google.com/spreadsheets/d/${RT_LISTINGS_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(INSIGHTS_BRAND_TAB)}&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
+            // REVERTED 2026-09-14 per Jaclyn — this was switched to gviz/tq
+            // (fetch-by-tab-name) as a defensive measure, on the theory that
+            // RT_LISTINGS_GID might be blank/wrong like SHEET_LISTING_AUDIT's
+            // gid turned out to be. That guess was wrong for THIS sheet:
+            // SHEET_PRODUCT_INVENTORY's gid is correctly configured (already
+            // proven working via loadListingsFromSheet() elsewhere), and
+            // gviz/tq has a real, confirmed bug on this specific sheet — for
+            // a wide daily-snapshot tab like this one (many rows, several
+            // near-constant columns), gviz silently PIVOTS the data instead
+            // of returning normal rows, collapsing all 70+ dates into a
+            // single space-separated string in one "cell." That garbage
+            // input is exactly why "Where in Listing" stopped finding
+            // matches — not a matching-logic bug, a data-fetch bug I
+            // introduced. Back to the plain gid export, confirmed directly
+            // against the live sheet to return correct tabular data.
+            fetch(rtCsvUrl(RT_LISTINGS_SHEET_ID, RT_LISTINGS_GID)).then(r => r.ok ? r.text() : '').catch(() => ''),
             fetch(rtCsvUrl(RT_PPC_SHEET_ID, RT_PPC_GID)).then(r => r.ok ? r.text() : '').catch(() => ''),
             fetch(rtCsvUrl(RT_INSIGHTS_SHEET_ID, RT_INSIGHTS_GID)).then(r => r.ok ? r.text() : '').catch(() => ''),
           ]);
@@ -10313,11 +10328,20 @@ async function initSnsExternal() {
             changeCell = '<span style="color:var(--danger);font-weight:600;">⚠️ Dropped</span>';
           }
         }
+        // Row highlighting — per Jaclyn, "show green when stuff is
+        // improving" should be a row-level signal, not just the small
+        // Change-column text (which was already green for a positive
+        // move). isImproving folds in alongside the existing "good PPC
+        // tier" green trigger, so a keyword can earn the green tint
+        // either by genuinely climbing in rank OR by converting well on
+        // PPC — whichever applies. Urgent (red) still takes precedence
+        // over both, matching the existing priority order.
+        const isImproving = r.changeValueSigned > 0;
         const rowBg = r.urgent ? 'rgba(219,55,45,0.06)'
-          : r.ppc.tier === 'good' ? 'var(--green-dim)'
+          : (isImproving || r.ppc.tier === 'good') ? 'var(--green-dim)'
           : r.ppc.tier === 'warn' ? 'rgba(244,223,208,0.55)'
           : '';
-        const rowBorder = r.urgent ? 'border-left:3px solid var(--danger);' : (r.ppc.tier === 'good' ? 'border-left:3px solid var(--green);' : '');
+        const rowBorder = r.urgent ? 'border-left:3px solid var(--danger);' : ((isImproving || r.ppc.tier === 'good') ? 'border-left:3px solid var(--green);' : '');
         const rowStyle = (rowBg || rowBorder) ? ` style="background:${rowBg};${rowBorder}"` : '';
         const actionCell = r.aiRecommendation
           ? `<span style="color:var(--navy);font-weight:600;">✨ ${escapeHtml(r.aiRecommendation)}</span>`
