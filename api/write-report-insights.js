@@ -39,7 +39,7 @@ const { ensureTab, readRows, replaceRows } = require('./config/_sheets_client');
 const sheets = require('./config/sheets');
 const brands = require('./config/brands');
 
-const MONTHLY_HEADERS = [
+const MONTHLY_HEADERS_DEFAULT = [
   'year', 'month',
   'exec_summary_title', 'exec_summary_left', 'exec_summary_right',
   'amazon_key_insight', 'website_key_insight', 'walmart_key_insight',
@@ -56,6 +56,36 @@ const MONTHLY_HEADERS = [
   // row physically has its own newest column, or every existing row's data
   // silently shifts into the wrong columns on the next save.
 ];
+
+// MIGUARD-SPECIFIC LAYOUT — added 2026-09-14 per Jaclyn, matching the real
+// header row she manually created on the "miguard" tab (gid 1972203350),
+// pasted directly rather than guessed. Diverges from every other brand's
+// tab on this same shared workbook after ad_impressions_note: adds
+// category_key_insight, a 4-card "What's Been Accomplished" block (images
+// only on cards 1-2, matching the dashboard's own Opportunities page
+// build), and expands Future Opportunities from 4 cards to 6 (opp5/opp6).
+// Headers are NOT globally brand-parameterized elsewhere in this file —
+// MONTHLY_HEADERS_DEFAULT above is what every other brand's tab actually
+// has. Blindly extending the shared default to match MiGuard's layout
+// would have made every other brand's ensureTab() header check fail loud
+// and started writing blank values into columns that don't exist on their
+// tabs. getMonthlyHeaders() below is the per-brand switch instead — if a
+// second brand ever needs this same expanded layout, add it there rather
+// than assuming every tab matches MiGuard's.
+const MONTHLY_HEADERS_MIGUARD = [
+  ...MONTHLY_HEADERS_DEFAULT,
+  'category_key_insight',
+  'accomplished1_title', 'accomplished1_subtitle', 'accomplished1_body', 'accomplished1_image1', 'accomplished1_image2', 'accomplished1_image3',
+  'accomplished2_title', 'accomplished2_subtitle', 'accomplished2_body', 'accomplished2_image1', 'accomplished2_image2',
+  'accomplished3_title', 'accomplished3_subtitle', 'accomplished3_body',
+  'accomplished4_title', 'accomplished4_subtitle', 'accomplished4_body',
+  'opp5_title', 'opp5_subtitle', 'opp5_body',
+  'opp6_title', 'opp6_subtitle', 'opp6_body',
+];
+
+function getMonthlyHeaders(brandId) {
+  return brandId === 'miguard' ? MONTHLY_HEADERS_MIGUARD : MONTHLY_HEADERS_DEFAULT;
+}
 
 const EVENT_HEADERS = [
   'event_name', 'event_year',
@@ -97,7 +127,7 @@ module.exports = async function handler(req, res) {
       }
       const result = await upsertRow({
         tabName: brand.tabName,
-        headers: MONTHLY_HEADERS,
+        headers: getMonthlyHeaders(brandId),
         matchFields: { year: yearStr, month: monthStr },
         fields, action, actor,
       });
