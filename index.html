@@ -2070,42 +2070,6 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     </div>
     <div class="channel-page" id="m-opportunities">
 
-      <div class="card" style="margin-bottom:18px;padding:12px 20px;">
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-          <span style="font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;">Show sections:</span>
-          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
-            <input type="checkbox" id="m-opp-cb-subsave" checked style="margin:0;"
-              onchange="(function(cb){var s=document.getElementById('m-opp-subsave-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
-            Subscribe &amp; Save
-          </label>
-          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
-            <input type="checkbox" id="m-opp-cb-accomplished" checked style="margin:0;"
-              onchange="(function(cb){var s=document.getElementById('m-opp-accomplished-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
-            What's Been Accomplished
-          </label>
-          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
-            <input type="checkbox" id="m-opp-cb-future" checked style="margin:0;"
-              onchange="(function(cb){var s=document.getElementById('m-opp-future-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
-            Future Opportunities
-          </label>
-        </div>
-      </div>
-
-      <div id="m-opp-subsave-section">
-      <div class="section-label">Subscribe &amp; Save</div>
-      <div class="kpi-row" style="margin-bottom:20px;">
-        <div class="kpi-card" id="kpi-active-subs"><div class="kpi-label">Active Subscriptions</div><div class="kpi-value" style="font-size:36px;">123</div><div class="kpi-mom flat">Loading…</div></div>
-        <div class="kpi-card" id="kpi-retention"><div class="kpi-label">Subscribe &amp; Save Retention (90 Days)</div><div class="kpi-value" style="font-size:36px;">70%</div><div class="kpi-mom flat">Loading…</div></div>
-      </div>
-      <div class="card" style="margin-bottom:20px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div class="card-title" style="margin-bottom:0;">Active Subscriptions by Month</div>
-          <div id="legend-sns" style="display:flex;align-items:center;"></div>
-        </div>
-        <div style="position:relative;height:320px;"><canvas id="chart-sns"></canvas></div>
-      </div>
-      </div>
-
       <div id="m-opp-accomplished-section">
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -2151,7 +2115,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       <div id="m-opp-future-section">
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div style="display:inline-block;background:rgba(36,233,163,.12);border:1px solid rgba(36,233,163,.3);border-radius:4px;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);">Future Opportunities</div>
+          <div style="display:inline-block;background:rgba(36,233,163,.12);border:1px solid rgba(36,233,163,.3);border-radius:4px;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);">Opportunities</div>
           <button class="btn-edit" id="opp-edit-btn">✏️ Edit</button>
         </div>
         <div class="opp-grid" id="opp-grid">
@@ -2175,12 +2139,22 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
             <div class="opp-subtitle" id="opp-subtitle-4"></div>
             <div class="opp-body" id="opp-body-4"></div>
           </div>
+          <div class="opp-card" id="opp-card-5" style="display:none;">
+            <div class="opp-title" id="opp-title-5"></div>
+            <div class="opp-subtitle" id="opp-subtitle-5"></div>
+            <div class="opp-body" id="opp-body-5"></div>
+          </div>
+          <div class="opp-card" id="opp-card-6" style="display:none;">
+            <div class="opp-title" id="opp-title-6"></div>
+            <div class="opp-subtitle" id="opp-subtitle-6"></div>
+            <div class="opp-body" id="opp-body-6"></div>
+          </div>
         </div>
-        <div id="opp-empty-state" style="display:none;color:var(--muted);font-size:12px;padding:8px 0;">No opportunities added yet — click Edit to add up to 4.</div>
+        <div id="opp-empty-state" style="display:none;color:var(--muted);font-size:12px;padding:8px 0;">No opportunities added yet — click Edit to add up to 6.</div>
       </div>
       </div>
       <div class="insight-editor" id="opp-editor">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Up to 4 opportunity cards. Leave a card's Title blank to leave it out of the report entirely. Subtitle is optional — if left blank, the body text sits directly under the title.</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Up to 6 opportunity cards. Leave a card's Title blank to leave it out of the report entirely. Subtitle is optional — if left blank, the body text sits directly under the title.</div>
         <div id="opp-editor-slots"></div>
         <div class="editor-footer" style="margin-top:10px;">
           <span class="editor-note">Saves directly to the report sheet as a draft.</span>
@@ -11506,8 +11480,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const slotsEl = document.getElementById('opp-editor-slots');
     if (!editBtn || !saveBtn || !editorEl || !slotsEl) return;
 
-    // Build the 4 editor slots once.
-    slotsEl.innerHTML = [1,2,3,4].map(n => `
+    // Build the 6 editor slots once.
+    slotsEl.innerHTML = [1,2,3,4,5,6].map(n => `
       <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px;">
         <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:4px;">Opportunity ${n} — Title</div>
         <textarea id="textarea-opp${n}-title" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid rgba(0,31,96,.2);border-radius:var(--radius-sm);font-family:var(--font);font-size:12px;color:var(--navy);resize:none;height:40px;margin-bottom:8px;"></textarea>
@@ -11529,7 +11503,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const { year, month } = getLastFullMonthLocal2();
       const row = await window.reportInsightsFetchRow(BRAND, { year: String(year), month: String(month) });
       let anyVisible = false;
-      [1,2,3,4].forEach(n => {
+      [1,2,3,4,5,6].forEach(n => {
         const title    = row ? (row[`opp${n}_title`]    || '') : '';
         const subtitle = row ? (row[`opp${n}_subtitle`] || '') : '';
         const body     = row ? (row[`opp${n}_body`]     || '') : '';
@@ -11567,7 +11541,7 @@ document.addEventListener('DOMContentLoaded', function() {
       try {
         const { year, month } = getLastFullMonthLocal2();
         const fields = {};
-        [1,2,3,4].forEach(n => {
+        [1,2,3,4,5,6].forEach(n => {
           fields[`opp${n}_title`]    = (document.getElementById(`textarea-opp${n}-title`).value || '').trim();
           fields[`opp${n}_subtitle`] = (document.getElementById(`textarea-opp${n}-subtitle`).value || '').trim();
           fields[`opp${n}_body`]     = (document.getElementById(`textarea-opp${n}-body`).value || '').trim();
@@ -18345,7 +18319,11 @@ async function loadAuditResultsFromSheet() {
   }
 
   function pdfxFutureOpportunitiesBlock() {
-    const cards = Array.prototype.map.call(document.querySelectorAll('#m-opportunities .opp-card'), function (card) {
+    // Scoped to #opp-grid specifically, not the whole #m-opportunities
+    // container — Accomplished's cards share the same .opp-card class,
+    // so the broader selector would have pulled those in here too and
+    // duplicated their content into the Opportunities PDF section.
+    const cards = Array.prototype.map.call(document.querySelectorAll('#opp-grid .opp-card'), function (card) {
       const title = pdfxText('.opp-title', card);
       if (!title) return ''; // blank Title = this slot is unused, per Jaclyn 2026-07-18
       const subtitle = pdfxText('.opp-subtitle', card);
@@ -18363,7 +18341,7 @@ async function loadAuditResultsFromSheet() {
     // follows Accomplished — without reintroducing the full box. Matches
     // Skinside Seoul's build per Jaclyn.
     return '<div class="pdfx-card" style="border:none;padding:0;border-top:1px solid var(--border);padding-top:12px;">' +
-      '<span class="pdfx-pill" style="margin-bottom:16px;">Future Opportunities</span>' +
+      '<span class="pdfx-pill" style="margin-bottom:16px;">Opportunities</span>' +
       '<div class="pdfx-cover-cols">' + cards + '</div>' +
       '</div>';
   }
@@ -18476,26 +18454,18 @@ async function loadAuditResultsFromSheet() {
   }
 
   function buildOpportunitiesPage(monthYear) {
-    // Show sections — same "checkboxes on the live tab, read at PDF-build
-    // time" pattern as Brand Momentum. Unchecking a section on the live
-    // tab excludes it from the exported PDF too, not just the on-screen
-    // view. Matches Skinside Seoul's build per Jaclyn.
-    const showSubsave = !!(document.getElementById('m-opp-cb-subsave') && document.getElementById('m-opp-cb-subsave').checked);
-    const showAccomplished = !!(document.getElementById('m-opp-cb-accomplished') && document.getElementById('m-opp-cb-accomplished').checked);
-    const showFuture  = !!(document.getElementById('m-opp-cb-future')  && document.getElementById('m-opp-cb-future').checked);
-    const kpis = ['kpi-active-subs', 'kpi-retention'].map(pdfxKpi);
-    const subsaveHtml = showSubsave
-      ? '<div class="pdfx-chlabel">Subscribe &amp; Save</div>' +
-        '<div class="pdfx-kpis n2" style="margin-top:6px;">' + kpis.map(pdfxKpiCardHtml).join('') + '</div>' +
-        '<div class="pdfx-card"><div class="pdfx-card-title">Active Subscriptions by Month</div>' + pdfxChartBlock('_snsChart') + '</div>'
-      : '';
-    const accomplishedHtml = showAccomplished ? pdfxAccomplishedBlock() : '';
-    const futureHtml = showFuture ? pdfxFutureOpportunitiesBlock() : '';
+    // No Subscribe & Save section and no show/hide toggles on this page —
+    // matches Vivian Valenty Skincare's build per Jaclyn (S&S lives
+    // elsewhere on VVS's dashboard, not on its Opportunities tab; this
+    // page just always shows both Accomplished and Opportunities, no
+    // checkbox gating either).
+    const accomplishedHtml = pdfxAccomplishedBlock();
+    const futureHtml = pdfxFutureOpportunitiesBlock();
     return '' +
       '<div class="pdfx-page">' +
         '<div class="pdfx-inner">' +
           pdfxHeaderBand(monthYear, 'Opportunities') +
-          subsaveHtml + accomplishedHtml + futureHtml +
+          accomplishedHtml + futureHtml +
           '<div class="pdfx-pin-bottom">' + pdfxFooter(monthYear) + '</div>' +
         '</div>' +
       '</div>';
