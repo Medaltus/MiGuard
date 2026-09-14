@@ -492,4 +492,4 @@ function base64url(str) {
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-module.exports = { ensureTab, appendRows, replaceRows, readRows, updateRange, ensureRowCapacity, getSheetsToken, touchMeta }; 
+module.exports = { ensureTab, appendRows, replaceRows, readRows, updateRange, ensureRowCapacity, getSheetsToken, touchMeta };
