@@ -10093,7 +10093,15 @@ async function initSnsExternal() {
         if (!_kwRows) {
           const [kwCsv, listingCsv, ppcCsv, insightsCsv] = await Promise.all([
             fetch(csvUrl()).then(r => r.ok ? r.text() : '').catch(() => ''),
-            fetch(rtCsvUrl(RT_LISTINGS_SHEET_ID, RT_LISTINGS_GID)).then(r => r.ok ? r.text() : '').catch(() => ''),
+            // Fetched by tab name, not gid — same fix applied to the
+            // Listing Audit results read (2026-09-14 per Jaclyn): a
+            // gid that's blank or wrong in SHEET_CFG fails silently
+            // (returns an unrelated page, not an error), while the tab
+            // is always reliably named after the brand. Removes this
+            // as a possible cause of "Where in Listing" coming up empty
+            // even when the underlying listing content and matching
+            // logic are both confirmed correct.
+            fetch(`https://docs.google.com/spreadsheets/d/${RT_LISTINGS_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(INSIGHTS_BRAND_TAB)}&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
             fetch(rtCsvUrl(RT_PPC_SHEET_ID, RT_PPC_GID)).then(r => r.ok ? r.text() : '').catch(() => ''),
             fetch(rtCsvUrl(RT_INSIGHTS_SHEET_ID, RT_INSIGHTS_GID)).then(r => r.ok ? r.text() : '').catch(() => ''),
           ]);
