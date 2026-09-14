@@ -3333,7 +3333,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     <!-- Top-level tabs -->
     <div class="channel-tabs">
       <button class="ch-tab active" onclick="showChannel('ppc','ppc-context',this)">Blended Context</button>
-      <button class="ch-tab" onclick="showChannel('ppc','ppc-strategy',this)">Strategy by Product</button>
+      <button class="ch-tab" onclick="showChannel('ppc','ppc-strategy',this)">Strategy</button>
       <button class="ch-tab" onclick="showChannel('ppc','ppc-opportunities',this)">Opportunities</button>
     </div>
 
@@ -3448,33 +3448,8 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     <!-- ── STRATEGY BY PRODUCT TYPE ── -->
     <div class="channel-page" id="ppc-strategy">
 
-      <!-- Product type tabs -->
-      <div class="sub-tabs">
-        <button class="sub-tab active" onclick="showSubTab('ppc-strategy','ppc-act',this)">Activators</button>
-        <button class="sub-tab" onclick="showSubTab('ppc-strategy','ppc-shampoo',this)">Shampoos</button>
-        <button class="sub-tab" onclick="showSubTab('ppc-strategy','ppc-cond',this)">Conditioners</button>
-        <button class="sub-tab" onclick="showSubTab('ppc-strategy','ppc-mask',this)">Hair Masks</button>
-        <button class="sub-tab" onclick="showSubTab('ppc-strategy','ppc-dry',this)">Dry Shampoo</button>
-        <button class="sub-tab" onclick="showSubTab('ppc-strategy','ppc-bundles',this)">Bundles</button>
-      </div>
-
-      <div class="sub-page active" id="ppc-act">
-        <div id="ppc-act-container"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
-      </div>
-      <div class="sub-page" id="ppc-shampoo">
-        <div id="ppc-shampoo-container"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
-      </div>
-      <div class="sub-page" id="ppc-cond">
-        <div id="ppc-cond-container"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
-      </div>
-      <div class="sub-page" id="ppc-mask">
-        <div id="ppc-mask-container"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
-      </div>
-      <div class="sub-page" id="ppc-dry">
-        <div id="ppc-dry-container"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
-      </div>
-      <div class="sub-page" id="ppc-bundles">
-        <div id="ppc-bundles-container"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
+      <div class="sub-page active" id="ppc-miguard">
+        <div id="ppc-miguard-container"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
       </div>
 
     </div><!-- /ppc-strategy -->
@@ -3544,11 +3519,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
     <!-- Top-level tabs -->
     <div class="channel-tabs" style="margin-top:20px;">
-      <button class="ch-tab active" onclick="showChannel('organic','org-activators',this)">Activators</button>
-      <button class="ch-tab" onclick="showChannel('organic','org-shampoos',this)">Shampoos</button>
-      <button class="ch-tab" onclick="showChannel('organic','org-conditioners',this)">Conditioners</button>
-      <button class="ch-tab" onclick="showChannel('organic','org-masks',this)">Hair Masks</button>
-      <button class="ch-tab" onclick="showChannel('organic','org-dryshampoo',this)">Dry Shampoo</button>
+      <button class="ch-tab active" onclick="showChannel('organic','org-activators',this)">MiGuard Supplements</button>
     </div>
 
     <!-- ══ ACTIVATORS ══ -->
@@ -3556,7 +3527,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
       <div class="sub-tabs">
         <button class="sub-tab active" onclick="showSubTab('org-activators','oa-insights',this)">Insights</button>
-        <button class="sub-tab" onclick="showSubTab('org-activators','oa-ranktracker',this); window.initRankTracker('activators');">Rank Tracker</button>
+        <button class="sub-tab" onclick="showSubTab('org-activators','oa-ranktracker',this); window.initRankTracker('miguard');">Rank Tracker</button>
       </div>
 
       <!-- INSIGHTS — read weekly. Cards below have static fallback content
@@ -3569,31 +3540,24 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
         <div class="insight-grid">
           <div class="ppc-opp-card summary-type">
             <div class="ppc-opp-hd"><div class="ppc-opp-badge med">SUMMARY</div><div class="ppc-opp-title">This Week</div></div>
-            <div class="ppc-opp-body" id="org-insight-summary">B0CQSXSHZT holds rank 306 across all high-volume hair mask and growth keywords — the ASIN isn't indexed or is buried. B07SG6S4VV ranks #1 for the branded term "miguard." No rank movement is visible yet without a historical baseline.</div>
+            <div class="ppc-opp-body" id="org-insight-summary">No Run Analysis output yet for MiGuard Supplements — click Run Analysis on the Insights Log page to generate this week's summary.</div>
           </div>
           <div class="ppc-opp-card win-type">
             <div class="ppc-opp-hd"><div class="ppc-opp-badge win">✓ WIN</div></div>
             <div class="ppc-opp-body" id="org-insight-win"><ul style="margin:0;padding-left:18px;">
-              <li>B07SG6S4VV holds rank #1 for "miguard" with strong conversion potential</li>
-              <li>EVO0014 and EVO0015 convert at 46.97% and 57.14% respectively</li>
-              <li>EVO0001 drives $1,399.71 in revenue on 141 sessions at 20.57% conversion</li>
+              <li>No wins logged yet — click Run Analysis to generate this week's findings.</li>
             </ul></div>
           </div>
           <div class="ppc-opp-card action-type">
             <div class="ppc-opp-hd"><div class="ppc-opp-badge urgent">⚡ ACTION</div></div>
             <div class="ppc-opp-body" id="org-insight-action"><ul style="margin:0;padding-left:18px;">
-              <li>Launch exact match PPC on "hair growth accelerator" (293 comps, 51.3% ABA)</li>
-              <li>Launch "postpartum hair loss" exact match (661 comps, 25% ABA)</li>
-              <li>Activate Prevent PPC on "scalp treatment" + "dry scalp treatment" — 0 sessions, all upside</li>
-              <li>Add "scalp serum" to Prevent title — backend only today, needs title placement</li>
+              <li>No action items logged yet — click Run Analysis to generate this week's findings.</li>
             </ul></div>
           </div>
           <div class="ppc-opp-card opportunity-type">
             <div class="ppc-opp-hd"><div class="ppc-opp-badge high">💡 OPPORTUNITY</div></div>
             <div class="ppc-opp-body" id="org-insight-opportunity"><ul style="margin:0;padding-left:18px;">
-              <li>"hair growth serum" — 71,798 vol, B0CQSXSHZT sits at rank 306, needs an indexing push</li>
-              <li>"hair mask for dry damaged hair and growth" — high-value long tail, not yet targeted</li>
-              <li>Upload Seller Central SQP data to replace Cerebro estimates</li>
+              <li>No opportunities logged yet — click Run Analysis to generate this week's findings.</li>
             </ul></div>
           </div>
         </div>
@@ -3623,7 +3587,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
           </div>
         </div>
 
-        <div class="org-section-title">Fastest Path to Page 1 — Activators</div>
+        <div class="org-section-title">Fastest Path to Page 1 — MiGuard Supplements</div>
         <div class="p1-list" id="oa-p1-list"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
       </div>
 
@@ -3638,7 +3602,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
             <div class="org-sqp-title" style="margin-bottom:0;">Rank Changes <span class="org-sqp-badge" id="oa-rt-daterange">Loading…</span></div>
             <div style="display:flex;gap:8px;align-items:center;">
               <label style="font-size:11px;color:var(--muted);">Compare to:</label>
-              <select id="oa-rt-window" onchange="window.renderRankTracker('activators')" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);">
+              <select id="oa-rt-window" onchange="window.renderRankTracker('miguard')" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);">
                 <option value="7">1 week ago</option>
                 <option value="28" selected>~4 weeks ago</option>
                 <option value="84">~12 weeks ago</option>
@@ -3661,268 +3625,13 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
             <strong>Where in Listing</strong> and <strong>PPC</strong> are always live — recomputed from the listing-copy and ad-search-terms sheets on every page load. PPC is exact-match only (a keyword tracked as "hair growth serum" won't catch spend under "hair growth serums") — a wrong fuzzy match that looks confident is worse than an honest "No spend."<br>
             <strong>Recommended Action</strong> shows the ✨ AI-written recommendation (factors in rank change, PPC performance, and listing placement together) whenever one exists for that keyword — generated by Run Analysis, not on every page load, so it's only as fresh as the last time someone clicked it. Keywords Run Analysis hasn't covered yet fall back to a simpler rank-only rule, shown without the ✨.<br>
             <strong>Where in Listing</strong> reflects the live listing copy as of its last sync only — it can't show when a keyword was added, since the listings sheet doesn't keep dated history.<br>
-            Product mapping: Reverse = EVO0001 (confirmed). Promote = EVO0005, Prevent = EVO0009 — pulled from the Insights → Products tab, not yet verified against the master SKU list.
+            Product mapping: MiGuard Supplements = MIG0001 / ASIN B0B9187Q4P — single-product brand, no mapping ambiguity.
           </div>
         </div>
       </div>
 
     </div><!-- /org-activators -->
 
-    <!-- ══ SHAMPOOS ══ -->
-    <div class="channel-page" id="org-shampoos">
-      <div class="sub-tabs">
-        <button class="sub-tab active" onclick="showSubTab('org-shampoos','osh-insights',this)">Insights</button>
-              <button class="sub-tab" onclick="showSubTab('org-shampoos','osh-ranktracker',this); window.initRankTracker('shampoos');">Rank Tracker</button>
-      </div>
-      <div class="sub-page active" id="osh-insights">
-        <div class="insight-grid" style="grid-template-columns:1fr 1fr;">
-          <div class="ppc-opp-card action-type">
-            <div class="ppc-opp-hd"><div class="ppc-opp-badge urgent">⚡ ACTION</div></div>
-            <div class="ppc-opp-body"><ul style="margin:0;padding-left:18px;">
-              <li>Add "hair growth shampoo" to Reverse + Promote shampoo titles — currently missing from both. Highest-volume shampoo keyword.</li>
-            </ul></div>
-          </div>
-          <div class="ppc-opp-card opportunity-type">
-            <div class="ppc-opp-hd"><div class="ppc-opp-badge high">💡 OPPORTUNITY</div></div>
-            <div class="ppc-opp-body"><ul style="margin:0;padding-left:18px;">
-              <li>Promote Shampoo: build Sponsored Brand campaign featuring the People.com 2024 Lengthening Award in headline copy</li>
-              <li>Prevent Shampoo: target "anti-aging shampoo" + "scalp treatment shampoo" — unique niche terms with low competition</li>
-            </ul></div>
-          </div>
-        </div>
-        <div class="org-section-title">Fastest Path to Page 1 — Shampoos</div>
-        <div class="p1-list" id="osh-p1-list"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
-      </div>
-          <div class="sub-page" id="osh-ranktracker">
-        <div class="org-sqp-alert" id="osh-rt-banner">
-          <span>📈</span>
-          <span id="osh-rt-banner-text">Loading…</span>
-        </div>
-        <div class="org-sqp-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-            <div class="org-sqp-title" style="margin-bottom:0;">Rank Changes <span class="org-sqp-badge" id="osh-rt-daterange">Loading…</span></div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <label style="font-size:11px;color:var(--muted);">Compare to:</label>
-              <select id="osh-rt-window" onchange="window.renderRankTracker('shampoos')" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);">
-                <option value="7">1 week ago</option>
-                <option value="28" selected>~4 weeks ago</option>
-                <option value="84">~12 weeks ago</option>
-                <option value="9999">Earliest available</option>
-              </select>
-            </div>
-          </div>
-          <div style="overflow-x:auto;">
-            <table class="data-table">
-              <thead><tr>
-                <th>Product</th><th>Keyword</th><th>Vol/mo</th>
-                <th id="osh-rt-col-older">Earlier</th><th id="osh-rt-col-newer">Latest</th>
-                <th>Change</th><th>Where in Listing</th><th>PPC (Spend · Sales · ACoS)</th><th>Recommended Action</th>
-              </tr></thead>
-              <tbody id="osh-rt-tbody"><tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);font-style:italic;">Loading…</td></tr></tbody>
-            </table>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6;">
-            Rows are sorted with anything needing immediate attention first (🔴), then best-performing, down to lowest-performing — not alphabetical or by volume.<br>
-            <strong>Where in Listing</strong> and <strong>PPC</strong> are always live — recomputed from the listing-copy and ad-search-terms sheets on every page load. PPC is exact-match only (a keyword tracked as "hair growth serum" won't catch spend under "hair growth serums") — a wrong fuzzy match that looks confident is worse than an honest "No spend."<br>
-            <strong>Recommended Action</strong> shows the ✨ AI-written recommendation (factors in rank change, PPC performance, and listing placement together) whenever one exists for that keyword — generated by Run Analysis, not on every page load, so it's only as fresh as the last time someone clicked it. Keywords Run Analysis hasn't covered yet fall back to a simpler rank-only rule, shown without the ✨.<br>
-            <strong>Where in Listing</strong> reflects the live listing copy as of its last sync only — it can't show when a keyword was added, since the listings sheet doesn't keep dated history.
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /org-shampoos -->
-
-    <!-- ══ CONDITIONERS ══ -->
-    <div class="channel-page" id="org-conditioners">
-      <div class="sub-tabs">
-        <button class="sub-tab active" onclick="showSubTab('org-conditioners','ocd-insights',this)">Insights</button>
-              <button class="sub-tab" onclick="showSubTab('org-conditioners','ocd-ranktracker',this); window.initRankTracker('conditioners');">Rank Tracker</button>
-      </div>
-      <div class="sub-page active" id="ocd-insights">
-        <div class="insight-grid" style="grid-template-columns:1fr 1fr;">
-          <div class="ppc-opp-card action-type">
-            <div class="ppc-opp-hd"><div class="ppc-opp-badge urgent">⚡ ACTION</div></div>
-            <div class="ppc-opp-body"><ul style="margin:0;padding-left:18px;">
-              <li>⚠ EVO0011 title has typo "Conditiner" — fix immediately before any PPC spend on this ASIN</li>
-              <li>Launch PPC on "hair growth conditioner" + "conditioner for thinning hair" as Reverse Conditioner core terms</li>
-            </ul></div>
-          </div>
-          <div class="ppc-opp-card opportunity-type">
-            <div class="ppc-opp-hd"><div class="ppc-opp-badge high">💡 OPPORTUNITY</div></div>
-            <div class="ppc-opp-body"><ul style="margin:0;padding-left:18px;">
-              <li>Promote Conditioner: Sponsored Brand with People.com award headline — "Voted Best Lengthening Conditioner 2024"</li>
-            </ul></div>
-          </div>
-        </div>
-        <div class="org-section-title">Fastest Path to Page 1 — Conditioners</div>
-        <div class="p1-list" id="ocd-p1-list"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
-      </div>
-          <div class="sub-page" id="ocd-ranktracker">
-        <div class="org-sqp-alert" id="ocd-rt-banner">
-          <span>📈</span>
-          <span id="ocd-rt-banner-text">Loading…</span>
-        </div>
-        <div class="org-sqp-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-            <div class="org-sqp-title" style="margin-bottom:0;">Rank Changes <span class="org-sqp-badge" id="ocd-rt-daterange">Loading…</span></div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <label style="font-size:11px;color:var(--muted);">Compare to:</label>
-              <select id="ocd-rt-window" onchange="window.renderRankTracker('conditioners')" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);">
-                <option value="7">1 week ago</option>
-                <option value="28" selected>~4 weeks ago</option>
-                <option value="84">~12 weeks ago</option>
-                <option value="9999">Earliest available</option>
-              </select>
-            </div>
-          </div>
-          <div style="overflow-x:auto;">
-            <table class="data-table">
-              <thead><tr>
-                <th>Product</th><th>Keyword</th><th>Vol/mo</th>
-                <th id="ocd-rt-col-older">Earlier</th><th id="ocd-rt-col-newer">Latest</th>
-                <th>Change</th><th>Where in Listing</th><th>PPC (Spend · Sales · ACoS)</th><th>Recommended Action</th>
-              </tr></thead>
-              <tbody id="ocd-rt-tbody"><tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);font-style:italic;">Loading…</td></tr></tbody>
-            </table>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6;">
-            Rows are sorted with anything needing immediate attention first (🔴), then best-performing, down to lowest-performing — not alphabetical or by volume.<br>
-            <strong>Where in Listing</strong> and <strong>PPC</strong> are always live — recomputed from the listing-copy and ad-search-terms sheets on every page load. PPC is exact-match only (a keyword tracked as "hair growth serum" won't catch spend under "hair growth serums") — a wrong fuzzy match that looks confident is worse than an honest "No spend."<br>
-            <strong>Recommended Action</strong> shows the ✨ AI-written recommendation (factors in rank change, PPC performance, and listing placement together) whenever one exists for that keyword — generated by Run Analysis, not on every page load, so it's only as fresh as the last time someone clicked it. Keywords Run Analysis hasn't covered yet fall back to a simpler rank-only rule, shown without the ✨.<br>
-            <strong>Where in Listing</strong> reflects the live listing copy as of its last sync only — it can't show when a keyword was added, since the listings sheet doesn't keep dated history.
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /org-conditioners -->
-
-    <!-- ══ HAIR MASKS ══ -->
-    <div class="channel-page" id="org-masks">
-      <div class="sub-tabs">
-        <button class="sub-tab active" onclick="showSubTab('org-masks','omk-insights',this)">Insights</button>
-              <button class="sub-tab" onclick="showSubTab('org-masks','omk-ranktracker',this); window.initRankTracker('masks');">Rank Tracker</button>
-      </div>
-      <div class="sub-page active" id="omk-insights">
-        <div class="insight-grid" style="grid-template-columns:1fr 1fr;">
-          <div class="ppc-opp-card action-type">
-            <div class="ppc-opp-hd"><div class="ppc-opp-badge urgent">⚡ ACTION</div></div>
-            <div class="ppc-opp-body"><ul style="margin:0;padding-left:18px;">
-              <li>⚠ Promote Mask (EVO0008) title missing "MIGUARD" prefix — fix for brand consistency before PPC spend</li>
-              <li>Launch PPC on "deep conditioning hair mask" + "hair mask for hair growth" as core terms for both masks</li>
-            </ul></div>
-          </div>
-          <div class="ppc-opp-card opportunity-type">
-            <div class="ppc-opp-hd"><div class="ppc-opp-badge high">💡 OPPORTUNITY</div></div>
-            <div class="ppc-opp-body"><ul style="margin:0;padding-left:18px;">
-              <li>Reverse Mask: unique angle on "collagen hair mask" — in INCI, low competition, defensible claim. Add to title if character limit allows.</li>
-            </ul></div>
-          </div>
-        </div>
-        <div class="org-section-title">Fastest Path to Page 1 — Hair Masks</div>
-        <div class="p1-list" id="omk-p1-list"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
-      </div>
-          <div class="sub-page" id="omk-ranktracker">
-        <div class="org-sqp-alert" id="omk-rt-banner">
-          <span>📈</span>
-          <span id="omk-rt-banner-text">Loading…</span>
-        </div>
-        <div class="org-sqp-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-            <div class="org-sqp-title" style="margin-bottom:0;">Rank Changes <span class="org-sqp-badge" id="omk-rt-daterange">Loading…</span></div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <label style="font-size:11px;color:var(--muted);">Compare to:</label>
-              <select id="omk-rt-window" onchange="window.renderRankTracker('masks')" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);">
-                <option value="7">1 week ago</option>
-                <option value="28" selected>~4 weeks ago</option>
-                <option value="84">~12 weeks ago</option>
-                <option value="9999">Earliest available</option>
-              </select>
-            </div>
-          </div>
-          <div style="overflow-x:auto;">
-            <table class="data-table">
-              <thead><tr>
-                <th>Product</th><th>Keyword</th><th>Vol/mo</th>
-                <th id="omk-rt-col-older">Earlier</th><th id="omk-rt-col-newer">Latest</th>
-                <th>Change</th><th>Where in Listing</th><th>PPC (Spend · Sales · ACoS)</th><th>Recommended Action</th>
-              </tr></thead>
-              <tbody id="omk-rt-tbody"><tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);font-style:italic;">Loading…</td></tr></tbody>
-            </table>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6;">
-            Rows are sorted with anything needing immediate attention first (🔴), then best-performing, down to lowest-performing — not alphabetical or by volume.<br>
-            <strong>Where in Listing</strong> and <strong>PPC</strong> are always live — recomputed from the listing-copy and ad-search-terms sheets on every page load. PPC is exact-match only (a keyword tracked as "hair growth serum" won't catch spend under "hair growth serums") — a wrong fuzzy match that looks confident is worse than an honest "No spend."<br>
-            <strong>Recommended Action</strong> shows the ✨ AI-written recommendation (factors in rank change, PPC performance, and listing placement together) whenever one exists for that keyword — generated by Run Analysis, not on every page load, so it's only as fresh as the last time someone clicked it. Keywords Run Analysis hasn't covered yet fall back to a simpler rank-only rule, shown without the ✨.<br>
-            <strong>Where in Listing</strong> reflects the live listing copy as of its last sync only — it can't show when a keyword was added, since the listings sheet doesn't keep dated history.
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /org-masks -->
-
-    <!-- ══ DRY SHAMPOO ══ -->
-    <div class="channel-page" id="org-dryshampoo">
-      <div class="sub-tabs">
-        <button class="sub-tab active" onclick="showSubTab('org-dryshampoo','ods-insights',this)">Insights</button>
-              <button class="sub-tab" onclick="showSubTab('org-dryshampoo','ods-ranktracker',this); window.initRankTracker('dryshampoo');">Rank Tracker</button>
-      </div>
-      <div class="sub-page active" id="ods-insights">
-        <div class="insight-grid" style="grid-template-columns:1fr 1fr;">
-          <div class="ppc-opp-card action-type">
-            <div class="ppc-opp-hd"><div class="ppc-opp-badge urgent">⚡ ACTION</div></div>
-            <div class="ppc-opp-body"><ul style="margin:0;padding-left:18px;">
-              <li>Own "dry shampoo for dark hair" — residue-free claim is genuine, low competition, and differentiates from mass brands. Launch exact match.</li>
-              <li>Add "dry shampoo for thinning hair" to listing copy explicitly — miguard has a genuine claim (FGF5 botanicals, scalp health) that no mass brand can make</li>
-            </ul></div>
-          </div>
-          <div class="ppc-opp-card opportunity-type">
-            <div class="ppc-opp-hd"><div class="ppc-opp-badge high">💡 OPPORTUNITY</div></div>
-            <div class="ppc-opp-body"><ul style="margin:0;padding-left:18px;">
-              <li>Consider "non comedogenic dry shampoo" as a Sponsored Brand headline — unique, defensible, and likely uncontested by any current competitor</li>
-            </ul></div>
-          </div>
-        </div>
-        <div class="org-section-title">Fastest Path to Page 1 — Dry Shampoo</div>
-        <div class="p1-list" id="ods-p1-list"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
-      </div>
-          <div class="sub-page" id="ods-ranktracker">
-        <div class="org-sqp-alert" id="ods-rt-banner">
-          <span>📈</span>
-          <span id="ods-rt-banner-text">Loading…</span>
-        </div>
-        <div class="org-sqp-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-            <div class="org-sqp-title" style="margin-bottom:0;">Rank Changes <span class="org-sqp-badge" id="ods-rt-daterange">Loading…</span></div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <label style="font-size:11px;color:var(--muted);">Compare to:</label>
-              <select id="ods-rt-window" onchange="window.renderRankTracker('dryshampoo')" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);">
-                <option value="7">1 week ago</option>
-                <option value="28" selected>~4 weeks ago</option>
-                <option value="84">~12 weeks ago</option>
-                <option value="9999">Earliest available</option>
-              </select>
-            </div>
-          </div>
-          <div style="overflow-x:auto;">
-            <table class="data-table">
-              <thead><tr>
-                <th>Product</th><th>Keyword</th><th>Vol/mo</th>
-                <th id="ods-rt-col-older">Earlier</th><th id="ods-rt-col-newer">Latest</th>
-                <th>Change</th><th>Where in Listing</th><th>PPC (Spend · Sales · ACoS)</th><th>Recommended Action</th>
-              </tr></thead>
-              <tbody id="ods-rt-tbody"><tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted);font-style:italic;">Loading…</td></tr></tbody>
-            </table>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6;">
-            Rows are sorted with anything needing immediate attention first (🔴), then best-performing, down to lowest-performing — not alphabetical or by volume.<br>
-            <strong>Where in Listing</strong> and <strong>PPC</strong> are always live — recomputed from the listing-copy and ad-search-terms sheets on every page load. PPC is exact-match only (a keyword tracked as "hair growth serum" won't catch spend under "hair growth serums") — a wrong fuzzy match that looks confident is worse than an honest "No spend."<br>
-            <strong>Recommended Action</strong> shows the ✨ AI-written recommendation (factors in rank change, PPC performance, and listing placement together) whenever one exists for that keyword — generated by Run Analysis, not on every page load, so it's only as fresh as the last time someone clicked it. Keywords Run Analysis hasn't covered yet fall back to a simpler rank-only rule, shown without the ✨.<br>
-            <strong>Where in Listing</strong> reflects the live listing copy as of its last sync only — it can't show when a keyword was added, since the listings sheet doesn't keep dated history.
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /org-dryshampoo -->
 
   </div><!-- /page-organic -->
 
@@ -3965,7 +3674,7 @@ function showPage(id, btn) {
   // shared keyword tracker data now rather than waiting for someone to
   // click into Rank Tracker first. initRankTracker caches internally, so
   // this is a no-op on subsequent visits to the page.
-  if (id === 'organic' && typeof window.initRankTracker === 'function') window.initRankTracker('activators');
+  if (id === 'organic' && typeof window.initRankTracker === 'function') window.initRankTracker('miguard');
 
   // Export PDF Report button — only shown on the three "performance" pages
   // (Sales, Marketing, Events). Hidden everywhere else (Overview, Inventory,
@@ -10175,8 +9884,8 @@ async function initSnsExternal() {
 
   // DOM id prefix per category — matches each tab's own existing
   // "Insights" sub-page naming convention (oa-/osh-/ocd-/omk-/ods-).
-  const RT_ID_PREFIX = { activators: 'oa', shampoos: 'osh', conditioners: 'ocd', masks: 'omk', dryshampoo: 'ods' };
-  const RT_CATEGORY_LABEL = { activators: 'Activator', shampoos: 'Shampoo', conditioners: 'Conditioner', masks: 'Hair Mask', dryshampoo: 'Dry Shampoo' };
+  const RT_ID_PREFIX = { miguard: 'oa' };
+  const RT_CATEGORY_LABEL = { miguard: 'MiGuard Supplements' };
 
   function csvUrl() {
     return `https://docs.google.com/spreadsheets/d/${KW_TRACKER_SHEET_ID}/export?format=csv&gid=${KW_TRACKER_GID}&_cb=${Date.now()}`;
@@ -10405,7 +10114,7 @@ async function initSnsExternal() {
   // anymore (the Activators HTML now calls initRankTracker('activators')
   // directly, same as the other 4 categories), kept only in case
   // anything external still references the old name.
-  window.initRankTrackerActivators = function () { return window.initRankTracker('activators'); };
+  window.initRankTrackerActivators = function () { return window.initRankTracker('miguard'); };
 
   window.renderRankTracker = function (category) {
     if (!_kwRows) return; // not loaded yet — initRankTracker will call this once it is
@@ -10583,7 +10292,7 @@ async function initSnsExternal() {
     if (banner) banner.style.borderColor = urgentCount > 0 ? 'rgba(219,55,45,.4)' : (declined + droppedOut > improved + newlyRanking ? 'rgba(219,55,45,.3)' : 'rgba(36,233,163,.3)');
   };
   // Backward-compatible alias.
-  window.renderRankTrackerActivators = function () { return window.renderRankTracker('activators'); };
+  window.renderRankTrackerActivators = function () { return window.renderRankTracker('miguard'); };
 })();
 
 
@@ -13861,6 +13570,13 @@ const REVIEW_CATEGORY_PRODUCTS = {
   dryshampoo: [
     { sku: 'EVO0012', asin: 'B08BGCRKTV', label: 'Style + Treat Dry Shampoo' },
   ],
+  // MiGuard is single-product. Kept as a new key alongside évolis's
+  // existing category keys (rather than replacing them) since this same
+  // object is also read by the Reviews tab and Rank Tracker — neither of
+  // which has been migrated off évolis's category structure yet.
+  miguard: [
+    { sku: 'MIG0001', asin: 'B0B9187Q4P', label: 'MiGuard Supplements' },
+  ],
 };
 // Exposed globally 2026-08-08 so the Rank Tracker (Organic tab, a
 // different <script> block/scope) can reuse this same product list
@@ -15315,25 +15031,9 @@ async function ppcLoadStrategyByProduct() {
       container.innerHTML = cardsHtml;
     };
 
-    Object.keys(REVIEW_CATEGORY_PRODUCTS).forEach(catKey => {
-      const containerId = { activators: 'ppc-act', shampoos: 'ppc-shampoo', conditioners: 'ppc-cond', masks: 'ppc-mask', dryshampoo: 'ppc-dry' }[catKey];
-      renderIntoContainer(containerId, REVIEW_CATEGORY_PRODUCTS[catKey]);
-    });
-
-    // Bundles — added 2026-08-10 per Jaclyn. Product list is dynamic
-    // (getBundleProducts(), built from Product Short Name), not
-    // hardcoded like the 5 categories above — bundle SKUs/ASINs are
-    // opaque Amazon-generated codes not worth hand-copying. Card
-    // rendering itself needs no changes: ppc_strategy rows for bundle
-    // SKUs have the exact same shape as any other product now that
-    // Business Report and the OOS cross-reference both cover them.
-    const bundleProducts = await getBundleProducts();
-    if (bundleProducts.length) {
-      renderIntoContainer('ppc-bundles', bundleProducts);
-    } else {
-      const bundlesContainer = document.getElementById('ppc-bundles-container');
-      if (bundlesContainer) bundlesContainer.innerHTML = '<div style="color:var(--muted);font-size:12px;">No bundle SKUs found on Product Short Name.</div>';
-    }
+    // MiGuard is single-product — one container, no per-category loop or
+    // bundles handling (no bundle SKUs exist for this brand).
+    renderIntoContainer('ppc-miguard', REVIEW_CATEGORY_PRODUCTS.miguard);
   } catch (err) {
     console.warn('[PPC] strategy by product failed:', err.message);
   }
