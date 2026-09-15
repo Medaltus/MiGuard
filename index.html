@@ -3750,7 +3750,7 @@ function showChannel(page, channelId, btn) {
     if (channelId === 'm-opportunities' && !window._snsChart) initSns();
     if (channelId === 'ev-primeday')     window.initPrimeDayReport();
     if (channelId === 'ev-spring')       window.initBigSpringSaleReport();
-    if (channelId === 'ev-pbdd')         window.initPBDDReport();
+    if (channelId === 'ev-pbdd') { window.initPBDDReport(); window.initPbddEventHeader(); }
     if (channelId === 'ev-bfcm')         window.initBFCMReport();
     if (channelId === 'inv-oos-log')     window.initOosLog();
     if (channelId === 'm-fulfillment-cs') window.initMarketingFulfillmentCS();
@@ -11496,7 +11496,14 @@ async function initSnsExternal() {
             getProductNames(),
           ]);
 
-          const dateEl = document.getElementById(`${cfg.prefix}-event-dates`);
+          // Per Jaclyn 2026-09-15: pbdd-event-dates is now owned by the
+          // dedicated initPbddEventHeader() below (last-row-of-sheet logic,
+          // not filtered to this event name), so skip writing it here to
+          // avoid a race between the two async lookups both targeting the
+          // same element. bss/bfcm are untouched — they still use this
+          // exact-name-matched date, which is what their KPI/chart data
+          // below is also scoped to.
+          const dateEl = cfg.prefix === 'pbdd' ? null : document.getElementById(`${cfg.prefix}-event-dates`);
           if (dates.current) {
             if (dateEl) dateEl.innerHTML = eventDatesHtml(dates.current, dates.previous);
           } else if (dateEl) {
@@ -11554,6 +11561,64 @@ async function initSnsExternal() {
   window.initBigSpringSaleReport = makeInitFn(EVENTS.bss);
   window.initPBDDReport          = makeInitFn(EVENTS.pbdd);
   window.initBFCMReport          = makeInitFn(EVENTS.bfcm);
+
+  // Strategy-page header (title + dates) for ev-pbdd — added 2026-09-15
+  // per Jaclyn. Deliberately separate from getEventDates(eventName) above:
+  // that function is exact-name-matched to "Prime Big Deal Days" on
+  // purpose, because the KPI cards and Top Sellers chart further down
+  // this same page need THIS event's own real sales data, not whichever
+  // event was added most recently. This header, by contrast, is meant to
+  // require zero code changes going forward — Jaclyn just adds a new row
+  // to the Events tab before each event and the page reflects it — so it
+  // deliberately does NOT filter by event name at all: it takes literally
+  // the last row on the sheet, whatever event that is. Per Jaclyn
+  // 2026-09-15: this can mean the title/dates and the KPI data below
+  // disagree if a different event's row ever gets added after PBDD's own
+  // (e.g. a BFCM row) — accepted tradeoff for not having to touch code
+  // before every event.
+  window.initPbddEventHeader = function () {
+    if (window._pbddHeaderPromise) return window._pbddHeaderPromise;
+    window._pbddHeaderPromise = (async function () {
+      const titleEl = document.getElementById('pbdd-event-title');
+      const dateEl  = document.getElementById('pbdd-event-dates');
+      try {
+        const csv = await fetch(sheetCsvUrl(EVENTS_SHEET_ID, EVENTS_GID)).then(r => r.ok ? r.text() : '').catch(() => '');
+        if (!isCsv(csv)) {
+          if (dateEl) dateEl.textContent = 'Event dates not found on Events tab.';
+          return;
+        }
+        const rows = parseCsv(csv).filter(r => (r['Event Name'] || '').trim());
+        const last = rows[rows.length - 1] || null;
+        if (!last) {
+          if (dateEl) dateEl.textContent = 'Event dates not found on Events tab.';
+          return;
+        }
+
+        if (titleEl) {
+          const rawName = (last['Event Name'] || '').trim();
+          // Auto-prefix "Amazon " so typing just "Prime Big Deal Days" still
+          // reads "Amazon Prime Big Deal Days" as it does today — but don't
+          // double it up if someone already typed the full name themselves.
+          titleEl.textContent = /^amazon\s/i.test(rawName) ? rawName : (rawName ? `Amazon ${rawName}` : 'Amazon');
+        }
+
+        if (dateEl) {
+          const isTbd = v => !v || !v.trim() || /^tbd$/i.test(v.trim()) || /tbd/i.test(v.trim());
+          const startRaw = last.start_date || '';
+          const endRaw   = last.end_date || '';
+          if (isTbd(startRaw) || isTbd(endRaw)) {
+            dateEl.textContent = 'Dates TBD';
+          } else {
+            dateEl.innerHTML = `<span style="color:var(--navy);font-weight:700;">${fmtDate(startRaw)} – ${fmtDate(endRaw)}</span>`;
+          }
+        }
+      } catch (err) {
+        console.error('[PbddEventHeader]', err.message);
+        if (dateEl) dateEl.textContent = 'Error loading event data: ' + err.message;
+      }
+    })();
+    return window._pbddHeaderPromise;
+  };
 })();
 
 
@@ -18372,15 +18437,28 @@ async function loadAuditResultsFromSheet() {
     return full + ' ' + m[2];
   }
 
-  function pdfxHeaderBand(monthYear, activeTab) {
+  // overrideLabel/overrideSub — added 2026-09-15 per Jaclyn, for the
+  // Strategy page specifically: it has no room to carry the KPI-page-style
+  // "dates below the title" block seen on ev-pbdd itself (too much content
+  // already fills the page), so instead the header's own month/year line
+  // gets swapped for the event name, with a small date line underneath —
+  // just enough for whoever's reading the export to know which event this
+  // strategy is for. Both optional and default to undefined, so every
+  // other page's call (buildCoverPage, buildEventPage, etc.) is completely
+  // unaffected — they don't pass these args, so monthYear renders exactly
+  // as before.
+  function pdfxHeaderBand(monthYear, activeTab, overrideLabel, overrideSub) {
     const tabs = ['Sales', 'Fulfillment & Customer Service', 'Brand Stewardship', 'Opportunities', 'Events'];
     const tabsHtml = tabs.map(function (t) {
       return '<span class="pdfx-tab' + (t === activeTab ? ' on' : '') + '">' + t + '</span>';
     }).join('');
+    const subHtml = overrideSub
+      ? '<div style="font-size:9px;font-weight:500;color:rgba(255,255,255,.65);margin-top:1px;">' + pdfxEscape(overrideSub) + '</div>'
+      : '';
     return '<div class="pdfx-topband">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
         '<span class="pdfx-logo-navy" style="margin-left:-30.5px;display:inline-block;">' + pdfxLogoHtml('height:40px;width:auto;filter:brightness(0) invert(1);') + '</span>' +
-        '<div class="pdfx-tagright"><div class="pdfx-hdr-tag">Brand Performance Report</div><div class="pdfx-hdr-month">' + pdfxEscape(monthYear) + '</div></div>' +
+        '<div class="pdfx-tagright"><div class="pdfx-hdr-tag">Brand Performance Report</div><div class="pdfx-hdr-month">' + pdfxEscape(overrideLabel || monthYear) + '</div>' + subHtml + '</div>' +
       '</div>' +
       '<div class="pdfx-tabs">' + tabsHtml + '</div>' +
       '</div>' +
@@ -18759,22 +18837,29 @@ async function loadAuditResultsFromSheet() {
       '</div>' + itemsHtml + '</div>';
   }
   function buildStrategyPage(monthYear) {
+    // Reads the same live pbdd-event-title/pbdd-event-dates text the
+    // dashboard header now shows (populated by initPbddEventHeader(),
+    // already awaited before PDF page-building starts) — no separate
+    // fetch needed, just reusing what's already computed.
+    const eventLabel = pdfxText('#pbdd-event-title') || 'Amazon Prime Big Deal Days';
+    const eventDates = pdfxText('#pbdd-event-dates') || 'Dates TBD';
+
     const leadUp = pdfxStrategyPhase('lead-up', 'Phase 01', 'Lead Up', 'Prepare',
-      pdfxStrategyItem('Listings &amp; SEO', 'Refresh listing content, images, and A+ Content to ensure <strong>maximum search visibility and conversion readiness</strong> before traffic surges.') +
+      pdfxStrategyItem('Listings & SEO', 'Refresh listing content, images, and A+ Content to ensure <strong>maximum search visibility and conversion readiness</strong> before traffic surges.') +
       pdfxStrategyItem('Advertising', 'Gradually <strong>increase budgets 1.5–3x and bids 10%+</strong> in the 7–14 days prior to warm the algorithm and activate event-specific campaigns.') +
-      pdfxStrategyItem('Promotions &amp; Pricing', 'Finalize Prime Exclusive Discounts and <strong>confirm all deals are submitted, eligible, and approved</strong> with sufficient lead time.') +
-      pdfxStrategyItem('Inventory &amp; Operations', 'Confirm FBA stock coverage, inbound timelines, and <strong>buffer inventory levels to prevent sell-outs</strong> during peak demand.') +
-      pdfxStrategyItem('Creative &amp; Storefront', 'Upload refreshed imagery and <strong>add promotional banners and curated storefront landing pages</strong> optimized for high-traffic event conditions.') +
+      pdfxStrategyItem('Promotions & Pricing', 'Finalize Prime Exclusive Discounts and <strong>confirm all deals are submitted, eligible, and approved</strong> with sufficient lead time.') +
+      pdfxStrategyItem('Inventory & Operations', 'Confirm FBA stock coverage, inbound timelines, and <strong>buffer inventory levels to prevent sell-outs</strong> during peak demand.') +
+      pdfxStrategyItem('Creative & Storefront', 'Upload refreshed imagery and <strong>add promotional banners and curated storefront landing pages</strong> optimized for high-traffic event conditions.') +
       pdfxStrategyItem('Content Health Check', 'Resolve any listing suppressions, Q&amp;A gaps, and negative review flags <strong>before traffic surges</strong> — a suppressed listing during an event is a direct missed opportunity.')
     );
     const during = pdfxStrategyPhase('during', 'Phase 02', 'During', 'Execute',
       pdfxStrategyItem('Real-Time Ad Optimization', '<strong>Increase budgets 2–4x and bids 20%+</strong> as CPCs rise. Reallocate spend to top performers in real time across all ad placements.') +
-      pdfxStrategyItem('Deal &amp; Buy Box Monitoring', 'Ensure all discounts are active and the <strong>Buy Box is stable</strong>. Resolve any pricing issues immediately — lost Buy Box is direct lost revenue.') +
-      pdfxStrategyItem('Listing &amp; Inventory Health', 'Monitor for suppressed listings and <strong>low-inventory alerts in real time</strong> to prevent conversion interruptions across the event window.') +
+      pdfxStrategyItem('Deal & Buy Box Monitoring', 'Ensure all discounts are active and the <strong>Buy Box is stable</strong>. Resolve any pricing issues immediately — lost Buy Box is direct lost revenue.') +
+      pdfxStrategyItem('Listing & Inventory Health', 'Monitor for suppressed listings and <strong>low-inventory alerts in real time</strong> to prevent conversion interruptions across the event window.') +
       pdfxStrategyItem('Performance Tracking', 'Watch sessions, conversion rate, ACOS, and sell-through velocity continuously. <strong>Make decisions from live data</strong>, not post-event analysis.')
     );
     const leadOut = pdfxStrategyPhase('lead-out', 'Phase 03', 'Lead Out', 'Capitalize',
-      pdfxStrategyItem('Retargeting &amp; Display', 'Run Sponsored Display ads to <strong>re-engage shoppers who viewed but didn\u2019t convert</strong> during the event window.') +
+      pdfxStrategyItem('Retargeting & Display', 'Run Sponsored Display ads to <strong>re-engage shoppers who viewed but didn\u2019t convert</strong> during the event window.') +
       pdfxStrategyItem('Listing Refinement', 'Update keywords and creatives using <strong>what actually converted</strong> during the event — real data is the best optimization input.') +
       pdfxStrategyItem('Brand Halo Expansion', 'Capitalize on new-to-brand traffic with <strong>cross-sell and complementary product campaigns</strong> to increase basket size.') +
       pdfxStrategyItem('Inventory Replenishment', 'Adjust restock strategies based on <strong>post-event velocity and new customer acquisition rates</strong>.') +
@@ -18797,7 +18882,7 @@ async function loadAuditResultsFromSheet() {
     // this looks clean rather than cramped — can't visually verify
     // page-break behavior from here.
     const page1 = '<div class="pdfx-page"><div class="pdfx-inner">' +
-      pdfxHeaderBand(monthYear, 'Events') +
+      pdfxHeaderBand(monthYear, 'Events', eventLabel, eventDates) +
       '<div class="pdfx-chlabel">Event Strategy</div>' +
       leadUp + during + leadOut + outlook +
       pdfxFooter(monthYear) +
@@ -18918,6 +19003,14 @@ async function loadAuditResultsFromSheet() {
         (includeSections.pd && typeof window.initPrimeDayReport === 'function') ? window.initPrimeDayReport() : null,
         (includeSections.bss  && typeof window.initBigSpringSaleReport === 'function') ? window.initBigSpringSaleReport() : null,
         (includeSections.pbdd && typeof window.initPBDDReport === 'function')          ? window.initPBDDReport()          : null,
+        // Per Jaclyn 2026-09-15: pbdd-event-dates is populated by this
+        // dedicated header function now, not initPBDDReport() — needs to
+        // be awaited here too or the PDF would export with blank dates.
+        // Triggered by EITHER checkbox, not just pbdd — buildStrategyPage()
+        // now also reads pbdd-event-title/pbdd-event-dates for its own
+        // header override, and Strategy can be included without the PBDD
+        // report page being checked at all.
+        ((includeSections.pbdd || includeSections.strategy) && typeof window.initPbddEventHeader === 'function') ? window.initPbddEventHeader() : null,
         (includeSections.bfcm && typeof window.initBFCMReport === 'function')          ? window.initBFCMReport()          : null,
       ].filter(Boolean);
       if (initPromises.length) {
@@ -19000,7 +19093,7 @@ async function loadAuditResultsFromSheet() {
         includeSections.strategy ? buildStrategyPage(monthYear) : '',
         includeSections.bss  ? buildEventPage('bss',  'Big Spring Sale',             monthYear) : '',
         includeSections.pd   ? buildEventPage('pd',   'Prime Day',                   monthYear) : '',
-        includeSections.pbdd ? buildEventPage('pbdd', 'Prime Big Deal Days',         monthYear) : '',
+        includeSections.pbdd ? buildEventPage('pbdd', pdfxText('#pbdd-event-title') || 'Prime Big Deal Days', monthYear) : '',
         includeSections.bfcm ? buildEventPage('bfcm', 'Black Friday & Cyber Monday', monthYear) : '',
       ].join('');
 
