@@ -11422,49 +11422,89 @@ async function initSnsExternal() {
   // disagree if a different event's row ever gets added after PBDD's own
   // (e.g. a BFCM row) — accepted tradeoff for not having to touch code
   // before every event.
+  // Strategy-page header (title + dates) — added 2026-09-15 per Jaclyn,
+  // extended same day after catching a second gap: this was only wired to
+  // ev-pbdd's own Report tab elements (pbdd-event-title/pbdd-event-dates),
+  // but there's a SEPARATE, live "Strategy" tab (ev-strategy — the
+  // default-active tab on the Events page) with its own hardcoded
+  // evs-headline/evs-dates that this never touched. Both now share this
+  // one fetch/lookup. Deliberately separate from getEventDates(eventName)
+  // above: that function is exact-name-matched to "Prime Big Deal Days"
+  // on purpose, because the KPI cards and Top Sellers chart further down
+  // the ev-pbdd page need THIS event's own real sales data, not whichever
+  // event was added most recently. This header, by contrast, is meant to
+  // require zero code changes going forward — Jaclyn just adds a new row
+  // to the Events tab before each event and both places reflect it — so
+  // it deliberately does NOT filter by event name at all: it takes
+  // literally the last row on the sheet, whatever event that is. Per
+  // Jaclyn 2026-09-15: this can mean the title/dates and the KPI data
+  // below disagree if a different event's row ever gets added after
+  // PBDD's own (e.g. a BFCM row) — accepted tradeoff for not having to
+  // touch code before every event.
+  function fmtDateCompact(startIso, endIso) {
+    if (!startIso || !endIso) return '';
+    const [sy, sm] = startIso.split('-').map(Number);
+    const [ey, em] = endIso.split('-').map(Number);
+    if (sy === ey && sm === em) {
+      // Same month/year — "June 23 – 26, 2026", matching the format this
+      // element already used before this was hardcoded content.
+      const startFull = fmtDate(startIso); // "June 23, 2026"
+      const endDay = endIso.split('-')[2].replace(/^0/, '');
+      return startFull.replace(/,\s*\d{4}$/, '') + ' – ' + endDay + ', ' + ey;
+    }
+    return fmtDate(startIso) + ' – ' + fmtDate(endIso);
+  }
+
   window.initPbddEventHeader = function () {
     if (window._pbddHeaderPromise) return window._pbddHeaderPromise;
     window._pbddHeaderPromise = (async function () {
-      const titleEl = document.getElementById('pbdd-event-title');
-      const dateEl  = document.getElementById('pbdd-event-dates');
+      const titleEl   = document.getElementById('pbdd-event-title');
+      const dateEl    = document.getElementById('pbdd-event-dates');
+      const stratTitleEl = document.getElementById('evs-headline');
+      const stratDateEl  = document.getElementById('evs-dates');
+      const setErr = (msg) => { if (dateEl) dateEl.textContent = msg; if (stratDateEl) stratDateEl.textContent = msg; };
       try {
         const csv = await fetch(sheetCsvUrl(EVENTS_SHEET_ID, EVENTS_GID)).then(r => r.ok ? r.text() : '').catch(() => '');
-        if (!isCsv(csv)) {
-          if (dateEl) dateEl.textContent = 'Event dates not found on Events tab.';
-          return;
-        }
+        if (!isCsv(csv)) { setErr('Event dates not found on Events tab.'); return; }
         const rows = parseCsv(csv).filter(r => (r['Event Name'] || '').trim());
         const last = rows[rows.length - 1] || null;
-        if (!last) {
-          if (dateEl) dateEl.textContent = 'Event dates not found on Events tab.';
-          return;
-        }
+        if (!last) { setErr('Event dates not found on Events tab.'); return; }
 
-        if (titleEl) {
-          const rawName = (last['Event Name'] || '').trim();
-          // Auto-prefix "Amazon " so typing just "Prime Big Deal Days" still
-          // reads "Amazon Prime Big Deal Days" as it does today — but don't
-          // double it up if someone already typed the full name themselves.
-          titleEl.textContent = /^amazon\s/i.test(rawName) ? rawName : (rawName ? `Amazon ${rawName}` : 'Amazon');
-        }
+        const rawName = (last['Event Name'] || '').trim();
+        // Auto-prefix "Amazon " so typing just "Prime Big Deal Days" still
+        // reads "Amazon Prime Big Deal Days" as it does today — but don't
+        // double it up if someone already typed the full name themselves.
+        const fullTitle = /^amazon\s/i.test(rawName) ? rawName : (rawName ? `Amazon ${rawName}` : 'Amazon');
+        if (titleEl) titleEl.textContent = fullTitle;
+        if (stratTitleEl) stratTitleEl.textContent = fullTitle;
 
-        if (dateEl) {
-          const isTbd = v => !v || !v.trim() || /^tbd$/i.test(v.trim()) || /tbd/i.test(v.trim());
-          const startRaw = last.start_date || '';
-          const endRaw   = last.end_date || '';
-          if (isTbd(startRaw) || isTbd(endRaw)) {
-            dateEl.textContent = 'Dates TBD';
-          } else {
-            dateEl.innerHTML = `<span style="color:var(--navy);font-weight:700;">${fmtDate(startRaw)} – ${fmtDate(endRaw)}</span>`;
-          }
+        const isTbd = v => !v || !v.trim() || /^tbd$/i.test(v.trim()) || /tbd/i.test(v.trim());
+        const startRaw = last.start_date || '';
+        const endRaw   = last.end_date || '';
+        if (isTbd(startRaw) || isTbd(endRaw)) {
+          if (dateEl) dateEl.textContent = 'Dates TBD';
+          if (stratDateEl) stratDateEl.textContent = 'Dates TBD';
+        } else {
+          if (dateEl) dateEl.innerHTML = `<span style="color:var(--navy);font-weight:700;">${fmtDate(startRaw)} – ${fmtDate(endRaw)}</span>`;
+          if (stratDateEl) stratDateEl.textContent = fmtDateCompact(startRaw, endRaw);
         }
       } catch (err) {
         console.error('[PbddEventHeader]', err.message);
-        if (dateEl) dateEl.textContent = 'Error loading event data: ' + err.message;
+        setErr('Error loading event data: ' + err.message);
       }
     })();
     return window._pbddHeaderPromise;
   };
+
+  // ev-strategy is the default-active tab on the Events page (shown
+  // immediately on load, not behind a click), so unlike ev-pbdd — which
+  // gets this same data via the showChannel tab-open handler — nothing
+  // was calling this on initial page load. Fires once here; the
+  // window._pbddHeaderPromise cache above means the later ev-pbdd
+  // tab-click call is a no-op if this already ran.
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof window.initPbddEventHeader === 'function') window.initPbddEventHeader();
+  });
 })();
 
 
