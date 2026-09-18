@@ -749,6 +749,18 @@ COMPETITOR + CATEGORY-LEADER EVIDENCE:
 - Comparative context is not a template. Do not copy competitor wording or assume competitor claims/listings are compliant or substantiated for this product.
 - Use market data to understand positioning, shopper expectations and supported differentiation. Product-specific evidence outranks competitor/category convention.
 
+HOLISTIC PDP STRATEGY — REQUIRED BEFORE WRITING ANY FIELD:
+- Treat the title, Item Highlights, five bullets, description and backend keywords as one coordinated content system. Do not audit or rewrite a field in isolation.
+- First inventory the complete available evidence: PRODUCT CONTEXT, AUDIT GUARDRAILS, current listing, prior audit, business performance, keyword rankings and search volume, strategy groups, SKU-attributed ad terms, customer reviews, ingredients, brand insights and market context.
+- Build an internal content-priority map before generating rewrites. Identify: core product/use, purchase-critical facts, meaningful differentiators, substantiated proof, key ingredients, recurring customer needs or confusion, compliance constraints, established ranking terms, growth keyword opportunities, and useful information currently missing from the PDP.
+- Rank concepts by their value to shopper comprehension, conversion, differentiation, SEO defense, SEO growth and compliance. Existing copy does not receive priority merely because it is already present. PRODUCT CONTEXT is the source of truth for deciding which accurate product facts deserve PDP real estate.
+- Then assign each high-priority concept to its strongest appropriate field. Use the title for immediate product identification and the most valuable natural-fit search language; Item Highlights for rapid differentiation; bullets for the five strongest purchase-driving messages; description for useful detail, mechanism, education and supporting information; backend for relevant indexed keyword coverage that does not need shopper-facing placement.
+- Eliminate cross-field redundancy. Once a core benefit is clearly established, do not spend scarce space restating it in multiple bullets unless repetition is strategically justified by shopper comprehension or keyword protection.
+- Character limits are allocation constraints, not instructions to compress the current field. When a field is over limit, decide which concepts should remain, which should move, which are redundant or low-value enough to remove, and whether higher-priority unused PRODUCT CONTEXT or customer evidence should replace existing copy.
+- Do not silently discard meaningful information. If a product fact, customer need, differentiator, proof point or targeted keyword is removed from one field, determine whether it warrants relocation elsewhere in the PDP. State material relocations or intentional omissions concisely in the relevant NOTES field.
+- Do not assume all five current bullet topics deserve to survive. Select the five highest-value, nonredundant messages for this specific SKU from all available evidence. Likewise, do not omit a stronger unused message merely because no current bullet contains it.
+- Before finalizing, perform a whole-PDP coverage check: confirm the rewrites collectively communicate what the product is, why it matters, its strongest supported differentiators, the most important customer information, and the deliberate keyword strategy without avoidable duplication.
+
 KEYWORD TIER CLASSIFICATION — DO NOT CONFUSE STRATEGY WITH PERFORMANCE:
 - Top 20, Opportunity, and Reach for the Stars are STRATEGY GROUPS: they identify keywords we want to target.
 - Tier 1, Tier 2, and Tier 3 are PERFORMANCE GROUPS: they are determined from current SHEET_KEYWORD_TRACKER data and the existing tenure logic.
@@ -767,8 +779,18 @@ TITLE KEYWORD SELECTION:
 - When shortening a title to meet the character limit, first look for a shorter accurate/compliant phrase from the supplied target keyword lists. Do not fill newly available title space with invented SEO terminology while relevant target keywords are available.
 - Consider current organic rank, search volume, strategy group, exact product relevance, compliance, and shopper comprehension together. Do not keyword-stuff.
 
+SEO EQUITY DEFENSE + KEYWORD RELOCATION:
+- Treat meaningful existing organic rankings as established SEO equity. The goal is incremental visibility growth without avoidable backsliding.
+- Before removing, materially altering, or reducing the prominence of a ranked keyword, evaluate its current organic rank, search volume, current PDP placement, exact product relevance and strategic importance. Consider ranking trajectory when trajectory data is supplied; never invent a trend when only current rank is available.
+- Protect valuable ranking terms in their current prominent field when practical. A larger-volume opportunity does not automatically justify displacing a relevant term with an established valuable ranking.
+- Before removing any targeted or ranked keyword from a field, check whether it appears elsewhere in the current PDP and proposed PDP. If it deserves continued coverage, relocate it to the strongest natural and compliant field available rather than letting it disappear.
+- Preserve exact keyword phrasing or a natural grammatical form when doing so remains accurate and readable. Do not force awkward repetition, keyword stuffing, irrelevant terms or noncompliant claims solely to preserve text.
+- Evaluate defense and opportunity together: protect what the ASIN is already winning, identify valuable coverage gaps, and add realistic growth terms without unnecessarily sacrificing existing visibility.
+- If an important keyword must be removed because it is inaccurate, noncompliant, irreconcilably awkward or displaced by materially stronger evidence, explain the tradeoff in the relevant NOTES field.
+- Complete this defense analysis before drafting rewrites, not as a QA step after the copy has already been written.
+
 KEYWORD COVERAGE RULES — priority order matters, read the tiers below carefully:
-- TIER 1 keywords (already ranking page 1) are the HIGHEST priority of anything in this audit — higher than adding any new keyword, higher than fixing a coverage gap. If a rewrite would remove or weaken a Tier 1 keyword's presence in whatever field it currently occupies, that is a critical problem — flag it explicitly and do not let the rewrite do that. We never want to lose a page-1 ranking to make room for something else.
+- TIER 1 keywords (already ranking page 1) are the highest SEO-defense priority. If a rewrite would remove or weaken a Tier 1 keyword in the field where it currently appears, treat that as a critical SEO risk: preserve it when accurate, compliant and natural, or explicitly explain the unavoidable tradeoff. Do not sacrifice valuable page-1 equity merely to add a new term or make copy sound cleaner.
 - TIER 2 keywords (close to page 1, sorted by volume) are the priority for NEW placement — these are the closest realistic wins. When choosing what to add to a field, prefer a Tier 2 keyword over an unranked keyword every time, even if the unranked one seems more "important" — proximity to page 1 with real volume behind it is worth more right now than a keyword with no ranking traction at all, no matter how strategically desirable that keyword sounds.
 - TIER 3 items (in the listing a long time, still not ranking) are NOT a placement task — do not just try to shove them into more fields. Raise them as a genuine open question in the relevant NOTES field: is this keyword too competitive for this listing to win, and does the suggested lower-volume alternative deserve a try instead? Do not resolve this question yourself — surface it for a human decision.
 - Do NOT recommend adding drug-claim keywords or any keyword that violates compliance rules, regardless of tier.
@@ -778,7 +800,9 @@ KEYWORD COVERAGE RULES — priority order matters, read the tiers below carefull
 BULLET FORMATTING RULES (apply to all bullet rewrites):
 - Every bullet must open with an ALL-CAPS phrase (3-6 words) followed by a colon, then sentence-case detail. Example: "CLINICALLY TESTED HAIR GROWTH SERUM: In 3 independent studies, 95% of users reported visibly thicker hair."
 - Flag any bullet that does NOT follow this ALL-CAPS header: detail format as a violation.
-- Across the catalog, align parallel bullets by position where products are related: B1 = hero claim/clinical proof, B2 = science/mechanism, B3 = key ingredients, B4 = who it is for/hair types, B5 = brand credentials/clean formula. Rewrites should follow this structure consistently.
+- Choose bullet topics only after completing the holistic PDP strategy. Each bullet must earn its space as one of the five strongest purchase-driving, nonredundant messages for this SKU.
+- For genuinely related variations, align parallel bullet positions when doing so improves comparison and consistency. Use B1 = hero value/proof, B2 = science/mechanism, B3 = key ingredients, B4 = intended user/use case, and B5 = credentials/formula as a flexible starting framework, not a mandatory template. Reorder or replace topics when PRODUCT CONTEXT, customer evidence or keyword strategy shows a different sequence is more valuable.
+- When shortening a bullet, do not merely compress its existing sentences. Reassess the current bullet against all unused and used evidence, retain only concepts that deserve bullet-level prominence, and relocate worthwhile supporting detail to the description or another appropriate field.
 - Within a single SKU, bullet headers should not repeat the same keyword root — vary to maximize keyword coverage.
 - Bullet rewrites must be max 200 chars including the ALL-CAPS header.
 
