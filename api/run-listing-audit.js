@@ -305,10 +305,12 @@ async function getToken() {
 }
 
 // Sanitize a cell value for sending to Claude — remove smart quotes, em dashes,
-// HTML entities, extra whitespace. Truncate to maxLen.
+// HTML entities and extra whitespace. Input is preserved in full unless a
+// caller deliberately supplies maxLen. Output character limits are enforced
+// separately in the audit prompt and must never be reused as read-side caps.
 function san(s, maxLen) {
   if (!s) return '';
-  return String(s)
+  const cleaned = String(s)
     .replace(/&amp;/g, 'and').replace(/&nbsp;/g, ' ').replace(/&[a-z]+;/g, ' ')
     .replace(/[\u2018\u2019\u0060\u00b4]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
@@ -316,8 +318,8 @@ function san(s, maxLen) {
     .replace(/\u2026/g, '...')
     .replace(/\r?\n|\r/g, ' ')
     .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, maxLen || 400);
+    .trim();
+  return Number.isFinite(maxLen) ? cleaned.slice(0, maxLen) : cleaned;
 }
 
 // Parse Claude's plain-text delimited response into a result object.
@@ -760,6 +762,8 @@ HOLISTIC PDP STRATEGY — REQUIRED BEFORE WRITING ANY FIELD:
 - Do not silently discard meaningful information. If a product fact, customer need, differentiator, proof point or targeted keyword is removed from one field, determine whether it warrants relocation elsewhere in the PDP. State material relocations or intentional omissions concisely in the relevant NOTES field.
 - Do not assume all five current bullet topics deserve to survive. Select the five highest-value, nonredundant messages for this specific SKU from all available evidence. Likewise, do not omit a stronger unused message merely because no current bullet contains it.
 - Before finalizing, perform a whole-PDP coverage check: confirm the rewrites collectively communicate what the product is, why it matters, its strongest supported differentiators, the most important customer information, and the deliberate keyword strategy without avoidable duplication.
+- INPUT AND OUTPUT LENGTHS ARE SEPARATE: The current live title, Item Highlights, bullets, description, backend terms and ingredients are supplied for complete analysis and are not constrained by the rewrite limits. Read and assess the full supplied field. The 75/125/200/400-character limits apply only to the corresponding generated rewrites.
+- Do not say that a live field was truncated merely because it exceeds the allowed rewrite length. Only report input truncation if the prompt explicitly labels the field as truncated or includes a truncation marker.
 
 KEYWORD TIER CLASSIFICATION — DO NOT CONFUSE STRATEGY WITH PERFORMANCE:
 - Top 20, Opportunity, and Reach for the Stars are STRATEGY GROUPS: they identify keywords we want to target.
@@ -830,24 +834,26 @@ Write nothing else. No preamble. No explanation after the last line. Start immed
     const travel = isTravel(row);
 
     try {
-      const title     = san(row[COL.title], 400);
-      const ih        = san(row[COL.item_highlights], 200) || 'MISSING';
-      const b1        = san(row[COL.bullet_1], 300);
-      const b2        = san(row[COL.bullet_2], 300);
-      const b3        = san(row[COL.bullet_3], 300);
-      const b4        = san(row[COL.bullet_4], 300);
-      const b5        = san(row[COL.bullet_5], 300);
-      const desc      = san(row[COL.description], 400);
-      const backend      = san(row[COL.backend_keywords], 300);
-      const ingredients  = san(row[COL.ingredients], 600);
+      // Preserve the complete current PDP for analysis. Rewrite limits belong
+      // only to Claude's output instructions, never to these input fields.
+      const title        = san(row[COL.title]);
+      const ih           = san(row[COL.item_highlights]) || 'MISSING';
+      const b1           = san(row[COL.bullet_1]);
+      const b2           = san(row[COL.bullet_2]);
+      const b3           = san(row[COL.bullet_3]);
+      const b4           = san(row[COL.bullet_4]);
+      const b5           = san(row[COL.bullet_5]);
+      const desc         = san(row[COL.description]);
+      const backend      = san(row[COL.backend_keywords]);
+      const ingredients  = san(row[COL.ingredients]);
       const asin = (row[COL.asin] || '').trim();
       const skuContext = skuContextMap[sku] || {};
-      const productContext = san(skuContext.productContext || '', 2000);
-      const auditGuardrails = san(skuContext.auditGuardrails || '', 2000);
+      const productContext = san(skuContext.productContext || '');
+      const auditGuardrails = san(skuContext.auditGuardrails || '');
       const previousAudit = previousAuditMap[sku] || null;
       const contextBlock = `
 BUSINESS CONTEXT:
-BRAND INSIGHTS: ${san(brandInsights, 3000) || 'NOT AVAILABLE'}
+BRAND INSIGHTS: ${san(brandInsights) || 'NOT AVAILABLE'}
 PRODUCT CONTEXT: ${productContext || 'NOT AVAILABLE'}
 AUDIT GUARDRAILS: ${auditGuardrails || 'NOT AVAILABLE'}
 `;
@@ -959,13 +965,13 @@ Name: ${name}
 ASIN: ${asin}
 Related SKUs in this catalog: ${siblings || 'none'}
 Title (${title.length} chars as received by audit): ${title}
-Item Highlights: ${ih}
-Bullet 1: ${b1}
-Bullet 2: ${b2}
-Bullet 3: ${b3}
-Bullet 4: ${b4}
-Bullet 5: ${b5}
-Description (excerpt): ${desc}
+Item Highlights (${ih === 'MISSING' ? 0 : ih.length} chars as received by audit): ${ih}
+Bullet 1 (${b1.length} chars as received by audit): ${b1}
+Bullet 2 (${b2.length} chars as received by audit): ${b2}
+Bullet 3 (${b3.length} chars as received by audit): ${b3}
+Bullet 4 (${b4.length} chars as received by audit): ${b4}
+Bullet 5 (${b5.length} chars as received by audit): ${b5}
+Description (${desc.length} chars as received by audit): ${desc}
 Backend: ${backend}
 Ingredients: ${ingredients || 'NOT AVAILABLE'}`;
       }
