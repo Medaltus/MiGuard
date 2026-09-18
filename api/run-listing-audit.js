@@ -749,6 +749,24 @@ COMPETITOR + CATEGORY-LEADER EVIDENCE:
 - Comparative context is not a template. Do not copy competitor wording or assume competitor claims/listings are compliant or substantiated for this product.
 - Use market data to understand positioning, shopper expectations and supported differentiation. Product-specific evidence outranks competitor/category convention.
 
+KEYWORD TIER CLASSIFICATION — DO NOT CONFUSE STRATEGY WITH PERFORMANCE:
+- Top 20, Opportunity, and Reach for the Stars are STRATEGY GROUPS: they identify keywords we want to target.
+- Tier 1, Tier 2, and Tier 3 are PERFORMANCE GROUPS: they are determined from current SHEET_KEYWORD_TRACKER data and the existing tenure logic.
+- A keyword may be called TIER 1 only when SHEET_KEYWORD_TRACKER provides a current organic rank <= PAGE1_RANK_CUTOFF for this SKU.
+- A keyword may be called TIER 2 only when SHEET_KEYWORD_TRACKER provides a current organic rank > PAGE1_RANK_CUTOFF and <= CLOSE_TO_PAGE1_MAX for this SKU.
+- A keyword may be called TIER 3 only when the existing Tier 3 tenure logic qualifies it.
+- If the tracker has no current organic rank for a keyword, NEVER describe it as Tier 1 or Tier 2.
+- Never infer a performance tier merely because a keyword appears in Top 20, Opportunity, Reach, the live listing, a previous audit, ads, reviews, or competitor data.
+
+TITLE KEYWORD SELECTION:
+- Title space is scarce. For SEO-oriented title language, preferentially use exact target keywords or natural grammatical forms of target keywords supplied in the strategy/performance evidence.
+- Priority for title SEO terms: Tier 1 Protect, then Tier 2 Push, then relevant Top 20 strategy keywords, then relevant Opportunity keywords. Reach for the Stars may be used only when strategically justified and when stronger target terms do not fit or are not appropriate.
+- Do NOT invent a new keyword phrase merely because it sounds natural, compact, or semantically related to the product.
+- Do NOT replace an available targeted keyword with an untracked synonym just to shorten the title.
+- An untracked phrase may be used only when it is necessary for accurate shopper comprehension/grammar or PRODUCT_CONTEXT/BRAND_INSIGHTS establishes it as important product terminology. If used, TITLE_NOTES must explicitly say it is untracked and explain why it is preferable to the available target keywords.
+- When shortening a title to meet the character limit, first look for a shorter accurate/compliant phrase from the supplied target keyword lists. Do not fill newly available title space with invented SEO terminology while relevant target keywords are available.
+- Consider current organic rank, search volume, strategy group, exact product relevance, compliance, and shopper comprehension together. Do not keyword-stuff.
+
 KEYWORD COVERAGE RULES — priority order matters, read the tiers below carefully:
 - TIER 1 keywords (already ranking page 1) are the HIGHEST priority of anything in this audit — higher than adding any new keyword, higher than fixing a coverage gap. If a rewrite would remove or weaken a Tier 1 keyword's presence in whatever field it currently occupies, that is a critical problem — flag it explicitly and do not let the rewrite do that. We never want to lose a page-1 ranking to make room for something else.
 - TIER 2 keywords (close to page 1, sorted by volume) are the priority for NEW placement — these are the closest realistic wins. When choosing what to add to a field, prefer a Tier 2 keyword over an unranked keyword every time, even if the unranked one seems more "important" — proximity to page 1 with real volume behind it is worth more right now than a keyword with no ranking traction at all, no matter how strategically desirable that keyword sounds.
@@ -825,7 +843,7 @@ Prior notes: ${san([previousAudit.titleNotes, previousAudit.ihNotes, previousAud
 ${contextBlock}${previousAuditContext}
 SKU: ${sku}
 Name: ${name} [TRAVEL SIZE]
-Title: ${title}
+Title (${title.length} chars as received by audit): ${title}
 Item Highlights: ${ih}
 Backend: ${backend}`;
       } else {
@@ -852,6 +870,13 @@ Backend: ${backend}`;
           const fmt = e => `${e.keyword}${e.rank !== null ? ` (rank #${e.rank}` : ' (not ranking'}${e.volume !== null ? `, ${e.volume}/mo)` : ')'}`;
 
           kwContext = `
+QUARTERLY KEYWORD STRATEGY GROUPS (these are TARGET GROUPS, not performance tiers):
+TOP 20 TARGETS: ${skuKws.top20.length ? skuKws.top20.join(', ') : 'None supplied.'}
+OPPORTUNITY TARGETS: ${(skuKws.opportunity || []).length ? skuKws.opportunity.join(', ') : 'None supplied.'}
+REACH FOR THE STARS: ${(skuKws.reach || []).length ? skuKws.reach.join(', ') : 'None supplied.'}
+
+IMPORTANT: Only the tracker-derived sections below establish Tier 1/Tier 2 status. A keyword appearing in a strategy group does not make it Tier 1 or Tier 2.
+
 TIER 1 — PROTECT (already ranking page 1 — DO NOT let a rewrite remove or weaken these; this is the highest priority, above adding anything new):
 ${tier1Protect.length ? tier1Protect.map(fmt).join(', ') : 'None currently on page 1 for this SKU.'}
 
@@ -895,6 +920,7 @@ FIELD PRIORITY FOR PLACEMENT: Title > Item Highlights > Bullets > Product Descri
         const marketContext = `CLOSE COMPETITORS: ${JSON.stringify((skuKws?.competitors || []).slice(0,10).map(compactMarketProduct))}\nCATEGORY LEADERS: ${JSON.stringify((skuKws?.categoryLeaders || []).slice(0,10).map(compactMarketProduct))}`;
 
         console.log(`[listing-audit][debug] ${sku}: context product=${!!productContext}, guardrails=${!!auditGuardrails}, priorAudit=${!!previousAudit}, businessMonths=${performanceContext.length}, trackerKeywords=${Object.keys(kwTrackerLookup).length}, adAsinRows=${adAsinRows.length}, reviews=${skuReviews.length}, competitors=${(skuKws?.competitors||[]).length}, leaders=${(skuKws?.categoryLeaders||[]).length}`);
+        console.log(`[listing-audit][debug] ${sku}: liveTitleChars=${title.length}, liveTitle=${JSON.stringify(title)}, strategyTop20=${skuKws?.top20?.length || 0}, strategyOpportunity=${skuKws?.opportunity?.length || 0}, strategyReach=${skuKws?.reach?.length || 0}`);
 
         userPrompt = `Audit this full listing SKU.
 ${contextBlock}${previousAuditContext}
@@ -908,7 +934,7 @@ SKU: ${sku}
 Name: ${name}
 ASIN: ${asin}
 Related SKUs in this catalog: ${siblings || 'none'}
-Title: ${title}
+Title (${title.length} chars as received by audit): ${title}
 Item Highlights: ${ih}
 Bullet 1: ${b1}
 Bullet 2: ${b2}
