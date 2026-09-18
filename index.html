@@ -178,6 +178,7 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
 .kpi-value{font-size:30px;font-weight:600;letter-spacing:-1px;line-height:1;color:var(--navy);font-family:var(--font-numbers);}
 .kpi-value.sm{font-size:30px;}
 .kpi-mom{font-size:14px;margin-top:5px;}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px;}
 .kpi-mom.up{color:#1db88a;}
 .kpi-mom.dn{color:var(--danger);}
 .kpi-mom.flat{color:var(--muted);}
@@ -1031,6 +1032,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 .pdfx-kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin-bottom:9px;white-space:nowrap;}
 .pdfx-kpi-val{font-size:29px;font-weight:700;font-family:var(--font-numbers);color:var(--navy);letter-spacing:-.5px;line-height:1;}
 .pdfx-kpi-mom{font-size:13px;margin-top:6px;font-weight:400;font-family:var(--font-body-light);min-height:16px;}
+.pdfx-kpi-sub{font-size:10px;color:#6B7BA2;margin-top:6px;font-family:var(--font-body-light);}
 .pdfx-kpi-mom.up{color:var(--green);}
 .pdfx-kpi-mom.dn{color:var(--danger);}
 .pdfx-kpi-mom.flat{color:var(--muted);}
@@ -1788,6 +1790,17 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
           <button class="btn-cancel" id="tp-insight-cancel">Cancel</button>
           <button class="btn-save-stage" id="tp-insight-save">Save</button>
         </div>
+      </div>
+      <!-- Consignment Inventory Level — added 2026-09-17 per Jaclyn. Own
+           small kpi-row (not merged into the main 5-card row above) so it
+           doesn't force that row's existing auto-fit columns to
+           re-flow — this metric is conceptually separate (a stock level,
+           not a sales figure) and sits right below Sales by Product per
+           her request. max-width keeps a lone kpi-row from stretching to
+           the full page width the way it would with nothing else to
+           share the auto-fit grid with. -->
+      <div class="kpi-row" style="max-width:220px;">
+        <div class="kpi-card" id="kpi-consignment-inventory"><div class="kpi-label">Consignment Inventory Level</div><div class="kpi-value">—</div><div class="kpi-sub">Loading…</div></div>
       </div>
     </div>
 
@@ -4382,6 +4395,67 @@ async function initSns() {
         // returns netting).
         fetch(sheetCsvUrl(OV_RETURNS_SHEET_ID, OV_RETURNS_MIGUARD_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
       ]);
+
+      // Consignment Inventory Level KPI — added 2026-09-17 per Jaclyn.
+      // Independent fetch, deliberately not folded into the Promise.all
+      // above: this KPI has nothing to do with the sales data the rest
+      // of this function computes, so keeping it separate means a slow
+      // or failed consignment fetch can never delay or break the KPIs
+      // that already work. Declared locally rather than reusing
+      // CONSIGNMENT_SHEET_ID/OV_CONSIGNMENT_SHEET_ID from other scopes
+      // in this file, to avoid any cross-scope assumption — same
+      // defensive convention already used elsewhere in this file.
+      // AWAITED (not fire-and-forget) — the PDF export calls
+      // window.initAmazonLive() and reads this KPI's DOM value right
+      // after it resolves; an un-awaited inner fetch here would race
+      // against that read and could export "Loading…" instead of the
+      // real number.
+      await (async function () {
+        const consEl = document.getElementById('kpi-consignment-inventory');
+        if (!consEl) return;
+        try {
+          const CONS_SHEET_ID = window.SHEET_CFG.SHEET_CONSIGNMENT_INVENTORY?.fileId || '';
+          const CONS_GID = window.SHEET_CFG.SHEET_CONSIGNMENT_INVENTORY?.gid || '';
+          const consCsv = await fetch(sheetCsvUrl(CONS_SHEET_ID, CONS_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
+          const valEl = consEl.querySelector('.kpi-value');
+          const subEl = consEl.querySelector('.kpi-sub');
+          if (!isCsv(consCsv)) {
+            if (valEl) valEl.textContent = '—';
+            if (subEl) subEl.textContent = 'No data yet';
+            return;
+          }
+          const rows = parseCsv(consCsv);
+          // Single-SKU brand — MIG0001 is the only row expected, but
+          // matching by SKU rather than just taking rows[0] means this
+          // keeps working correctly if a second SKU is ever added to
+          // this sheet.
+          const row = rows.find(r => (r.sku || '').trim().toUpperCase() === 'MIG0001') || rows[0];
+          if (!row) {
+            if (valEl) valEl.textContent = '—';
+            if (subEl) subEl.textContent = 'No data yet';
+            return;
+          }
+          const available = parseFloat(row.available);
+          if (valEl) valEl.textContent = !isNaN(available) ? available.toLocaleString() : '—';
+          if (subEl) {
+            const iso = row.last_updated || '';
+            const d = iso ? new Date(iso) : null;
+            if (d && !isNaN(d.getTime())) {
+              const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+              subEl.textContent = `Updated: ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+            } else {
+              subEl.textContent = 'Updated: —';
+            }
+          }
+        } catch (err) {
+          console.warn('[MiGuard] Consignment Inventory KPI failed:', err.message);
+          const valEl = consEl.querySelector('.kpi-value');
+          const subEl = consEl.querySelector('.kpi-sub');
+          if (valEl) valEl.textContent = '—';
+          if (subEl) subEl.textContent = 'Error loading';
+        }
+      })();
+
 
       console.log('[MiGuard] syncCsv length:', syncCsv.length, 'isCsv:', isCsv(syncCsv));
       console.log('[MiGuard] histCsv length:', histCsv.length, 'isCsv:', isCsv(histCsv));
@@ -17752,7 +17826,7 @@ async function loadAuditResultsFromSheet() {
   // Reads a .kpi-card by element id → {label, value, mom, momClass}
   function pdfxKpi(id) {
     const el = pdfxById(id);
-    if (!el) return { label: '', value: '—', mom: '', momClass: 'flat' };
+    if (!el) return { label: '', value: '—', mom: '', momClass: 'flat', sub: '' };
     const label = pdfxText('.kpi-label', el);
     const value = pdfxText('.kpi-value', el);
     const momEl = el.querySelector('.kpi-mom');
@@ -17763,7 +17837,13 @@ async function loadAuditResultsFromSheet() {
       if (momEl.classList.contains('up')) momClass = 'up';
       else if (momEl.classList.contains('dn')) momClass = 'dn';
     }
-    return { label, value, mom, momClass };
+    // sub — added 2026-09-17 for Consignment Inventory Level's "Updated:
+    // <date>" line. Optional and additive: cards with no .kpi-sub (every
+    // existing card) just get an empty string here, so pdfxKpiCardHtml
+    // below only renders the sub line when there's actually one to show.
+    const subEl = el.querySelector('.kpi-sub');
+    const sub = subEl ? subEl.textContent.trim() : '';
+    return { label, value, mom, momClass, sub };
   }
 
   function pdfxKpiCardHtml(k) {
@@ -17774,10 +17854,11 @@ async function loadAuditResultsFromSheet() {
     // height across the row regardless of which cards happen to have a
     // MOM figure. An empty mom div still reserves its min-height (see CSS).
     const momHtml = '<div class="pdfx-kpi-mom ' + (k.mom ? k.momClass : 'flat') + '">' + (k.mom ? arrow + pdfxEscape(k.mom) : '') + '</div>';
+    const subHtml = k.sub ? '<div class="pdfx-kpi-sub">' + pdfxEscape(k.sub) + '</div>' : '';
     return '<div class="pdfx-kpi">' +
       '<div class="pdfx-kpi-lbl">' + pdfxEscape(k.label) + '</div>' +
       '<div class="pdfx-kpi-val">' + pdfxEscape(k.value) + '</div>' +
-      momHtml +
+      momHtml + subHtml +
       '</div>';
   }
 
@@ -18418,6 +18499,16 @@ async function loadAuditResultsFromSheet() {
     const kpis = ['kpi-total-units', 'kpi-total-orders', 'kpi-avg-order', 'kpi-units-ads', 'kpi-units-organic'].map(pdfxKpi);
     const rows = pdfxTableRows('tp-tbody');
     const insight = pdfxText('#tp-insight-text');
+    // Consignment Inventory Level — added 2026-09-17 per Jaclyn. Kept out
+    // of the kpis array above on purpose: .pdfx-kpis is a fixed 5-column
+    // grid, and a 6th item would squeeze in as an unevenly-sized column
+    // rather than laying out cleanly. Rendered as its own small block
+    // instead, positioned after Top Selling Products to match where it
+    // sits on the live page.
+    const consKpi = pdfxKpi('kpi-consignment-inventory');
+    const consHtml = consKpi.label
+      ? '<div class="pdfx-kpis" style="grid-template-columns:220px;margin-top:14px;">' + pdfxKpiCardHtml(consKpi) + '</div>'
+      : '';
     return '' +
       '<div class="pdfx-page">' +
         '<div class="pdfx-inner">' +
@@ -18429,6 +18520,7 @@ async function loadAuditResultsFromSheet() {
           '<div class="pdfx-card"><div class="pdfx-card-title">Top Selling Products <span style="font-weight:400;color:var(--muted);">(by Units)</span></div>' +
             pdfxTableHtml(['#', 'Product', 'Units', 'Units (Ads)', 'Units (Organic)'], rows) +
           '</div>' +
+          consHtml +
           (insight ? '<div class="pdfx-insight"><strong>Key Insight:</strong> ' + pdfxEscape(insight) + '</div>' : '') +
         '</div>' +
       '</div>';
@@ -20613,5 +20705,4 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
- 
  
