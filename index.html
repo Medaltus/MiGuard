@@ -1965,7 +1965,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
         <div class="kpi-card">
           <div class="kpi-label">Reviews Requested</div>
           <div class="kpi-value" id="mfc-kpi-reviews">—</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;" id="mfc-kpi-reviews-sub">Helium 10 Follow Up</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;" id="mfc-kpi-reviews-sub">Post Purchase Follow Up</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Compliance Cases Resolved</div>
@@ -2262,7 +2262,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
         <div class="kpi-card">
           <div class="kpi-label">Reviews Requested</div>
           <div class="kpi-value" id="mx-mfc-kpi-reviews">—</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Helium 10 Follow Up</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Post Purchase Follow Up</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Compliance Cases Resolved</div>
@@ -12916,8 +12916,28 @@ window.loadActivatorsPerformanceTable = async function() {
       const totalRevenue = amzRevenue + wmtRevenue + webRevenue;
       setPerfCellText(`perf-act-revenue-${suffix}`, '$' + totalRevenue.toFixed(2));
 
-      // Conversion — recomputed from the live Sessions/Units above.
-      const conv = sessions > 0 ? (totalUnits / sessions * 100) : null;
+      // Conversion — FIXED 2026-09-17 per Jaclyn: was recomputed from
+      // totalUnits/sessions above, where totalUnits is a raw sum of this
+      // sheet's own order-line-item unit_count values with NO status
+      // filtering at all (not even excluding cancelled orders) — a third,
+      // independent calculation from what the PPC page and Overview page
+      // use. It happened to currently match both of those (7.78%) only
+      // because MiGuard had zero cancellations in the month being shown —
+      // raw and Amazon-reported units coincided this time, not because
+      // the logic was the same. Per Jaclyn: all three pages should read
+      // the same number, and that number should be the raw session-to-
+      // purchase rate — cancellations and returns are real business
+      // outcomes, not something to net out of "did someone convert."
+      // Amazon's own CONVERSION_RATE field on the Business Report row
+      // (same bizRow already matched above for Sessions/Revenue) already
+      // holds exactly that, unadjusted — confirmed directly against the
+      // sheet's raw UNITS_ORDERED vs UNITS_ORDERED_CLEAN columns; this
+      // field is computed from the former. Reading it directly here
+      // instead of re-deriving it makes this page match the PPC page's
+      // Product Performance table and the Overview page's Top Selling
+      // Products table by construction, not by coincidence.
+      const convRaw = bizRow ? parseFloat(bizRow.conversion_rate) : NaN;
+      const conv = !isNaN(convRaw) ? convRaw : null;
       setPerfCellText(`perf-act-conv-${suffix}`, conv != null ? conv.toFixed(2) + '%' : '—');
     });
   } catch (err) {
@@ -19942,17 +19962,44 @@ async function loadAuditResultsFromSheet() {
       // silently inflate it against a denominator that only covers part
       // of the numerator. Column header says "(Amazon)" for the same
       // reason, rather than presenting it as a whole-business rate.
+      //
+      // FIXED 2026-09-16 per Jaclyn — this used to compute conv% from our
+      // OWN units figure (amazonUnits, i.e. amzUnitsByAsin — which has
+      // cancelled/pending orders excluded via isValidAmazonRow AND returns
+      // subtracted via netByAsin further up this function), divided by
+      // sessions. That's a legitimate "net units sold" figure for the
+      // Units column itself, but it made this specific Conv% answer a
+      // different question than intended — "what fraction of sessions
+      // resulted in an order that's still valid today" rather than "what
+      // fraction of sessions converted to a purchase at all." That's also
+      // exactly why this number disagreed with the PPC page's own Product
+      // Performance table, which reads conversion_rate straight from the
+      // Business Report — Amazon's own reported rate, unaffected by any
+      // cancellation/return processing on our end. Per Jaclyn: conversion
+      // rate should reflect the raw session-to-purchase rate, not net of
+      // what happened to the order afterward — so this now reads that
+      // same Business Report field directly instead of deriving its own,
+      // matching the PPC page's number exactly. The Units column itself
+      // is untouched — still net of cancellations/returns, which is the
+      // right question for "how many units did we actually sell."
       const sessionsByAsinCurr = {};
+      const convRateByAsinCurr = {};
       bizRows.forEach(r => {
         if (parseInt(r.year, 10) === cfg.year && parseInt(r.month, 10) === cfg.month) {
           const asin = (r.asin || '').trim().toUpperCase();
-          if (asin) sessionsByAsinCurr[asin] = (sessionsByAsinCurr[asin] || 0) + (parseInt(r.sessions, 10) || 0);
+          if (asin) {
+            sessionsByAsinCurr[asin] = (sessionsByAsinCurr[asin] || 0) + (parseInt(r.sessions, 10) || 0);
+            // One row per ASIN per month in this sheet, so a direct
+            // assignment (not an accumulation) is correct here.
+            const rate = parseFloat(r.conversion_rate);
+            if (!isNaN(rate)) convRateByAsinCurr[asin] = rate;
+          }
         }
       });
       function convCell(amazonUnits, asin) {
         const sessions = sessionsByAsinCurr[asin] || 0;
-        if (!sessions) return '<span class="tp-dash">—</span>';
-        const conv = (amazonUnits / sessions) * 100;
+        if (!sessions || !(asin in convRateByAsinCurr)) return '<span class="tp-dash">—</span>';
+        const conv = convRateByAsinCurr[asin];
         const convClass = conv >= 15 ? 'rank-top' : (conv > 0 ? 'rank-low' : 'rank-none');
         return `<span class="rank-pill ${convClass}">${conv.toFixed(2)}%</span>`;
       }
