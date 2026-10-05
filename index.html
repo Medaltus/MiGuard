@@ -179,6 +179,82 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
 .kpi-value.sm{font-size:30px;}
 .kpi-mom{font-size:14px;margin-top:5px;}
 .kpi-sub{font-size:11px;color:var(--muted);margin-top:5px;}
+/* ADDED 2026-09-28 per Jaclyn — Brand Momentum per-product cards, ported
+   from the VBC/Dazzle Dry file's Vivian Valenty Skincare (VVS) Brand
+   Momentum implementation, read directly from that file before writing
+   this (not assumed from the earlier build-notes summary). Unscoped, to
+   match évolis's own existing CSS convention (this file's other classes
+   are unscoped too, unlike the VBC reference's .evo-page-prefixed copy
+   of the same rules). */
+.momentum-cards-grid{display:grid;grid-template-columns:1fr;gap:28px;}
+.momentum-pcard{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.momentum-pcard-hd{background:var(--navy);padding:14px 20px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.momentum-pcard-name{font-size:16px;font-weight:600;}
+.momentum-pcard-rating{display:flex;align-items:center;gap:6px;font-size:13px;}
+.momentum-pcard-rating-stars{color:#f5a623;letter-spacing:1px;}
+.momentum-pcard-rating-num{color:var(--green);font-weight:700;}
+.momentum-pcard-body{padding:26px 20px;display:flex;justify-content:space-between;}
+.momentum-pcard-row{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;text-align:center;}
+.momentum-pcard-label{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;}
+.momentum-pcard-value{font-weight:700;color:var(--navy);font-size:26px;font-family:var(--font-subheader);line-height:1;}
+.momentum-pcard-subcategory{font-size:11px;color:var(--muted);}
+.momentum-pill{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;}
+.momentum-pill-up{background:rgba(36,233,163,.15);color:#1db88a;}
+.momentum-pill-dn{background:rgba(219,55,45,.12);color:var(--danger);}
+.momentum-tracking-card{background:var(--navy);border-radius:var(--radius);padding:20px 24px;}
+.momentum-tracking-title{font-size:13px;font-weight:700;color:var(--green);margin-bottom:14px;}
+.momentum-tracking-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.momentum-tracking-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:14px 16px;}
+.momentum-tracking-item-title{font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px;}
+.momentum-tracking-item-text{font-size:11.5px;color:rgba(255,255,255,.65);line-height:1.55;}
+/* PDF-only tightening for the reused .momentum-pcard elements — ported
+   verbatim from the reference: with several products' worth of cards at
+   full live-dashboard spacing, the page overflows past 11in and forces
+   the whole page to non-uniformly squish during capture. Live dashboard
+   spacing stays completely untouched — only applies inside the PDF via
+   this wrapper. */
+/* EXPANDED 2026-09-29 per Jaclyn — "3 fits but wastes space, fonts can
+   be smaller, condense so 5 fit on a page with no other KPIs." Only
+   affects the PDF capture (this wrapper class is added only inside
+   #pdfx-root) — the live dashboard's own card spacing is completely
+   untouched. Sized to fit 5 cards + gaps within the ~900px of a
+   no-KPI-row Brand Momentum page (pages after the first, which still
+   carries the top-3 KPIs and needs its own room). */
+.pdfx-momentum-tight .momentum-cards-grid{gap:8px;}
+.pdfx-momentum-tight .momentum-pcard-hd{padding:7px 14px;}
+.pdfx-momentum-tight .momentum-pcard-name{font-size:13px;}
+.pdfx-momentum-tight .momentum-pcard-rating{font-size:11px;}
+.pdfx-momentum-tight .momentum-pcard-body{padding:9px 16px;}
+.pdfx-momentum-tight .momentum-pcard-label{font-size:9px;}
+.pdfx-momentum-tight .momentum-pcard-value{font-size:19px;}
+.pdfx-momentum-tight .momentum-pcard-subcategory{font-size:9.5px;}
+.pdfx-momentum-tight .momentum-pill{font-size:9px;padding:2px 7px;}
+/* PDF only: subcategory label hidden on Brand Momentum cards (2026-10-01 porting notes). */
+.pdfx-momentum-tight .momentum-pcard-subcategory{display:none;}
+/* Reviews & Ratings (Sales > Reviews) — ported 2026-10-05 from the VBC
+   reference's .evo-page .review-* rules, scoped to #s-reviews here instead.
+   Reference used --surf2/--surf3, which this file doesn't define — mapped to
+   --bg/--bg2 (same two light surface tones). */
+.evo-pending{padding:32px 20px;text-align:center;color:var(--muted);font-size:12.5px;font-style:italic;background:var(--bg);border-radius:var(--radius);border:1px dashed var(--border2);}
+#s-reviews .review-section{margin-bottom:28px;}
+#s-reviews .review-hd{background:var(--navy);border-radius:8px 8px 0 0;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;color:#fff;}
+#s-reviews .review-hd-title{font-size:13px;font-weight:700;}
+#s-reviews .review-hd-right{display:flex;align-items:center;gap:14px;font-size:11px;color:rgba(255,255,255,.7);}
+#s-reviews .review-stars{color:#f5a623;letter-spacing:1px;}
+#s-reviews .review-avg{font-size:14px;font-weight:700;color:var(--green);}
+#s-reviews .review-avg-of{font-size:10px;color:rgba(255,255,255,.55);}
+#s-reviews .review-bars{background:var(--white);border:1px solid var(--border);border-top:none;padding:14px 18px;}
+#s-reviews .review-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+#s-reviews .review-bar-row:last-child{margin-bottom:0;}
+#s-reviews .review-bar-label{width:26px;flex-shrink:0;font-size:11px;color:var(--muted);font-weight:600;}
+#s-reviews .review-bar-track{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;}
+#s-reviews .review-bar-fill{height:100%;background:var(--green);border-radius:4px;}
+#s-reviews .review-bar-count{width:32px;flex-shrink:0;font-size:11px;color:var(--muted);text-align:right;font-family:var(--mono);}
+#s-reviews .review-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:14px 18px;}
+#s-reviews .review-card{background:var(--bg);border-left:3px solid var(--green);border-radius:0 6px 6px 0;padding:14px 16px;}
+#s-reviews .review-card-stars{color:#f5a623;font-size:12px;letter-spacing:1px;margin-bottom:6px;}
+#s-reviews .review-card-title{font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+#s-reviews .review-card-text{font-size:11.5px;color:var(--muted);line-height:1.6;}
 .kpi-mom.up{color:#1db88a;}
 .kpi-mom.dn{color:var(--danger);}
 .kpi-mom.flat{color:var(--muted);}
@@ -1070,6 +1146,8 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 .pdfx-footer-tag{font-size:9.5px;color:var(--muted);}
 .pdfx-footer-right{text-align:right;font-size:10px;color:var(--muted);}
 .pdfx-footer-conf{color:var(--green);font-weight:700;letter-spacing:.05em;}
+/* Compact footer (Opportunities page) — no divider line, tighter spacing. */
+.pdfx-footer.pdfx-footer-compact{margin-top:14px;padding-top:0;border-top:none;}
 
 /* ── Inbound Shipments (ASN) — external Inventory page ──────────────────
    Adapted from Luccini's InboundTab.module.css design reference, ported to
@@ -1254,6 +1332,8 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
              anyone who doesn't touch these gets today's existing behavior
              (all three Sales channels always included). -->
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;"><input type="checkbox" id="pdf-include-amazon" checked style="margin:0;"> Amazon</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;"><input type="checkbox" id="pdf-include-insights" checked style="margin:0;"> Insights</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;"><input type="checkbox" id="pdf-include-brand-momentum" checked style="margin:0;"> Brand Momentum</label>
         <!-- Marketing pages — same default-checked reasoning as Sales above. -->
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;"><input type="checkbox" id="pdf-include-fulfillment" checked style="margin:0;"> Fulfillment &amp; CS</label>
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;"><input type="checkbox" id="pdf-include-stewardship" checked style="margin:0;"> Stewardship</label>
@@ -1678,6 +1758,8 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       <div class="channel-tabs">
         <button class="ch-tab active" onclick="showChannel('sales','s-overview',this)">Overview</button>
         <button class="ch-tab" onclick="showChannel('sales','s-amazon',this)">Amazon</button>
+        <button class="ch-tab" onclick="showChannel('sales','s-insights',this)">Insights</button>
+        <button class="ch-tab" onclick="showChannel('sales','s-reviews',this)">Reviews</button>
         <button class="ch-tab" onclick="showChannel('sales','s-brand-momentum',this)">Brand Momentum</button>
       </div>
       <!-- Shared period-selector row — added 2026-08-12 per Jaclyn, moved
@@ -1805,45 +1887,143 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     </div>
 
 
+    <!-- Insights tab — added 2026-10-05 per Jaclyn, matches Dazzle Dry's
+         Insights tab (VBC reference) / évolis's s-insights: Unit Sales by
+         Product Category chart, Subscriptions card (moved here from
+         Opportunities), Key Insight. Same element ids évolis uses
+         (ins-category-chart, kpi-active-subs, kpi-retention, legend-sns,
+         chart-sns, ins-catinsight-*) so the existing initSns() keeps
+         working unchanged. -->
+    <div class="channel-page" id="s-insights">
+      <div class="card">
+        <div class="card-title">Unit Sales by Product Category</div>
+        <div style="position:relative;height:320px;"><canvas id="ins-category-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Subscriptions</div>
+        <div class="kpi-row" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px;">
+          <div class="kpi-card" id="kpi-active-subs"><div class="kpi-label">Active Subscriptions</div><div class="kpi-value" style="font-size:36px;">—</div><div class="kpi-mom flat">Loading…</div></div>
+          <div class="kpi-card" id="kpi-retention"><div class="kpi-label">Subscribe &amp; Save Retention (90 Days)</div><div class="kpi-value" style="font-size:36px;">—</div><div class="kpi-mom flat">Loading…</div></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;color:var(--muted);font-weight:600;">Active Subscriptions by Month</div>
+          <div id="legend-sns" style="display:flex;align-items:center;"></div>
+        </div>
+        <div style="position:relative;height:260px;"><canvas id="chart-sns"></canvas></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div class="card-title" style="margin-bottom:0;">Key Insight</div>
+          <button class="btn-edit" id="ins-catinsight-edit-btn">✏️ Edit</button>
+        </div>
+        <div class="insight-text key-insight" id="ins-catinsight-disp">Loading…</div>
+        <div class="insight-editor" id="ins-catinsight-editor">
+          <textarea id="ins-catinsight-input"></textarea>
+          <div class="editor-footer">
+            <span class="editor-note">Saves to this month's report row. Any field can be left blank — nothing here is required.</span>
+            <button class="btn-cancel" id="ins-catinsight-cancel-btn">Cancel</button>
+            <button class="btn-save-stage" id="ins-catinsight-save-btn">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews tab — added 2026-10-05 per Jaclyn, ported from Vivian
+         Valenty's Sales > Reviews tab (VBC reference, vvs-s-reviews). One
+         section per product: all-time rating/count/distribution, plus the
+         reviews tagged (YEAR + MONTH columns on the reviews sheet) for the
+         last full month. Rendered by window.loadSalesReviews(). -->
+    <div class="channel-page" id="s-reviews">
+      <div class="page-hd" style="margin-bottom:16px;">
+        <div><div class="page-title" style="font-size:18px;">Reviews &amp; Ratings</div><div class="page-sub">Amazon customer reviews, curated monthly per product</div></div>
+      </div>
+      <div id="s-reviews-container">
+        <div class="evo-pending">Loading…</div>
+      </div>
+    </div>
+
     <!-- Brand Momentum tab — added 2026-09-01 per Jaclyn, ported from
          Skinside Seoul's proven build. -->
     <div class="channel-page" id="s-brand-momentum">
-      <div class="channel-hdr">
-        <span style="font-size:16px;font-weight:600;color:var(--navy);">Brand Momentum</span>
+      <!-- REBUILT 2026-09-28 per Jaclyn — matches Vivian Valenty
+           Skincare's Brand Momentum page structure, read directly from
+           the VBC/Dazzle Dry reference file before writing this. One
+           card per product (Sessions/Organic Keywords/BSR/Reviews all
+           in one row) replaces the previous 4 separate tables. All the
+           underlying data was already computed by initBrandMomentum
+           below — this is a genuine reshape into cards, not a rebuild
+           of the data layer.
+           NOTE: the reference's live "Show sections" row has 5
+           checkboxes (Sessions/Keyword Rankings/Subcategory BSR/Review
+           Velocity/Tracking), but only 3 actually toggle a real section
+           — confirmed directly against the reference's own PDF export
+           code, which only reads vvs-mo-cb-sessions/-keywords/-next.
+           The BSR/Reviews checkboxes are leftover from an earlier
+           3-separate-section design and don't wrap anything anymore.
+           Built évolis's version with only the 3 working ones, rather
+           than ship dead checkboxes that would look broken when clicked.
+           PORTED to MiGuard 2026-10-05 per Jaclyn (replaces the older
+           Skinside Seoul-based 4-KPI version). -->
+      <div class="card" style="margin-bottom:18px;padding:12px 20px;">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;">Show sections:</span>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
+            <input type="checkbox" id="bm-cb-products" checked style="margin:0;" onchange="(function(cb){var s=document.getElementById('bm-cb-products-section');if(s)s.style.display=cb.checked?'':'none';})(this)"> Performance by Product
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
+            <input type="checkbox" id="bm-cb-keywords" checked style="margin:0;" onchange="(function(cb){var s=document.getElementById('bm-cb-keywords-section');if(s)s.style.display=cb.checked?'':'none';})(this)"> Keyword Rankings
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
+            <input type="checkbox" id="bm-cb-next" checked style="margin:0;" onchange="(function(cb){var s=document.getElementById('bm-cb-next-section');if(s)s.style.display=cb.checked?'':'none';})(this)"> What We're Tracking
+          </label>
+        </div>
       </div>
 
-      <div class="kpi-row">
+      <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
         <div class="kpi-card" id="bm-kpi-reviews"><div class="kpi-label">Reviews Collected</div><div class="kpi-value">—</div></div>
         <div class="kpi-card" id="bm-kpi-ranked-keywords"><div class="kpi-label">Keywords with Organic Rank</div><div class="kpi-value">—</div></div>
         <div class="kpi-card" id="bm-kpi-sessions"><div class="kpi-label">Sessions</div><div class="kpi-value">—</div><div class="kpi-mom flat"></div></div>
-        <div class="kpi-card" id="bm-kpi-subbsr"><div class="kpi-label">Subcategory BSR</div><div class="kpi-value">—</div><div class="kpi-mom flat"></div></div>
       </div>
 
-      <div class="ppc-card">
+      <div id="bm-cb-products-section" class="card" style="margin-bottom:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+          <div class="card-title" style="margin-bottom:0;">Performance by Product</div>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);cursor:pointer;flex-shrink:0;">
+            <input type="checkbox" id="bm-hide-negative-bsr" style="margin:0;" onchange="window.bmRenderMomentumCards && window.bmRenderMomentumCards()">
+            Hide negative BSR changes
+          </label>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">
+          Sessions measured vs. prior month; BSR change reflects total movement since first recorded.
+        </div>
+        <div class="momentum-cards-grid" id="bm-momentum-cards-grid"><div style="color:var(--muted);font-size:12px;">Loading…</div></div>
+      </div>
+
+      <div id="bm-cb-keywords-section" class="ppc-card">
         <div class="ppc-card-title">Targeted Keyword Indexing Progress</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:14px;">Organic rankings signal algorithm traction — new brands typically take 3–12 months to index.</div>
         <div style="overflow-x:auto;">
           <table class="data-table">
-            <thead><tr><th>Keyword</th><th>Organic Rank</th><th>Search Volume</th></tr></thead>
-            <tbody id="bm-keyword-tbody"><tr><td colspan="3" style="color:var(--muted);">Loading…</td></tr></tbody>
+            <thead><tr><th>Keyword</th><th>Product</th><th>Organic Rank</th><th>Search Volume</th></tr></thead>
+            <tbody id="bm-keyword-tbody"><tr><td colspan="4" style="color:var(--muted);">Loading…</td></tr></tbody>
           </table>
         </div>
-        <div class="ppc-note">ℹ Top 20 rows, keywords with real rank movement sorted first, then by rank ascending within each group.</div>
       </div>
 
-      <div class="ppc-card" style="background:var(--navy);border:none;">
-        <div class="ppc-card-title" style="color:var(--green);">What We're Tracking Next</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
-          <div style="background:rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:14px 16px;">
-            <div style="color:var(--green);font-weight:700;font-size:13px;margin-bottom:6px;">Organic Rank Movement</div>
-            <div style="color:rgba(255,255,255,0.65);font-size:12.5px;line-height:1.5;">Tracking organic rank movement for our top-priority keyword set, month over month.</div>
+      <div id="bm-cb-next-section" class="momentum-tracking-card">
+        <div class="momentum-tracking-title">What We're Tracking Next</div>
+        <div class="momentum-tracking-grid">
+          <div class="momentum-tracking-item">
+            <div class="momentum-tracking-item-title">Keyword Rank Movement</div>
+            <div class="momentum-tracking-item-text">Organic rank movement for our top-priority keyword set, month over month.</div>
           </div>
-          <div style="background:rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:14px 16px;">
-            <div style="color:var(--green);font-weight:700;font-size:13px;margin-bottom:6px;">Subcategory BSR Trends</div>
-            <div style="color:rgba(255,255,255,0.65);font-size:12.5px;line-height:1.5;">Subcategory BSR trends as a leading indicator of category-level momentum, independent of overall BSR.</div>
+          <div class="momentum-tracking-item">
+            <div class="momentum-tracking-item-title">Subcategory BSR Trends</div>
+            <div class="momentum-tracking-item-text">Subcategory BSR as a leading indicator of category-level momentum, independent of overall BSR.</div>
           </div>
-          <div style="background:rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:14px 16px;">
-            <div style="color:var(--green);font-weight:700;font-size:13px;margin-bottom:6px;">Review Velocity &amp; Rating</div>
-            <div style="color:rgba(255,255,255,0.65);font-size:12.5px;line-height:1.5;">Review velocity and rating trends as new products build up their own review base.</div>
+          <div class="momentum-tracking-item">
+            <div class="momentum-tracking-item-title">Review Velocity</div>
+            <div class="momentum-tracking-item-text">Review velocity and rating trends as new products build up their own review base.</div>
           </div>
         </div>
       </div>
@@ -2092,11 +2272,6 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
           <span style="font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;">Show sections:</span>
           <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
-            <input type="checkbox" id="m-opp-cb-subsave" checked style="margin:0;"
-              onchange="(function(cb){var s=document.getElementById('m-opp-subsave-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
-            Subscribe &amp; Save
-          </label>
-          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
             <input type="checkbox" id="m-opp-cb-accomplished" checked style="margin:0;"
               onchange="(function(cb){var s=document.getElementById('m-opp-accomplished-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
             What's Been Accomplished
@@ -2104,24 +2279,9 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
           <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--navy);flex-shrink:0;">
             <input type="checkbox" id="m-opp-cb-future" checked style="margin:0;"
               onchange="(function(cb){var s=document.getElementById('m-opp-future-section');if(s)s.style.display=cb.checked?'':'none';})(this)">
-            Opportunities
+            Future Opportunities
           </label>
         </div>
-      </div>
-
-      <div id="m-opp-subsave-section">
-      <div class="section-label">Subscribe &amp; Save</div>
-      <div class="kpi-row" style="margin-bottom:20px;">
-        <div class="kpi-card" id="kpi-active-subs"><div class="kpi-label">Active Subscriptions</div><div class="kpi-value" style="font-size:36px;">—</div><div class="kpi-mom flat">Loading…</div></div>
-        <div class="kpi-card" id="kpi-retention"><div class="kpi-label">Subscribe &amp; Save Retention (90 Days)</div><div class="kpi-value" style="font-size:36px;">—</div><div class="kpi-mom flat">Loading…</div></div>
-      </div>
-      <div class="card" style="margin-bottom:20px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div class="card-title" style="margin-bottom:0;">Active Subscriptions by Month</div>
-          <div id="legend-sns" style="display:flex;align-items:center;"></div>
-        </div>
-        <div style="position:relative;height:320px;"><canvas id="chart-sns"></canvas></div>
-      </div>
       </div>
 
       <div id="m-opp-accomplished-section">
@@ -2169,7 +2329,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       <div id="m-opp-future-section">
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div style="display:inline-block;background:rgba(36,233,163,.12);border:1px solid rgba(36,233,163,.3);border-radius:4px;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);">Opportunities</div>
+          <div style="display:inline-block;background:rgba(36,233,163,.12);border:1px solid rgba(36,233,163,.3);border-radius:4px;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);">Future Opportunities</div>
           <button class="btn-edit" id="opp-edit-btn">✏️ Edit</button>
         </div>
         <div class="opp-grid" id="opp-grid">
@@ -3584,7 +3744,6 @@ function showPage(id, btn) {
     if (cid && cid.indexOf('ix-') === 0) window.initInventoryExternalPage();
     if (cid==='m-stewardship')   window.initStewardshipLive();
     if (cid==='m-fulfillment-cs') window.initMarketingFulfillmentCS();
-    if (cid==='m-opportunities' && !window._snsChart) initSns();
   }
 }
 
@@ -3606,7 +3765,8 @@ function showChannel(page, channelId, btn) {
     if (channelId.indexOf('mx-') === 0)  window.initMarketingExternalPage();
     if (channelId.indexOf('ix-') === 0)  window.initInventoryExternalPage();
     if (channelId === 'm-stewardship')   window.initStewardshipLive();
-    if (channelId === 'm-opportunities' && !window._snsChart) initSns();
+    if (channelId === 's-insights') { window.loadInsCategoryChart(); if (!window._snsChart) initSns(); }
+    if (channelId === 's-reviews')  window.loadSalesReviews();
     if (channelId === 'ev-primeday')     window.initPrimeDayReport();
     if (channelId === 'ev-spring')       window.initBigSpringSaleReport();
     if (channelId === 'ev-pbdd') { window.initPBDDReport(); window.initPbddEventHeader(); }
@@ -3917,8 +4077,10 @@ async function initSns() {
   const RETENTION_SHEET_ID = window.SHEET_CFG.SHEET_SUBSCRIPTIONS?.fileId || '';  // Subscriptions cache — confirmed correct directly from Jaclyn's own URL text 2026-07-28 (my prior 'KR' correction was wrong — misread a screenshot; P and R look nearly identical in that font). The real bug was ONLY the gid below, which pointed at a tab with pbj's data instead of miguard's.
   const RETENTION_GID = window.SHEET_CFG.SHEET_SUBSCRIPTIONS?.gid || '';                                   // 'miguard' tab, confirmed directly from Jaclyn's screenshot 2026-07-28 (previous gid 1742224413 was also wrong — different tab in the wrong file entirely)
 
-  const kpiValues = document.querySelectorAll('#m-opportunities .kpi-value');
-  const subsKpiEl = kpiValues[0] || null;
+  // FIXED 2026-10-05: was the first .kpi-value inside #m-opportunities (a
+  // positional lookup) — broke when Subscriptions moved to Sales > Insights.
+  // Looks the card up by its own id instead, so it works wherever it lives.
+  const subsKpiEl = document.querySelector('#kpi-active-subs .kpi-value') || null;
   const retentionKpiEl = document.querySelector('#kpi-retention .kpi-value') || null;
 
   try {
@@ -11623,6 +11785,13 @@ document.addEventListener('DOMContentLoaded', function() {
     fields: [{ key: 'ad_impressions_note', displayId: 'adimp-insight-text', textareaId: 'adimp-insight-textarea', placeholder: 'No note added yet — click Edit to add one.' }],
     editBtnId: 'adimp-insight-edit-btn', saveBtnId: 'adimp-insight-save', cancelBtnId: 'adimp-insight-cancel', editorId: 'adimp-insight-editor',
   });
+  // Sales > Insights Key Insight — added 2026-10-05 per Jaclyn. category_key_insight
+  // already exists in MiGuard's report-sheet headers (write-report-insights.js).
+  window.wireInsightBlock({
+    scope: 'monthly',
+    fields: [{ key: 'category_key_insight', displayId: 'ins-catinsight-disp', textareaId: 'ins-catinsight-input', placeholder: 'No insight added yet — click Edit to add one.' }],
+    editBtnId: 'ins-catinsight-edit-btn', saveBtnId: 'ins-catinsight-save-btn', cancelBtnId: 'ins-catinsight-cancel-btn', editorId: 'ins-catinsight-editor',
+  });
 
   // Events — one summary block per event tab. No per-block Approve anymore.
   [
@@ -11782,8 +11951,12 @@ document.addEventListener('DOMContentLoaded', function() {
     slotsEl.innerHTML = [1, 2, 3, 4].map(n => {
       const imgInputs = IMAGE_COUNTS[n]
         ? Array.from({ length: IMAGE_COUNTS[n] }, (_, i) => i + 1).map(i => `
-        <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Image ${i} URL <span style="font-weight:400;">(optional — paste a hosted link)</span></div>
-        <input type="text" id="textarea-acc${n}-image${i}" style="width:100%;box-sizing:border-box;padding:6px 10px;border:1px solid rgba(0,31,96,.2);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;color:var(--navy);margin-bottom:8px;">`).join('')
+        <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Image ${i} URL <span style="font-weight:400;">(optional — upload, or paste a hosted link)</span></div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <input type="text" id="textarea-acc${n}-image${i}" style="flex:1;min-width:0;box-sizing:border-box;padding:6px 10px;border:1px solid rgba(0,31,96,.2);border-radius:var(--radius-sm);font-family:var(--font);font-size:11px;color:var(--navy);">
+          <label class="btn-edit" id="acc${n}-image${i}-upload-btn" for="acc${n}-image${i}-file" style="cursor:pointer;white-space:nowrap;flex-shrink:0;">📤 Upload</label>
+          <input type="file" id="acc${n}-image${i}-file" accept="image/*" style="display:none;" onchange="miguardUploadInsightImage(this,'textarea-acc${n}-image${i}','acc${n}-image${i}-upload-btn')">
+        </div>`).join('')
         : '';
       return `
       <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px;">
@@ -14479,7 +14652,238 @@ async function ppcLoadBlendedPerformance(periodKey) {
 // (per-keyword AND summary tabs) and Business Report sheets already
 // confirmed and used elsewhere on this dashboard.
 // ═══════════════════════════════════════════════════════════════════
-let window_bmLastKwRows = null; // vestigial — was used by a "hide negative" checkbox that no longer exists (removed when Subcategory BSR/Review Velocity/Sessions tables were merged into the combined product summary card). Left in place/still set below since nothing reads it but removing it isn't necessary either.
+// ═══════════════════════════════════════════════════════════════════
+// SALES > INSIGHTS + REVIEWS — added 2026-10-05 per Jaclyn.
+// Insights category chart ported from évolis's loadInsCategoryChart(); the
+// Reviews tab ported from Vivian Valenty's loadVVSReviews() (VBC reference).
+// Both reuse helpers this file already has in this same scope
+// (getProductMaster, fetchAmazonReviews, ovCsvUrl, parseCsvToRows).
+// ═══════════════════════════════════════════════════════════════════
+const INS_CATEGORY_PALETTE = ['#001F60', '#24E9A3', '#6B7BA2', '#F4DFD0', '#CCD3D5'];
+async function _loadInsCategoryChartImpl() {
+  if (window._insCategoryChart) return;
+  const canvas = document.getElementById('ins-category-chart');
+  if (!canvas) return;
+  // MiGuard's own historical-orders tab (SHEET_ORDERS_HISTORICAL) — évolis
+  // hardcodes its own gid here; this reads the per-brand config instead.
+  const HIST_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS_HISTORICAL?.fileId || '';
+  const HIST_GID = window.SHEET_CFG.SHEET_ORDERS_HISTORICAL?.gid || '';
+  try {
+    const [master, histCsv] = await Promise.all([
+      getProductMaster(),
+      fetch(ovCsvUrl(HIST_SHEET_ID, HIST_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
+    ]);
+    const histRows = parseCsvToRows(histCsv);
+    const f = v => parseFloat((v || '0').toString().replace(/[^0-9.-]/g, '')) || 0;
+    const byPeriod = {};   // 'YYYY-M' -> { category: units }
+    const totals = {};     // category -> units across the whole window (orders the legend)
+    histRows.forEach(r => {
+      if ((r.status || '').trim().toLowerCase() === 'cancelled') return;
+      const m = (r.date || '').trim().match(/^(\d{4})-(\d{2})/);
+      if (!m) return;
+      const yr = Number(m[1]), mo = Number(m[2]);
+      const skus = (r.skus || r.sku || '').split(',').map(s => s.trim().toUpperCase().replace(/-SF$/, '')).filter(Boolean);
+      if (!skus.length) return;
+      const perSkuUnits = (f(r.unit_count) || f(r.quantity_ordered)) / skus.length;
+      skus.forEach(sku => {
+        const entry = master.bySku[sku];
+        if (!entry) return;
+        // MiGuard is a one-product brand and its Product Category column is
+        // blank on the Product Short Name sheet, so fall back to the product
+        // name — the chart then shows MiGuard Supplements as its own series
+        // instead of silently plotting nothing. Fills in automatically if
+        // categories are ever added to that sheet.
+        const cat = (entry.category || entry.name || sku).trim();
+        const key = `${yr}-${mo}`;
+        byPeriod[key] = byPeriod[key] || {};
+        byPeriod[key][cat] = (byPeriod[key][cat] || 0) + perSkuUnits;
+        totals[cat] = (totals[cat] || 0) + perSkuUnits;
+      });
+    });
+    const periods = Object.keys(byPeriod)
+      .map(k => { const [yr, mo] = k.split('-'); return { key: k, year: Number(yr), month: Number(mo) }; })
+      .sort((a, b) => (a.year * 12 + a.month) - (b.year * 12 + b.month))
+      .slice(-13);
+    if (!periods.length) return;
+    const cats = Object.keys(totals).sort((a, b) => totals[b] - totals[a]);
+    const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const labels = periods.map(p => MONTH_ABBR[p.month - 1] || p.month);
+    const datasets = cats.map((c, i) => ({
+      label: c,
+      data: periods.map(p => Math.round(((byPeriod[p.key] && byPeriod[p.key][c]) || 0) * 10) / 10),
+      backgroundColor: INS_CATEGORY_PALETTE[i % INS_CATEGORY_PALETTE.length],
+      borderRadius: 2,
+    }));
+    window._insCategoryChart = new Chart(canvas, {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', align: 'end', labels: { boxWidth: 12, boxHeight: 12, font: { family: 'DM Sans, sans-serif', size: 11 }, color: '#001F60', padding: 10 } },
+          tooltip: {
+            backgroundColor: '#fff', borderColor: 'rgba(0,31,96,0.1)', borderWidth: 1,
+            titleColor: '#001F60', bodyColor: '#6B7BA2',
+            titleFont: { family: 'DM Sans, sans-serif', size: 11, weight: '600' },
+            bodyFont: { family: 'DM Sans, sans-serif', size: 11 },
+            padding: 12,
+          },
+        },
+        scales: {
+          x: { border: { display: false }, grid: { display: false }, ticks: { font: { family: 'DM Sans, sans-serif', size: 10 }, color: '#6B7BA2' } },
+          y: { border: { display: false }, grid: { color: 'rgba(0,31,96,0.05)' }, ticks: { font: { family: 'DM Sans, sans-serif', size: 10 }, color: '#6B7BA2' } },
+        },
+      },
+    });
+  } catch (err) {
+    console.error('[loadInsCategoryChart]', err);
+  }
+}
+// Promise-cached: a second caller (e.g. PDF export while the tab is still
+// loading) waits on the same in-flight load instead of drawing a 2nd chart.
+window.loadInsCategoryChart = function () {
+  if (!window._insCategoryChartPromise) window._insCategoryChartPromise = _loadInsCategoryChartImpl();
+  return window._insCategoryChartPromise;
+};
+
+// ── Accomplished image upload — added 2026-10-05 per Jaclyn ──────────────
+// Ported from the VBC reference's ddUploadInsightImage. Sends the file as
+// base64 JSON to /api/upload-insight-image (shared "Report Images" Drive
+// folder), then drops the returned lh3.googleusercontent.com URL into the
+// image's URL field — saved with the card on Save, same as a pasted link.
+async function miguardUploadInsightImage(fileInputEl, targetInputId, statusBtnId) {
+  const file = fileInputEl.files && fileInputEl.files[0];
+  if (!file) return;
+  const targetInput = document.getElementById(targetInputId);
+  const statusBtn = document.getElementById(statusBtnId);
+  const MAX_BYTES = 4 * 1024 * 1024; // stays under Vercel's 4.5MB body limit once base64-inflated
+  const setBtn = (txt) => { if (statusBtn) statusBtn.textContent = txt; };
+  if (file.size > MAX_BYTES) { setBtn('✗ Too large (max 4MB)'); fileInputEl.value = ''; return; }
+  try {
+    setBtn('⟳ Uploading…');
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsDataURL(file);
+    });
+    const res = await fetch('/api/upload-insight-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: file.name, mimeType: file.type, imageBase64: base64 }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) throw new Error(data.error || ('HTTP ' + res.status));
+    if (targetInput) targetInput.value = data.url;
+    setBtn('✓ Uploaded');
+  } catch (err) {
+    console.error('[miguardUploadInsightImage]', err);
+    setBtn('✗ Upload failed');
+  } finally {
+    fileInputEl.value = '';
+  }
+}
+window.miguardUploadInsightImage = miguardUploadInsightImage;
+
+function reviewStarsHtml(rating) {
+  const r = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
+  return '★'.repeat(r) + '☆'.repeat(5 - r);
+}
+
+window.loadSalesReviews = async function () {
+  const container = document.getElementById('s-reviews-container');
+  if (!container || window._salesReviewsLoaded) return;
+  window._salesReviewsLoaded = true;
+  // Local copy on purpose — a shared escapeHtml may live in a different
+  // scope in this file (see the "X is not defined" scope gotcha).
+  const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  try {
+    const rows = await fetchAmazonReviews();
+    if (!rows.length) throw new Error('Empty sheet');
+    // parseCsvToRows lowercases header keys, so these lookups are
+    // case-insensitive for free.
+    if (!('year' in rows[0]) || !('month' in rows[0])) {
+      container.innerHTML = '<div class="evo-pending">Waiting on YEAR and MONTH columns in the reviews sheet — add them to the miguard tab and tag each review you want featured; this tab activates automatically once they exist.</div>';
+      return;
+    }
+    // Last FULL month — reviews are tagged after the month closes.
+    const { year: targetYear, month: targetMonth } = getLastFullMonthShared();
+
+    // All-time stats per product (count, average, 1–5 distribution).
+    const stats = {};
+    rows.forEach(r => {
+      const name = (r.product_name || '').trim();
+      if (!name) return;
+      const rating = Math.round(Number(r.star_rating) || 0);
+      const s = stats[name] = stats[name] || { count: 0, sum: 0, dist: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } };
+      s.count++;
+      s.sum += Number(r.star_rating) || 0;
+      if (rating >= 1 && rating <= 5) s.dist[rating]++;
+    });
+
+    // Featured reviews: rows tagged with the target YEAR/MONTH, by product.
+    const featured = {};
+    const order = [];
+    rows.forEach(r => {
+      if (parseInt(r.year, 10) !== targetYear || parseInt(r.month, 10) !== targetMonth) return;
+      const name = (r.product_name || '').trim();
+      if (!name) return;
+      if (!featured[name]) { featured[name] = []; order.push(name); }
+      featured[name].push(r);
+    });
+    if (!order.length) {
+      container.innerHTML = `<div class="evo-pending">No reviews tagged for ${MONTHS[targetMonth - 1]} ${targetYear} yet — set YEAR=${targetYear} and MONTH=${targetMonth} on the rows you want featured here.</div>`;
+      return;
+    }
+    container.innerHTML = order.map(name => {
+      const st = stats[name] || { count: 0, sum: 0, dist: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } };
+      const avg = st.count ? st.sum / st.count : 0;
+      const maxDist = Math.max(1, ...Object.values(st.dist));
+      const bars = [5, 4, 3, 2, 1].map(n => {
+        const c = st.dist[n] || 0;
+        const pct = Math.round((c / maxDist) * 100);
+        return `<div class="review-bar-row"><div class="review-bar-label">${n}★</div><div class="review-bar-track"><div class="review-bar-fill" style="width:${pct}%"></div></div><div class="review-bar-count">${c}</div></div>`;
+      }).join('');
+      const cards = featured[name].map(r => `
+        <div class="review-card">
+          <div class="review-card-stars">${reviewStarsHtml(r.star_rating)}</div>
+          <div class="review-card-title">${esc((r.review_title || '').trim())}</div>
+          <div class="review-card-text">${esc((r.review_text || '').trim())}</div>
+        </div>`).join('');
+      return `<div class="review-section">
+        <div class="review-hd">
+          <div class="review-hd-title">${esc(name)}</div>
+          <div class="review-hd-right">
+            <span>${st.count.toLocaleString()} Reviews</span>
+            <span class="review-stars">${reviewStarsHtml(avg)}</span>
+            <span class="review-avg">${avg.toFixed(1)}<span class="review-avg-of"> /5</span></span>
+          </div>
+        </div>
+        <div class="review-bars">${bars}</div>
+        <div class="review-cards">${cards}</div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    console.error('[Sales Reviews]', err);
+    window._salesReviewsLoaded = false; // allow retry
+    container.innerHTML = '<div class="evo-pending">Could not load — ' + esc(err.message || '') + '</div>';
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// BRAND MOMENTUM TAB — re-ported 2026-10-05 per Jaclyn from évolis's
+// rebuilt version (per-product cards). Originally ported from Skinside
+// Seoul's build. Reuses fetchAmazonReviews()/getProductMaster()
+// (already cached, memoized, globally accessible in this same scope —
+// no second fetch of either sheet) plus the same Keyword Tracker
+// (per-keyword AND summary tabs) and Business Report sheets already
+// confirmed and used elsewhere on this dashboard.
+// ═══════════════════════════════════════════════════════════════════
+let window_bmLastKwRows = null; // cached for the "hide negative" checkbox re-render, avoids re-fetching on toggle
+
+// reviewStarsHtml() is shared with the Sales > Reviews tab (defined above).
 
 window.initBrandMomentum = async function () {
   if (window._bmInit) return;
@@ -14503,21 +14907,45 @@ window.initBrandMomentum = async function () {
     let prevYear = year, prevMonth = month - 1;
     if (prevMonth === 0) { prevMonth = 12; prevYear--; }
 
-    // miguard-specific product ASINs — every ASIN in Product Master whose
-    // brand matches miguard and channel includes Amazon (same pattern
-    // already established for Bundles/US-filter elsewhere on this page).
+    // FIXED 2026-09-28 per Jaclyn — real root cause of the entire Brand
+    // Momentum page showing zero data everywhere (all 3 KPIs, product
+    // cards, keyword table): confirmed directly against the live Product
+    // Short Name sheet that the real "Brand" column value is the
+    // ACCENTED "évolis" (confirmed: 46 rows, exact string), not plain
+    // "evolis" — 'évolis'.toLowerCase() !== 'evolis' in JS, since
+    // .toLowerCase() case-folds but does not strip accents, so this
+    // comparison always returned zero matches, making miguardAsins empty,
+    // which made every single downstream metric on this page empty too.
+    // This exact bug (this same brand-match line, copied verbatim from
+    // before this rebuild) predates this session's changes — not
+    // something the card rebuild introduced. Fixed to compare accent-
+    // stripped strings on both sides (Unicode NFD decompose + strip
+    // combining marks) rather than hardcoding the accented spelling, so
+    // this survives a future "evolis"/"Evolis"/"évolis" spelling
+    // variation on the sheet without breaking again.
+    const stripAccents = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    // ADDED 2026-09-28 per Jaclyn — Brand Momentum should only show
+    // catalog products, not bundles (column J "SKU Type" on Product
+    // Short Name — same column/values already used for this exact
+    // purpose elsewhere on this dashboard, e.g. the internal Inventory
+    // page's own CATALOG-only filter). Confirmed directly against the
+    // real sheet before adding this: of the 31 Amazon-channel évolis
+    // rows, 19 are CATALOG and 12 are BUNDLE — the 12 bundles were
+    // showing as their own product cards before this fix, which is
+    // exactly the double-counting/merchandising-noise problem this
+    // column exists to let dashboards filter out.
     const miguardAsins = new Set(
       Object.values(master.byAsin)
-        .filter(e => (e.brand || '').trim().toLowerCase() === 'miguard' && (e.channel || '').toLowerCase().includes('amazon'))
+        .filter(e => stripAccents(e.brand).trim().toLowerCase() === 'miguard' && (e.channel || '').toLowerCase().includes('amazon') && (e.skuType || '').trim().toUpperCase() === 'CATALOG')
         .map(e => e.asin)
     );
 
-    // ── KPI 1: Reviews Collected — total review rows for miguard's own products ──
+    // ── KPI 1: Reviews Collected ──
     const miguardReviewRows = reviews.filter(r => miguardAsins.has((r.asin || '').trim().toUpperCase()));
     const reviewsKpiEl = document.getElementById('bm-kpi-reviews');
     if (reviewsKpiEl) reviewsKpiEl.querySelector('.kpi-value').textContent = miguardReviewRows.length.toLocaleString();
 
-    // ── KPI 2: Keywords with Organic Rank — latest sync date, rank 1-306 (not the ">" not-ranking marker) ──
+    // ── KPI 2: Keywords with Organic Rank ──
     const miguardKwRows = kwRows.filter(r => miguardAsins.has((r.asin || '').trim().toUpperCase()));
     const latestKwDate = miguardKwRows.reduce((max, r) => (r.date > max ? r.date : max), '');
     const latestKwRows = miguardKwRows.filter(r => r.date === latestKwDate);
@@ -14531,7 +14959,7 @@ window.initBrandMomentum = async function () {
     const rankedKwEl = document.getElementById('bm-kpi-ranked-keywords');
     if (rankedKwEl) rankedKwEl.querySelector('.kpi-value').textContent = rankedKeywordSet.size.toLocaleString();
 
-    // ── KPI 3: Sessions (MoM) — sum across miguard's own ASIN rows for the last full month ──
+    // ── KPI 3: Sessions (MoM) ──
     const currSessions = bizRows.filter(r => parseInt(r.year, 10) === year && parseInt(r.month, 10) === month && miguardAsins.has((r.asin || '').trim().toUpperCase()))
       .reduce((s, r) => s + (parseInt(r.sessions, 10) || 0), 0);
     const prevSessions = bizRows.filter(r => parseInt(r.year, 10) === prevYear && parseInt(r.month, 10) === prevMonth && miguardAsins.has((r.asin || '').trim().toUpperCase()))
@@ -14547,9 +14975,13 @@ window.initBrandMomentum = async function () {
       }
     }
 
-    // ── Sessions by Product — kept as per-SKU data (feeds the combined
-    // product summary card below); no longer rendered as its own table. ──
-    const launchSessionsBySku = {}; // first-ever recorded session count per SKU, for "% vs Launch"
+    // ── Sessions by product (feeds cards, not a table anymore) ──
+    // CHANGED 2026-09-28 per Jaclyn — was "% vs Launch" (first-ever
+    // recorded session count per SKU), now "% vs prior month" (MoM),
+    // matching the same prevYear/prevMonth already computed above for
+    // the top-3 Sessions KPI, just applied per-SKU instead of as one
+    // aggregate total.
+    const prevMonthSessionsBySku = {};
     const currSessionsBySku = {};
     bizRows.forEach(r => {
       const asin = (r.asin || '').trim().toUpperCase();
@@ -14557,43 +14989,16 @@ window.initBrandMomentum = async function () {
       const entry = master.byAsin[asin];
       const sku = entry ? entry.sku : asin;
       const sessions = parseInt(r.sessions, 10) || 0;
-      if (parseInt(r.year, 10) === year && parseInt(r.month, 10) === month) {
+      const rYear = parseInt(r.year, 10), rMonth = parseInt(r.month, 10);
+      if (rYear === year && rMonth === month) {
         currSessionsBySku[sku] = (currSessionsBySku[sku] || 0) + sessions;
       }
-      const ym = `${r.year}-${String(r.month).padStart(2, '0')}`;
-      if (!launchSessionsBySku[sku] || ym < launchSessionsBySku[sku].ym) {
-        launchSessionsBySku[sku] = { ym, sessions };
+      if (rYear === prevYear && rMonth === prevMonth) {
+        prevMonthSessionsBySku[sku] = (prevMonthSessionsBySku[sku] || 0) + sessions;
       }
     });
-    // (currSessionsBySku/launchSessionsBySku above are currently unused —
-    // left in place since they're cheap to compute and may feed a future
-    // per-product sessions view; not rendered anywhere right now.)
 
-    // ── Targeted Keyword Indexing Progress — top 10, real-movement keywords first, then rank ascending ──
-    // Parses a rank cell for MATH purposes only — treats a "not yet
-    // ranking" cell (">306", ">150", etc.) as literally the number after
-    // the ">" rather than null, per Jaclyn: that's the tracker's own
-    // starting baseline for an unranked keyword, so "went from >306 to
-    // #13" should read as a 293-spot improvement, not "no prior data."
-    // Kept separate from the DISPLAYED rank (which still shows "Not
-    // ranking" for these, via `isRanking`/`rank` below) — this is only
-    // used for the Change Since First Recorded column's math.
-    function parseRankForMath(rankStr) {
-      const s = String(rankStr || '').trim();
-      if (!s) return null;
-      const n = parseInt(s.replace(/[^\d]/g, ''), 10);
-      return isNaN(n) ? null : n;
-    }
-    function pickFirstRankForKeyword(keyword, asin) {
-      const rows = miguardKwRows.filter(r => r.keyword.trim().toLowerCase() === keyword && (r.asin || '').trim().toUpperCase() === asin);
-      if (!rows.length) return null;
-      const firstDate = rows.reduce((min, r) => (!min || r.date < min ? r.date : min), '');
-      return rows.find(r => r.date === firstDate) || null;
-    }
-    function pickLatestRankForKeyword(keyword, asin) {
-      const matches = latestKwRows.filter(r => r.keyword.trim().toLowerCase() === keyword && (r.asin || '').trim().toUpperCase() === asin);
-      return matches[0] || null;
-    }
+    // ── Keyword rows (feeds both the table below AND per-product counts) ──
     function pickPrevRankForKeyword(keyword, asin) {
       const priorRows = miguardKwRows.filter(r => r.date < latestKwDate && r.keyword.trim().toLowerCase() === keyword && (r.asin || '').trim().toUpperCase() === asin);
       if (!priorRows.length) return null;
@@ -14603,24 +15008,19 @@ window.initBrandMomentum = async function () {
     const seenKeywordAsin = new Set();
     const keywordRows = [];
     latestKwRows.forEach(r => {
-      const key = r.keyword.trim().toLowerCase() + '||' + (r.asin || '').trim().toUpperCase();
+      const asin = (r.asin || '').trim().toUpperCase();
+      const key = r.keyword.trim().toLowerCase() + '||' + asin;
       if (seenKeywordAsin.has(key)) return;
       seenKeywordAsin.add(key);
       const rankStr = String(r.organic_rank || '').trim();
       const isRanking = rankStr && !rankStr.startsWith('>');
       const rank = isRanking ? parseInt(rankStr.replace(/[^\d]/g, ''), 10) : null;
-      const prevRow = pickPrevRankForKeyword(r.keyword.trim().toLowerCase(), (r.asin || '').trim().toUpperCase());
+      const prevRow = pickPrevRankForKeyword(r.keyword.trim().toLowerCase(), asin);
       const prevRankStr = prevRow ? String(prevRow.organic_rank || '').trim() : '';
       const prevRank = (prevRankStr && !prevRankStr.startsWith('>')) ? parseInt(prevRankStr.replace(/[^\d]/g, ''), 10) : null;
       const hasMovement = rank != null && prevRank != null && rank !== prevRank;
-      const firstRow = pickFirstRankForKeyword(r.keyword.trim().toLowerCase(), (r.asin || '').trim().toUpperCase());
-      const firstRankNum = firstRow ? parseRankForMath(firstRow.organic_rank) : null;
-      const latestRankNum = parseRankForMath(r.organic_rank);
-      const spotsChange = (firstRankNum != null && latestRankNum != null) ? firstRankNum - latestRankNum : null;
-      // rankDisplay — the raw not-ranking marker (">306", ">150", etc.)
-      // exactly as the tracker sheet has it, shown as-is for unranked
-      // keywords rather than a generic "Not ranking" label.
-      keywordRows.push({ keyword: r.keyword, rank, rankDisplay: rankStr, hasMovement, spotsChange, volume: parseInt(r.search_volume, 10) || 0 });
+      const entry = master.byAsin[asin];
+      keywordRows.push({ keyword: r.keyword, asin, product: entry ? entry.name : r.asin, rank, hasMovement, volume: parseInt(r.search_volume, 10) || 0 });
     });
     keywordRows.sort((a, b) => {
       if (a.hasMovement !== b.hasMovement) return a.hasMovement ? -1 : 1;
@@ -14629,61 +15029,172 @@ window.initBrandMomentum = async function () {
     });
     const kwTbody = document.getElementById('bm-keyword-tbody');
     if (kwTbody) {
-      const top10 = keywordRows.slice(0, 20); // variable name kept as-is; now shows 20 rows per Jaclyn (single-product brand)
-      kwTbody.innerHTML = top10.length ? top10.map(r => {
-        // Single merged cell: "#151 ▲ +155" for a ranking keyword with
-        // real movement since first recorded, just "#151" if ranking but
-        // flat/no baseline, or the raw not-ranking marker (">306") as-is —
-        // no change shown at all for keywords that are still unranked.
-        let rankCell;
-        if (r.rank == null) {
-          rankCell = r.rankDisplay;
-        } else {
-          const changePart = r.spotsChange
-            ? ` <span style="color:${r.spotsChange > 0 ? 'var(--green)' : 'var(--danger)'};">${r.spotsChange > 0 ? '▲' : '▼'} ${r.spotsChange > 0 ? '+' : ''}${r.spotsChange}</span>`
-            : '';
-          rankCell = `#${r.rank}${changePart}`;
-        }
-        return `<tr><td>${r.keyword}</td><td>${rankCell}</td><td>${r.volume.toLocaleString()}</td></tr>`;
-      }).join('') : '<tr><td colspan="3" style="color:var(--muted);">No keyword data available</td></tr>';
+      const top10 = keywordRows.slice(0, 10);
+      kwTbody.innerHTML = top10.length ? top10.map(r =>
+        `<tr><td>${r.keyword}</td><td>${r.product}</td><td>${r.rank == null ? 'Not ranking' : '#' + r.rank}</td><td>${r.volume.toLocaleString()}</td></tr>`
+      ).join('') : '<tr><td colspan="4" style="color:var(--muted);">No keyword data available</td></tr>';
     }
+    // ADDED for the card rebuild — per-product organic keyword COUNT
+    // (distinct from the top-10 table above), keyed by SKU to match
+    // Sessions/Reviews' own keying. Only counts keywords with a real
+    // rank (matching the KPI 2 "ranked keywords" definition above), from
+    // the same already-deduped keywordRows array — no second pass over
+    // the raw sheet.
+    const kwCountBySku = {};
+    keywordRows.forEach(r => {
+      if (r.rank == null) return;
+      const entry = master.byAsin[r.asin];
+      const sku = entry ? entry.sku : r.asin;
+      kwCountBySku[sku] = (kwCountBySku[sku] || 0) + 1;
+    });
 
-    // ── Subcategory BSR — top-level KPI card, MoM % change (last full
-    // month's snapshot vs the month before), pooled across all miguard
-    // ASINs (currently just one product, but this stays correct if a
-    // second SKU is ever added — "lower BSR = improvement" convention,
-    // same as everywhere else on this dashboard).
-    const miguardBsrRows = kwSummaryRows.filter(r => miguardAsins.has((r.asin || '').trim().toUpperCase()) && r.subcategory_bsr && r.date);
-    function bsrSnapshotForMonth(rows, y, m) {
-      const inMonth = rows.filter(r => {
-        const d = new Date(r.date + 'T00:00:00');
-        return !isNaN(d) && d.getFullYear() === y && (d.getMonth() + 1) === m;
-      }).sort((a, b) => a.date.localeCompare(b.date));
-      if (!inMonth.length) return null;
-      return Number(inMonth[inMonth.length - 1].subcategory_bsr) || null;
-    }
-    const currBsr = bsrSnapshotForMonth(miguardBsrRows, year, month);
-    const prevBsr = bsrSnapshotForMonth(miguardBsrRows, prevYear, prevMonth);
-    const subBsrEl = document.getElementById('bm-kpi-subbsr');
-    if (subBsrEl) {
-      subBsrEl.querySelector('.kpi-value').textContent = currBsr != null ? '#' + currBsr.toLocaleString() : '—';
-      const momEl = subBsrEl.querySelector('.kpi-mom');
-      if (momEl && currBsr != null && prevBsr != null && prevBsr > 0) {
-        const spotChange = prevBsr - currBsr; // lower BSR = improvement, positive = moved toward #1
-        const pct = Math.round((spotChange / prevBsr) * 1000) / 10;
-        momEl.className = 'kpi-mom ' + (spotChange === 0 ? 'flat' : spotChange > 0 ? 'up' : 'dn');
-        // Spot count AND %, same inline arrow convention as the Targeted
-        // Keyword Indexing Progress table's Organic Rank column — the
-        // tracker has a weekly entry per ASIN, same as the keyword tab,
-        // so this reads change over time the same way.
-        momEl.textContent = spotChange === 0 ? '' : `${spotChange > 0 ? '▲' : '▼'} ${Math.abs(spotChange).toLocaleString()} spots (${Math.abs(pct)}%) vs prior month`;
-      }
-    }
+    // ── BSR by product — restructured from a flat table into a per-SKU
+    // lookup so it can be joined onto the same cards as Sessions/
+    // Keywords/Reviews. Same "lower BSR = improvement" convention as
+    // before, unchanged. ──
+    const bsrBySku = {};
+    kwSummaryRows.forEach(r => {
+      const asin = (r.asin || '').trim().toUpperCase();
+      if (!miguardAsins.has(asin)) return;
+      if (!r.subcategory_bsr) return;
+      const entry = master.byAsin[asin];
+      const sku = entry ? entry.sku : asin;
+      if (!bsrBySku[sku]) bsrBySku[sku] = [];
+      bsrBySku[sku].push(r);
+    });
+    window._bmBsrBySku = {}; // {sku: {latestBsr, changePct, subcategory}} — cached for bmRenderMomentumCards() re-renders
+    Object.keys(bsrBySku).forEach(sku => {
+      const rows = bsrBySku[sku].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      if (!rows.length) return;
+      const first = rows[0], latest = rows[rows.length - 1];
+      const firstBsr = Number(first.subcategory_bsr) || 0;
+      const latestBsr = Number(latest.subcategory_bsr) || 0;
+      const changePct = firstBsr > 0 ? Math.round(((firstBsr - latestBsr) / firstBsr) * 1000) / 10 : 0;
+      window._bmBsrBySku[sku] = { latestBsr, changePct, subcategory: latest.subcategory || '' };
+    });
+
+    // ── Review Velocity & Quality — per-product review count + avg rating ──
+    const reviewStatsBySku = {};
+    miguardReviewRows.forEach(r => {
+      const asin = (r.asin || '').trim().toUpperCase();
+      const entry = master.byAsin[asin];
+      const sku = entry ? entry.sku : asin;
+      const name = entry ? entry.name : asin;
+      if (!reviewStatsBySku[sku]) reviewStatsBySku[sku] = { name, count: 0, ratingSum: 0 };
+      reviewStatsBySku[sku].count++;
+      reviewStatsBySku[sku].ratingSum += parseFloat(r.star_rating) || 0;
+    });
+
+    // Cache everything bmRenderMomentumCards() needs to re-render without
+    // re-fetching (same "hide negative" re-render pattern the old
+    // bmRenderBsrTable used, now covering the whole card, not just BSR).
+    window._bmCardData = { master, currSessionsBySku, prevMonthSessionsBySku, kwCountBySku, reviewStatsBySku, year, month };
+    window.bmRenderMomentumCards();
 
   } catch (err) {
     console.warn('[BrandMomentum] failed:', err.message);
   }
 };
+
+// Separate render function (not just inline in initBrandMomentum) so the
+// "Hide negative BSR changes" checkbox can re-render instantly from
+// already-fetched, cached data (window._bmCardData / window._bmBsrBySku)
+// without re-fetching — same reasoning the old bmRenderBsrTable had, now
+// covering the whole per-product card grid rather than just a BSR table.
+// Card structure (.momentum-pcard / .momentum-pcard-hd / etc.) ported
+// from the VBC/Dazzle Dry reference's Vivian Valenty Skincare Brand
+// Momentum page, read directly from that file. Product list is every SKU
+// that has Sessions data for the current month — the most reliable,
+// widely-available metric — rather than every catalog SKU regardless
+// (which would show a wall of all-"—" cards for products with no real
+// activity yet). Sorted by Sessions descending, same order the old
+// Sessions-by-Product table used.
+window.bmRenderMomentumCards = function () {
+  const grid = document.getElementById('bm-momentum-cards-grid');
+  if (!grid || !window._bmCardData) return;
+  const { master, currSessionsBySku, prevMonthSessionsBySku, kwCountBySku, reviewStatsBySku, year, month } = window._bmCardData;
+  const hideNegativeBsr = document.getElementById('bm-hide-negative-bsr')?.checked;
+
+  const skus = Object.keys(currSessionsBySku).sort((a, b) => currSessionsBySku[b] - currSessionsBySku[a]);
+  if (!skus.length) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:12px;">No data synced for this month yet</div>';
+    return;
+  }
+
+  const cardsHtml = skus.map(sku => {
+    const entry = master.bySku[sku];
+    const name = entry ? entry.name : sku;
+
+    const sessions = currSessionsBySku[sku];
+    // CHANGED 2026-09-28 per Jaclyn — "% vs prior month" (MoM) instead
+    // of "% vs Launch". prevMonthSessionsBySku[sku] is undefined (not
+    // just zero) for a SKU with no sessions recorded last month at all
+    // — distinguished from "had 0 sessions last month" so a genuinely
+    // new SKU still shows "New SKU" rather than a misleading "+∞%".
+    const prevSessions = prevMonthSessionsBySku[sku];
+    const pctVsPrevMonth = (prevSessions !== undefined && prevSessions > 0)
+      ? Math.round(((sessions - prevSessions) / prevSessions) * 1000) / 10
+      : null;
+    const sessPillHtml = pctVsPrevMonth != null
+      ? `<span class="momentum-pill ${pctVsPrevMonth > 0 ? 'momentum-pill-up' : 'momentum-pill-dn'}">${pctVsPrevMonth > 0 ? '▲' : '▼'} ${Math.abs(pctVsPrevMonth)}% vs prior month</span>`
+      : `<span class="momentum-pill" style="background:var(--bg2);color:var(--muted);">${prevSessions === undefined ? 'New SKU' : '—'}</span>`;
+
+    const kwCount = kwCountBySku[sku] || 0;
+
+    const bsr = window._bmBsrBySku ? window._bmBsrBySku[sku] : null;
+    let bsrValueHtml = '—', bsrPillHtml = '', bsrSubcatHtml = '', bsrRowAttr = '';
+    if (bsr) {
+      bsrValueHtml = '#' + bsr.latestBsr.toLocaleString();
+      if (bsr.changePct !== 0) {
+        const cls = bsr.changePct > 0 ? 'momentum-pill-up' : 'momentum-pill-dn';
+        const arrow = bsr.changePct > 0 ? '▲' : '▼';
+        bsrPillHtml = `<span data-bsr-chng class="momentum-pill ${cls}">${arrow} ${Math.abs(bsr.changePct)}%</span>`;
+      }
+      bsrRowAttr = bsr.changePct < 0 ? ' data-bsr-neg="true"' : '';
+      if (bsr.subcategory) bsrSubcatHtml = `<div class="momentum-pcard-subcategory">${bsr.subcategory}</div>`;
+    }
+    // "Hide negative BSR changes" hides the whole card if its ONLY signal
+    // is a negative BSR change — matches the spirit of the old table's
+    // row-hiding, adapted to a card layout where hiding just the pill
+    // (rather than the row) would leave a confusing half-empty card.
+    // CHANGED for MiGuard per the 2026-10-01 porting notes: the checkbox hides
+    // only the red BSR-change pill; the product card itself always shows.
+    if (hideNegativeBsr && bsr && bsr.changePct < 0) bsrPillHtml = '';
+
+    const rev = reviewStatsBySku[sku];
+    const reviewsCount = rev ? rev.count : 0;
+    const avgRating = rev && rev.count > 0 ? rev.ratingSum / rev.count : 0;
+    const ratingBadgeHtml = rev && rev.count > 0
+      ? `<div class="momentum-pcard-rating"><span class="momentum-pcard-rating-stars">${reviewStarsHtml(avgRating)}</span><span class="momentum-pcard-rating-num">${avgRating.toFixed(1)}</span></div>`
+      : '';
+
+    return `<div class="momentum-pcard">
+      <div class="momentum-pcard-hd">
+        <div class="momentum-pcard-name">${name}</div>
+        ${ratingBadgeHtml}
+      </div>
+      <div class="momentum-pcard-body">
+        <div class="momentum-pcard-row"><span class="momentum-pcard-label">Sessions</span><span class="momentum-pcard-value">${sessions}</span>${sessPillHtml}</div>
+        <div class="momentum-pcard-row"><span class="momentum-pcard-label">Organic Keywords</span><span class="momentum-pcard-value">${kwCount || '—'}</span></div>
+        <div class="momentum-pcard-row"${bsrRowAttr}><span class="momentum-pcard-label">BSR</span><span class="momentum-pcard-value">${bsrValueHtml}</span>${bsrPillHtml}${bsrSubcatHtml}</div>
+        <div class="momentum-pcard-row"><span class="momentum-pcard-label">Reviews</span><span class="momentum-pcard-value">${reviewsCount || '—'}</span></div>
+      </div>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  grid.innerHTML = cardsHtml || '<div style="color:var(--muted);font-size:12px;">No products left after filtering.</div>';
+};
+// Promise-cached wrapper (added 2026-10-05): initBrandMomentum's own _bmInit
+// flag returns immediately on a second call even while the first is still
+// fetching — the PDF export would then read empty cards. Every caller now
+// gets the same in-flight promise.
+(function () {
+  const impl = window.initBrandMomentum;
+  window.initBrandMomentum = function () {
+    if (!window._bmInitPromise) window._bmInitPromise = impl();
+    return window._bmInitPromise;
+  };
+})();
 
 // Shared getLastFullMonth logic, duplicated here per the established
 // pattern in this file (each scope keeps its own local copy rather than
@@ -17976,6 +18487,7 @@ async function loadAuditResultsFromSheet() {
     _investChart: 'chart-invest',
     _impressChart: 'chart-impressions',
     _snsChart: 'chart-sns',
+    _insCategoryChart: 'ins-category-chart', // Sales > Insights, added 2026-10-05
     // Added 2026-07-21 — was never registered here at all, so it fell
     // through to the naive pdfxRawChartImg fallback (no force-visible
     // ancestors, no correct-size capture), which is exactly why it showed
@@ -18002,6 +18514,15 @@ async function loadAuditResultsFromSheet() {
     _bssTopSellersChart:  'bss-chart-top-sellers',
     _pbddTopSellersChart: 'pbdd-chart-top-sellers',
     _bfcmTopSellersChart: 'bfcm-chart-top-sellers',
+  };
+  // Fixed PDF display height per chart (porting notes fix #2). Width always
+  // prints at 686px; only height comes from here. Charts not listed keep the
+  // old dashboard-height x 0.9 rule. Tune per chart from the export log.
+  const PDFX_CHART_TARGET_HEIGHT_PX = {
+    _amazonChart: 190, _webChart: 190, _walmartChart: 190,
+    _insCategoryChart: 220, _snsChart: 190,
+    _investChart: 170, _impressChart: 150,
+    mfcShippedChartInstance: 150,
   };
   let PDFX_CHART_CACHE = null; // populated once per export by pdfxCaptureAllChartImages() — now {varName: {img, width, height}}
 
@@ -18209,7 +18730,12 @@ async function loadAuditResultsFromSheet() {
       const PDFX_CAPTURE_TENSION = 0.3; // 2026-07-16: bumped from 0.22 — Jaclyn wanted more curve. Re-tested at 0.3 (the dashboard's own native value) with the corrected line-weight scaling and 0.9x height factor already in place, and it now reads clean rather than bulgy — the earlier over-exaggeration was compounded by the un-scaled thin lines, not tension alone.
       const PDFX_LINE_WIDTH_TARGET_PX = 3;   // dashboard's own is 2.5 — slightly heavier per Jaclyn's "increase the weight" ask
       const PDFX_POINT_RADIUS_TARGET_PX = 2.2; // dashboard's own is 2
-      const captureHeightPx = Math.round(originalWidthPx * ((dashboardHeightPx * PDFX_HEIGHT_FACTOR) / PDFX_CARD_WIDTH_PX));
+      const captureHeightPx = Math.round(PDFX_CHART_TARGET_HEIGHT_PX[varName]
+        ? originalWidthPx * (PDFX_CHART_TARGET_HEIGHT_PX[varName] / PDFX_CARD_WIDTH_PX)
+        : originalWidthPx * ((dashboardHeightPx * PDFX_HEIGHT_FACTOR) / PDFX_CARD_WIDTH_PX));
+      // Porting notes fix #1: Chart.js v4 silently defers resize() while an
+      // animation is running, so the capture read the OLD size. stop() first.
+      if (typeof liveChart.stop === 'function') liveChart.stop();
       liveChart.resize(originalWidthPx, captureHeightPx);
       console.log('[pdf-export][qa]', varName, '— canvas dims IMMEDIATELY after resize():', liveCanvas.width + 'x' + liveCanvas.height, '(requested', originalWidthPx + 'x' + captureHeightPx + ')');
 
@@ -18263,6 +18789,21 @@ async function loadAuditResultsFromSheet() {
         : 'no datasets';
       console.log('[pdf-export][qa]', varName, '— original size:', originalWidthPx + 'x' + originalHeightPx, '— dashboardHeightPx:', Math.round(dashboardHeightPx), '(x' + PDFX_HEIGHT_FACTOR + ' factor) — re-rendered at:', originalWidthPx + 'x' + captureHeightPx, '(will display as 686x' + Math.round(dashboardHeightPx * PDFX_HEIGHT_FACTOR) + ' in the PDF) — tension:', PDFX_CAPTURE_TENSION, '— borderWidth target/scaled:', PDFX_LINE_WIDTH_TARGET_PX + '/' + scaledBorderWidth.toFixed(1), '— pointRadius target/scaled:', PDFX_POINT_RADIUS_TARGET_PX + '/' + scaledPointRadius.toFixed(1), '— data:', rawDataInfo);
 
+      // Porting notes fix #3: scale on-canvas legends through the RAW config
+      // (chart.config.options), never the chart.options resolver proxy —
+      // copying from the proxy and assigning back throws "Recursion
+      // detected: _scriptable->_scriptable" and kills the export.
+      const rawLegend = liveChart.config && liveChart.config.options && liveChart.config.options.plugins && liveChart.config.options.plugins.legend;
+      const rawLabels = (rawLegend && rawLegend.display !== false && rawLegend.labels) || null;
+      const savedLegend = rawLabels ? { font: rawLabels.font, boxWidth: rawLabels.boxWidth, boxHeight: rawLabels.boxHeight, padding: rawLabels.padding } : null;
+      if (rawLabels) {
+        const fs = targetW / PDFX_CARD_WIDTH_PX;
+        rawLabels.font = Object.assign({}, savedLegend.font || {}, { size: Math.round(PDFX_CHART_AXIS_TARGET_PX * fs) });
+        rawLabels.boxWidth = Math.round((savedLegend.boxWidth || 12) * fs);
+        rawLabels.boxHeight = Math.round((savedLegend.boxHeight || 12) * fs);
+        rawLabels.padding = Math.round((savedLegend.padding || 10) * fs);
+      }
+
       let img = '';
       let capturedWidth = liveCanvas.width;
       let capturedHeight = liveCanvas.height;
@@ -18312,10 +18853,17 @@ async function loadAuditResultsFromSheet() {
             if (typeof orig.pointRadius === 'number') ds.pointRadius = orig.pointRadius;
           });
         }
-        liveChart.update('none');
+        if (rawLabels && savedLegend) {
+          Object.keys(savedLegend).forEach(function (k) {
+            if (savedLegend[k] === undefined) delete rawLabels[k]; else rawLabels[k] = savedLegend[k];
+          });
+        }
+        // Guarded (porting notes): one chart failing to restore costs that
+        // chart, not the whole PDF.
+        try { liveChart.update('none'); } catch (e) { console.warn('[pdf-export] restore update failed for', varName, e.message); }
       }
 
-      const result = { img: img, width: capturedWidth, height: capturedHeight, displayHeightPx: dashboardHeightPx * PDFX_HEIGHT_FACTOR };
+      const result = { img: img, width: capturedWidth, height: capturedHeight, displayHeightPx: PDFX_CHART_TARGET_HEIGHT_PX[varName] || dashboardHeightPx * PDFX_HEIGHT_FACTOR };
 
       // Restore the live dashboard's own chart to its original size —
       // explicit numeric resize again, same validated synchronous technique,
@@ -18457,8 +19005,8 @@ async function loadAuditResultsFromSheet() {
       '<div class="pdfx-header-divider"></div>';
   }
 
-  function pdfxFooter(monthYear) {
-    return '<div class="pdfx-footer">' +
+  function pdfxFooter(monthYear, compact) {
+    return '<div class="pdfx-footer' + (compact ? ' pdfx-footer-compact' : '') + '">' +
       '<div><div class="pdfx-footer-brand">medaltus.</div><div class="pdfx-footer-tag">A trusted partner for your brand.</div></div>' +
       '<div class="pdfx-footer-right">Generated: ' + pdfxEscape(monthYear) + '<br><span class="pdfx-footer-conf">CONFIDENTIAL</span></div>' +
       '</div>';
@@ -18629,7 +19177,7 @@ async function loadAuditResultsFromSheet() {
       const imagesEl = cardEl.querySelector('#acc-images-' + n);
       const imgUrls = imagesEl ? Array.prototype.map.call(imagesEl.querySelectorAll('img'), function (img) { return img.getAttribute('src'); }) : [];
       const imagesHtml = imgUrls.length
-        ? '<div class="pdfx-opp-images">' + imgUrls.map(function (u) { return '<img src="' + u + '" class="pdfx-opp-img">'; }).join('') + '</div>'
+        ? '<div class="pdfx-opp-images">' + imgUrls.map(function (u) { return '<img src="' + u + '" class="pdfx-opp-img pdfx-acc-img">'; }).join('') + '</div>'
         : '';
       return '<div>' +
         '<div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;">' + pdfxEscape(title) + '</div>' +
@@ -18671,7 +19219,7 @@ async function loadAuditResultsFromSheet() {
     // follows Accomplished — without reintroducing the full box. Matches
     // Skinside Seoul's build per Jaclyn.
     return '<div class="pdfx-card" style="border:none;padding:0;border-top:1px solid var(--border);padding-top:12px;">' +
-      '<span class="pdfx-pill" style="margin-bottom:16px;">Opportunities</span>' +
+      '<span class="pdfx-pill" style="margin-bottom:16px;">Future Opportunities</span>' +
       '<div class="pdfx-cover-cols">' + cards + '</div>' +
       '</div>';
   }
@@ -18784,31 +19332,91 @@ async function loadAuditResultsFromSheet() {
   }
 
   function buildOpportunitiesPage(monthYear) {
-    // Show sections — checkboxes on the live tab, read at PDF-build time.
-    // Unchecking a section on the live tab excludes it from the exported
-    // PDF too, not just the on-screen view. Re-added per Jaclyn (Subscribe
-    // & Save came back to this page after briefly following VVS's layout,
-    // which keeps S&S elsewhere on its own dashboard instead).
-    const showSubsave = !!(document.getElementById('m-opp-cb-subsave') && document.getElementById('m-opp-cb-subsave').checked);
+    // REBUILT 2026-10-05 per Jaclyn: What's Been Accomplished, then Future
+    // Opportunities — nothing else (Subscribe & Save moved to Sales >
+    // Insights, see buildSalesInsightsPage). Tighter padding + compact footer
+    // per the porting notes so the page stays within 11in; the Accomplished
+    // images are then grown into whatever space is left by
+    // pdfxGrowAccomplishedImages() at export time.
     const showAccomplished = !!(document.getElementById('m-opp-cb-accomplished') && document.getElementById('m-opp-cb-accomplished').checked);
     const showFuture  = !!(document.getElementById('m-opp-cb-future')  && document.getElementById('m-opp-cb-future').checked);
-    const kpis = ['kpi-active-subs', 'kpi-retention'].map(pdfxKpi);
-    const subsaveHtml = showSubsave
-      ? '<div class="pdfx-chlabel">Subscribe &amp; Save</div>' +
-        '<div class="pdfx-kpis n2" style="margin-top:6px;">' + kpis.map(pdfxKpiCardHtml).join('') + '</div>' +
-        '<div class="pdfx-card"><div class="pdfx-card-title">Active Subscriptions by Month</div>' + pdfxChartBlock('_snsChart') + '</div>'
-      : '';
     const accomplishedHtml = showAccomplished ? pdfxAccomplishedBlock() : '';
     const futureHtml = showFuture ? pdfxFutureOpportunitiesBlock() : '';
     return '' +
-      '<div class="pdfx-page">' +
-        '<div class="pdfx-inner">' +
+      '<div class="pdfx-page pdfx-opp-page">' +
+        '<div class="pdfx-inner" style="padding:22px 46px 26px;">' +
           pdfxHeaderBand(monthYear, 'Opportunities') +
-          subsaveHtml + accomplishedHtml + futureHtml +
-          '<div class="pdfx-pin-bottom">' + pdfxFooter(monthYear) + '</div>' +
+          accomplishedHtml + futureHtml +
+          pdfxFooter(monthYear, true) +
         '</div>' +
       '</div>';
   }
+
+  // Sales > Insights — added 2026-10-05, ported from évolis's
+  // buildInsightsPage: category chart, Subscriptions (2 KPIs + chart, moved
+  // here from Opportunities), Key Insight.
+  function buildSalesInsightsPage(monthYear) {
+    const snsKpis = ['kpi-active-subs', 'kpi-retention'].map(pdfxKpi);
+    const insight = pdfxText('#ins-catinsight-disp');
+    const hasInsight = insight && !/^No insight added yet/i.test(insight) && insight !== 'Loading…';
+    return '' +
+      '<div class="pdfx-page">' +
+        '<div class="pdfx-inner">' +
+          pdfxHeaderBand(monthYear, 'Sales') +
+          '<div class="pdfx-chlabel">Insights</div>' +
+          '<div class="pdfx-card"><div class="pdfx-card-title">Unit Sales by Product Category</div>' + pdfxChartBlock('_insCategoryChart') + '</div>' +
+          '<div class="pdfx-kpis n2" style="margin-top:14px;">' + snsKpis.map(pdfxKpiCardHtml).join('') + '</div>' +
+          '<div class="pdfx-card"><div class="pdfx-card-title">Active Subscriptions by Month</div>' + pdfxChartBlock('_snsChart') + '</div>' +
+          (hasInsight ? '<div class="pdfx-insight"><strong>Key Insight:</strong> ' + pdfxEscape(insight) + '</div>' : '') +
+        '</div>' +
+      '</div>';
+  }
+
+  // Brand Momentum — added 2026-10-05, ported from évolis's
+  // buildBrandMomentumPages: top-3 KPIs, product cards copied from the live
+  // DOM (4 on the first page, 5 per page after), then keyword table + What
+  // We're Tracking Next. Honors the live tab's 3 "Show sections" boxes.
+  // MiGuard-specific: with only 1-2 product cards, the keyword table and
+  // tracking card share the first page instead of getting their own.
+  function buildBrandMomentumPages(monthYear) {
+    const on = id => { const cb = document.getElementById(id); return !cb || cb.checked; };
+    const cards = on('bm-cb-products') ? Array.from(document.querySelectorAll('#bm-momentum-cards-grid .momentum-pcard')) : [];
+    const FIRST_PAGE_MAX = 4, OTHER_PAGE_MAX = 5;
+    const chunks = [];
+    { const rest = cards.slice(); if (rest.length) chunks.push(rest.splice(0, FIRST_PAGE_MAX)); while (rest.length) chunks.push(rest.splice(0, OTHER_PAGE_MAX)); }
+    const top3Kpis = ['bm-kpi-reviews', 'bm-kpi-ranked-keywords', 'bm-kpi-sessions'].map(pdfxKpi);
+    const firstHead = pdfxHeaderBand(monthYear, 'Sales') +
+      '<div class="pdfx-chlabel">Brand Momentum</div>' +
+      '<div class="pdfx-kpis n3" style="margin-top:6px;margin-bottom:10px;">' + top3Kpis.map(pdfxKpiCardHtml).join('') + '</div>';
+
+    const kwRows = on('bm-cb-keywords') ? pdfxTableRows('bm-keyword-tbody') : [];
+    const kwHtml = kwRows.length
+      ? '<div class="pdfx-card" style="margin-bottom:0;">' +
+          '<div class="pdfx-card-title">Targeted Keyword Indexing Progress <span style="font-weight:400;color:var(--muted);">(Top 10)</span></div>' +
+          pdfxTableHtml(['Keyword', 'Product', 'Organic Rank', 'Search Volume'], kwRows) +
+        '</div>'
+      : '';
+    const nextEl = on('bm-cb-next') ? pdfxById('bm-cb-next-section') : null;
+    const nextHtml = nextEl ? nextEl.outerHTML : '';
+    const tailHtml = kwHtml + (nextHtml ? '<div style="margin-top:' + (kwHtml ? '12px' : '0') + ';">' + nextHtml + '</div>' : '');
+
+    const combineTail = chunks.length === 1 && chunks[0].length <= 2;
+    let pages = chunks.map((chunk, i) => {
+      const head = i === 0
+        ? firstHead + '<div class="pdfx-card-title" style="margin-bottom:10px;">Performance by Product</div>'
+        : pdfxHeaderBand(monthYear, 'Sales') + '<div class="pdfx-chlabel">Performance by Product <span style="font-weight:400;color:var(--muted);">(continued)</span></div>';
+      return '<div class="pdfx-page"><div class="pdfx-inner pdfx-momentum-tight">' + head +
+        '<div class="momentum-cards-grid">' + chunk.map(c => c.outerHTML).join('') + '</div>' +
+        (combineTail && tailHtml ? '<div style="margin-top:12px;">' + tailHtml + '</div>' : '') +
+        '</div></div>';
+    }).join('');
+    if (!combineTail && tailHtml) {
+      pages += '<div class="pdfx-page"><div class="pdfx-inner">' + (chunks.length ? pdfxHeaderBand(monthYear, 'Sales') : firstHead) + tailHtml + '</div></div>';
+    }
+    if (!pages) pages = '<div class="pdfx-page"><div class="pdfx-inner">' + firstHead + '</div></div>';
+    return pages;
+  }
+
 
   // Static content — mirrors the Strategy tab's own text (#ev-strategy).
   // Hardcoded here rather than read from the DOM since it's a fixed
@@ -18869,14 +19477,7 @@ async function loadAuditResultsFromSheet() {
       pdfxStrategyItem('Review Acceleration', 'Activate follow-up sequences to drive <strong>organic review growth from event purchasers</strong> — the highest-quality acquisition window of the year.') +
       pdfxStrategyItem('Comprehensive Reporting', 'Deliver clear post-event analysis — <strong>what worked, what didn\u2019t, and how to capitalize</strong> on gains for the next event cycle.')
     );
-    // Green accent, matching .evs-outlook exactly — was wrongly using the
-    // orange/sand "key insight" treatment before. Those are two visually
-    // distinct callout styles on the live dashboard; this one was always
-    // meant to be green.
-    const outlook = '<div class="pdfx-card" style="background:rgba(36,233,163,.08);border:none;border-left:3px solid #1db88a;border-radius:6px;padding:10px 14px;margin-bottom:0;">' +
-      '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#1db88a;margin-bottom:4px;">Strategic Outlook</div>' +
-      '<div style="font-size:9.5px;color:var(--navy);line-height:1.4;">Promotional events are the highest-traffic sales windows of the year. The brands that win invest in the 2–3 weeks prior and capitalize in the week after. <strong>Preparation, real-time agility, and disciplined follow-through are the three variables we control.</strong></div>' +
-      '</div>';
+    // Strategic Outlook block and footer removed 2026-10-05 per the porting notes.
 
     // Combined onto ONE page — was 2 pages before. Fit is genuinely tight
     // with 16 total sub-items across 3 phases plus the outlook block;
@@ -18887,8 +19488,7 @@ async function loadAuditResultsFromSheet() {
     const page1 = '<div class="pdfx-page"><div class="pdfx-inner">' +
       pdfxHeaderBand(monthYear, 'Events', eventLabel, eventDates) +
       '<div class="pdfx-chlabel">Event Strategy</div>' +
-      leadUp + during + leadOut + outlook +
-      pdfxFooter(monthYear) +
+      leadUp + during + leadOut +
       '</div></div>';
     return page1;
   }
@@ -18939,6 +19539,306 @@ async function loadAuditResultsFromSheet() {
 
   // ---- main entry point ----------------------------------------------------
 
+  // ══════════════════════════════════════════════════════════════════════
+  // CLIENT PIPELINE — real-text PDF via /api/render-pdf, screenshot fallback.
+  // Added 2026-10-05 per Jaclyn's "PDF Export Pipeline — Porting Guide (from
+  // Just Bjorn)". Copied from the VBC reference (pdfxBuildRenderDocument,
+  // pdfxRenderViaServer, pdfxScreenshotPagesToPdf, pdfxRenderPagesToPdf,
+  // pdfxDownloadBlob) with the guide's additions: pdfxToast, remote-image
+  // embedding + downscale, adaptive Accomplished image size, 800px logo
+  // raster, and an over-limit log of the largest embedded images.
+  // pdfxRenderViaServer sends RAW (gzipped) HTML as application/octet-stream
+  // — not JSON. Do not rewrite it; that mismatch cost évolis weeks.
+  // ══════════════════════════════════════════════════════════════════════
+  const PDFX_TARGET_PAGE_HEIGHT_PX = 1056; // 11in at 96px/in
+  const PDFX_RENDER_ENDPOINT = '/api/render-pdf';
+  const PDFX_RENDER_TIMEOUT_MS = 55000;
+  const PDFX_RENDER_MAX_BODY_BYTES = 4200000; // Vercel's hard request limit is 4.5MB
+  const PDFX_SYMBOL_FONT_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&family=Noto+Sans+Math&display=block';
+  const PDFX_SYMBOL_FONT_STACK = "'Noto Sans Symbols 2','Noto Sans Math',sans-serif";
+  // Arrows, box/geometric shapes, stars (★ ☆ ▲ ▼ ↕ →) — the server's Chrome
+  // has no system fonts for these, so they'd print as empty boxes.
+  const PDFX_SYMBOL_RE = /[\u2190-\u21FF\u2500-\u27BF\u2B00-\u2BFF]/;
+  const PDFX_FALLBACK_TOAST = 'Heads up: the real-text PDF service didn\'t respond, so this PDF was made from screenshots (text isn\'t selectable). Try exporting again in a minute.';
+
+  // Local attribute-safe escape — kept inside this scope on purpose (the
+  // porting notes' "X is not defined" scope gotcha).
+  function pdfxEscAttr(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function pdfxWrapSymbolGlyphs(rootNode) {
+    const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT);
+    const targets = [];
+    while (walker.nextNode()) { if (PDFX_SYMBOL_RE.test(walker.currentNode.nodeValue)) targets.push(walker.currentNode); }
+    targets.forEach(textNode => {
+      const frag = document.createDocumentFragment();
+      textNode.nodeValue.split(/([\u2190-\u21FF\u2500-\u27BF\u2B00-\u2BFF]+)/).forEach(part => {
+        if (!part) return;
+        if (PDFX_SYMBOL_RE.test(part)) {
+          const span = document.createElement('span');
+          span.style.fontFamily = PDFX_SYMBOL_FONT_STACK;
+          span.textContent = part;
+          frag.appendChild(span);
+        } else {
+          frag.appendChild(document.createTextNode(part));
+        }
+      });
+      textNode.parentNode.replaceChild(frag, textNode);
+    });
+  }
+
+  // SVG logos (masks + color-matrix filters) print wrong in the server's
+  // headless Chrome, so each SVG <img> is rasterized client-side first.
+  // 800px longest side (not 1600) — the logo repeats in every page header
+  // and prints ~80px tall, so 800 is plenty and keeps the payload small.
+  async function pdfxSvgToPng(src) {
+    const im = new Image();
+    im.src = src;
+    await im.decode();
+    const w0 = im.naturalWidth || 1200, h0 = im.naturalHeight || 300;
+    const k = 800 / Math.max(w0, h0);
+    const c = document.createElement('canvas');
+    c.width = Math.round(w0 * k); c.height = Math.round(h0 * k);
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+    return c.toDataURL('image/png');
+  }
+  async function pdfxRasterizeSvgImages(clone) {
+    const cache = new Map();
+    const imgs = Array.from(clone.querySelectorAll('img'))
+      .filter(img => (img.getAttribute('src') || '').startsWith('data:image/svg+xml'));
+    for (const img of imgs) {
+      const src = img.getAttribute('src');
+      if (!cache.has(src)) cache.set(src, pdfxSvgToPng(src).catch(err => { console.warn('[pdf-export] SVG rasterize failed:', err && err.message); return null; }));
+      const png = await cache.get(src);
+      if (png) img.setAttribute('src', png);
+    }
+  }
+
+  // Server has no Georgia: Gelasio (same metrics) is loaded and renamed
+  // 'Georgia' inside the render document only.
+  const PDFX_GEORGIA_SUBSTITUTE_CSS = 'https://fonts.googleapis.com/css2?family=Gelasio:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=block';
+  let pdfxGeorgiaAliasCss = null;
+  async function pdfxGetGeorgiaAliasCss() {
+    if (pdfxGeorgiaAliasCss !== null) return pdfxGeorgiaAliasCss;
+    try {
+      const res = await fetch(PDFX_GEORGIA_SUBSTITUTE_CSS);
+      const css = res.ok ? await res.text() : '';
+      pdfxGeorgiaAliasCss = css.replace(/font-family:\s*['"]?Gelasio['"]?/g, "font-family: 'Georgia'");
+    } catch (err) {
+      console.warn('[pdf-export] Georgia substitute font CSS failed to load:', err && err.message);
+      pdfxGeorgiaAliasCss = '';
+    }
+    return pdfxGeorgiaAliasCss;
+  }
+
+  async function pdfxBuildRenderDocument(root, pageEls) {
+    const zooms = pageEls.map(el => {
+      const h = el.scrollHeight;
+      return h > PDFX_TARGET_PAGE_HEIGHT_PX + 1 ? { zoom: PDFX_TARGET_PAGE_HEIGHT_PX / h, heightPx: h } : null;
+    });
+    zooms.forEach((z, i) => { if (z) console.warn('[pdf-export] page', i + 1, 'is', z.heightPx + 'px tall (over 11in) — server will zoom it to', z.zoom.toFixed(3), '— trim that page to avoid side white space'); });
+    const clone = root.cloneNode(true);
+    clone.removeAttribute('style');
+    Array.from(clone.querySelectorAll('.pdfx-page')).forEach((pg, i) => {
+      const z = zooms[i];
+      if (!z) return;
+      pg.style.zoom = String(z.zoom);
+      pg.style.height = z.heightPx + 'px';
+      pg.style.margin = '0 auto';
+    });
+    pdfxWrapSymbolGlyphs(clone);
+    await pdfxRasterizeSvgImages(clone);
+    const georgiaAlias = await pdfxGetGeorgiaAliasCss();
+    const css = Array.from(document.querySelectorAll('style')).map(st => st.textContent).join('\n');
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .map(l => `<link rel="stylesheet" href="${pdfxEscAttr(l.href)}">`).join('');
+    const printCss = `@page{size:8.5in 11in;margin:0}
+html,body{height:auto!important;margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#pdfx-root{position:static!important;left:auto!important;top:auto!important;display:block!important;opacity:1!important;z-index:auto!important;width:8.5in}
+.pdfx-page{width:8.5in;height:11in;min-height:0;overflow:hidden;break-after:page;page-break-after:always}
+.pdfx-page:last-child{break-after:auto;page-break-after:auto}`;
+    return `<!doctype html><html><head><meta charset="utf-8"><base href="${pdfxEscAttr(location.href)}">${links}<link rel="stylesheet" href="${PDFX_SYMBOL_FONT_CSS}"><style>${georgiaAlias}</style><style>${css}</style><style>${printCss}</style></head><body>${clone.outerHTML}</body></html>`;
+  }
+
+  // Over-limit diagnostic: the 8 largest embedded images, by class + size.
+  function pdfxLogLargestImages(html) {
+    const imgs = [];
+    html.replace(/<img\b[^>]*>/g, tag => {
+      const m = tag.match(/src="(data:[^"]*)"/);
+      if (m) imgs.push({ cls: (tag.match(/class="([^"]*)"/) || [])[1] || '(no class)', mb: m[1].length / 1048576 });
+      return tag;
+    });
+    imgs.sort((a, b) => b.mb - a.mb);
+    return imgs.slice(0, 8).map(x => x.cls + ' ' + x.mb.toFixed(2) + 'MB').join(', ');
+  }
+
+  async function pdfxRenderViaServer(root, pageEls) {
+    const html = await pdfxBuildRenderDocument(root, pageEls);
+    let body = new Blob([html], { type: 'text/html' });
+    const headers = { 'Content-Type': 'application/octet-stream' };
+    if (typeof CompressionStream === 'function') {
+      body = await new Response(body.stream().pipeThrough(new CompressionStream('gzip'))).blob();
+      headers['X-Pdfx-Encoding'] = 'gzip';
+    }
+    if (body.size > PDFX_RENDER_MAX_BODY_BYTES) {
+      console.warn('[pdf-export] payload over limit — raw HTML', (html.length / 1048576).toFixed(1), 'MB, largest embedded images:', pdfxLogLargestImages(html));
+      throw new Error(`render payload ${(body.size / 1048576).toFixed(1)}MB is over the upload limit`);
+    }
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), PDFX_RENDER_TIMEOUT_MS);
+    try {
+      const res = await fetch(PDFX_RENDER_ENDPOINT, { method: 'POST', headers, body, signal: ctrl.signal });
+      if (!res.ok) {
+        const msg = await res.text().catch(() => '');
+        throw new Error(`render-pdf HTTP ${res.status} ${msg.slice(0, 200)}`);
+      }
+      const blob = await res.blob();
+      if (blob.size < 1000) throw new Error('render-pdf returned an empty file');
+      return new Blob([blob], { type: 'application/pdf' });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // Fallback only — html2canvas at scale 3 + JPEG 0.95. A page that runs
+  // long shrinks width and height together (never squishes height alone).
+  async function pdfxScreenshotPagesToPdf(pageEls) {
+    const jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    const pdf = new jsPDFCtor({ unit: 'in', format: 'letter', orientation: 'portrait', compress: true });
+    const pageWidthIn = 8.5, pageHeightIn = 11;
+    for (let i = 0; i < pageEls.length; i++) {
+      const el = pageEls[i];
+      const pageImgs = Array.from(el.querySelectorAll('img'));
+      await Promise.all(pageImgs.map(img => typeof img.decode === 'function' ? img.decode().catch(() => {}) : Promise.resolve()));
+      const needsCORS = el.querySelector('.pdfx-opp-img, .pdfx-acc-img') !== null;
+      const canvas = await html2canvas(el, {
+        scale: 3,
+        backgroundColor: '#ffffff',
+        ignoreElements: (node) => node.tagName === 'CANVAS' && !node.closest('#pdfx-root'),
+        useCORS: needsCORS,
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      if (i > 0) pdf.addPage();
+      let renderedWidthIn = pageWidthIn;
+      let renderedHeightIn = pageWidthIn * (canvas.height / canvas.width);
+      if (renderedHeightIn > pageHeightIn) {
+        const shrink = pageHeightIn / renderedHeightIn;
+        renderedHeightIn = pageHeightIn;
+        renderedWidthIn = pageWidthIn * shrink;
+      }
+      const xOffsetIn = (pageWidthIn - renderedWidthIn) / 2;
+      pdf.addImage(imgData, 'JPEG', xOffsetIn, 0, renderedWidthIn, renderedHeightIn, undefined, 'FAST');
+    }
+    return pdf.output('blob');
+  }
+
+  // The ONE entry point: server first, screenshot fallback on any error.
+  async function pdfxRenderPagesToPdf(root, pageEls) {
+    await new Promise(r => requestAnimationFrame(r));
+    try {
+      const blob = await pdfxRenderViaServer(root, pageEls);
+      console.log('[pdf-export] real-text PDF rendered server-side:', (blob.size / 1048576).toFixed(2) + 'MB');
+      return { blob, mode: 'text' };
+    } catch (err) {
+      console.warn('[pdf-export] server render failed — using screenshot fallback:', err.message);
+    }
+    const blob = await pdfxScreenshotPagesToPdf(pageEls);
+    console.log('[pdf-export] screenshot-fallback PDF:', (blob.size / 1048576).toFixed(2) + 'MB');
+    return { blob, mode: 'image' };
+  }
+
+  // Uses this dashboard's own #toast if present; creates one on demand if not.
+  function pdfxToast(msg) {
+    let el = document.getElementById('toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast'; el.className = 'toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.remove('green');
+    el.classList.add('show');
+    clearTimeout(pdfxToast._t);
+    pdfxToast._t = setTimeout(() => el.classList.remove('show'), 9000);
+  }
+
+  function pdfxDownloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+
+  // Draws a data: URL onto a canvas at maxPx longest side and returns JPEG
+  // 0.85 on a white background. A data: URL is same-origin, so the canvas
+  // never gets tainted. Uploads can be 4MB each; this keeps the payload
+  // under Vercel's 4.5MB limit.
+  async function pdfxDownscaleDataUrl(dataUrl, maxPx) {
+    maxPx = maxPx || 600;
+    const im = new Image();
+    im.src = dataUrl;
+    await im.decode();
+    const w0 = im.naturalWidth || 1, h0 = im.naturalHeight || 1;
+    const k = Math.min(1, maxPx / Math.max(w0, h0));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w0 * k)); c.height = Math.max(1, Math.round(h0 * k));
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(im, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.85);
+  }
+
+  // Embeds every remote <img> in #pdfx-root as a downscaled data: URL, so
+  // neither the server nor html2canvas has to fetch a cross-origin Drive
+  // image. fetch() + FileReader, NOT canvas drawImage on the remote image:
+  // lh3.googleusercontent.com allows a normal cross-origin GET but not the
+  // stricter canvas pixel read. Must actually be CALLED before rendering.
+  async function pdfxRasterizeRemoteImages(root) {
+    const imgs = Array.from(root.querySelectorAll('img[src^="http"]'));
+    await Promise.all(imgs.map(async img => {
+      try {
+        const res = await fetch(img.src, { mode: 'cors' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const blob = await res.blob();
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        img.src = await pdfxDownscaleDataUrl(dataUrl, 600).catch(() => dataUrl);
+        if (typeof img.decode === 'function') await img.decode().catch(() => {});
+      } catch (e) {
+        console.warn('[pdf-export] could not embed remote image', img.src.slice(0, 80), '—', e.message);
+      }
+    }));
+    if (imgs.length) console.log('[pdf-export] embedded', imgs.length, 'remote image(s)');
+  }
+
+  // Grows the Accomplished images into whatever room the Opportunities page
+  // has left: tries each size and keeps the first where .pdfx-inner (NOT
+  // .pdfx-page — that has min-height:11in, so it always reads as full)
+  // still fits in 11in minus a 24px margin. #pdfx-root must be display:block
+  // (off-screen) at this point, or every height measures 0.
+  function pdfxGrowAccomplishedImages(root) {
+    const SIZES = [200, 170, 140, 115, 90, 72, 56];
+    const limit = PDFX_TARGET_PAGE_HEIGHT_PX - 24;
+    Array.from(root.querySelectorAll('.pdfx-page')).forEach(page => {
+      const imgs = Array.from(page.querySelectorAll('.pdfx-acc-img'));
+      const inner = page.querySelector('.pdfx-inner');
+      if (!imgs.length || !inner) return;
+      let chosen = SIZES[SIZES.length - 1];
+      for (const size of SIZES) {
+        imgs.forEach(img => { img.style.width = size + 'px'; img.style.height = size + 'px'; });
+        if (inner.offsetHeight <= limit) { chosen = size; break; }
+      }
+      imgs.forEach(img => { img.style.width = chosen + 'px'; img.style.height = chosen + 'px'; });
+      console.log('[pdf-export] Accomplished images sized to', chosen + 'px — page inner height', inner.offsetHeight + 'px of', limit);
+    });
+  }
+
   window.exportPartnerPDF = async function () {
     const btn = pdfxById('pdf-export-btn');
     if (btn) { btn.disabled = true; btn.classList.add('pdfx-loading'); }
@@ -18983,6 +19883,8 @@ async function loadAuditResultsFromSheet() {
         fulfillment:   !!document.getElementById('pdf-include-fulfillment')   && document.getElementById('pdf-include-fulfillment').checked,
         stewardship:   !!document.getElementById('pdf-include-stewardship')   && document.getElementById('pdf-include-stewardship').checked,
         opportunities: !!document.getElementById('pdf-include-opportunities') && document.getElementById('pdf-include-opportunities').checked,
+        insights:      !!document.getElementById('pdf-include-insights')      && document.getElementById('pdf-include-insights').checked,
+        brandMomentum: !!document.getElementById('pdf-include-brand-momentum') && document.getElementById('pdf-include-brand-momentum').checked,
         strategy: !!document.getElementById('pdf-include-strategy') && document.getElementById('pdf-include-strategy').checked,
         bss:  !!document.getElementById('pdf-include-bss')  && document.getElementById('pdf-include-bss').checked,
         pd:   !!document.getElementById('pdf-include-pd')   && document.getElementById('pdf-include-pd').checked,
@@ -18999,7 +19901,10 @@ async function loadAuditResultsFromSheet() {
         (includeSections.walmart       && typeof window.initWalmartLive === 'function')            ? window.initWalmartLive()            : null,
         (includeSections.stewardship   && typeof window.initStewardshipLive === 'function')        ? window.initStewardshipLive()        : null,
         (includeSections.fulfillment   && typeof window.initMarketingFulfillmentCS === 'function')  ? window.initMarketingFulfillmentCS() : null,
-        (includeSections.opportunities && !window._snsChart && typeof initSns === 'function')       ? initSns()                           : null,
+        // Subscriptions now lives on Sales > Insights (moved from Opportunities 2026-10-05).
+        (includeSections.insights && typeof window.loadInsCategoryChart === 'function')           ? window.loadInsCategoryChart()       : null,
+        (includeSections.insights && !window._snsChart && typeof initSns === 'function')          ? initSns()                           : null,
+        (includeSections.brandMomentum && typeof window.initBrandMomentum === 'function')         ? window.initBrandMomentum()          : null,
         // Prime Day's KPIs/chart are lazy-loaded on tab click — if it's
         // checked for inclusion but the tab was never opened this session,
         // this is what actually builds the chart before capture below.
@@ -19051,7 +19956,9 @@ async function loadAuditResultsFromSheet() {
       // never going to render because its page got excluded.
       const chartsBySection = {
         amazon: ['_amazonChart'], website: ['_webChart'], walmart: ['_walmartChart'],
-        stewardship: ['_investChart', '_impressChart'], opportunities: ['_snsChart'],
+        stewardship: ['_investChart', '_impressChart'],
+        insights: ['_snsChart', '_insCategoryChart'],
+        fulfillment: ['mfcShippedChartInstance'],
       };
       const expectedCharts = Object.keys(chartsBySection)
         .filter(sec => includeSections[sec])
@@ -19087,6 +19994,8 @@ async function loadAuditResultsFromSheet() {
         includeSections.amazon        ? buildAmazonPage(monthYear)        : '',
         includeSections.website       ? buildWebsitePage(monthYear)       : '',
         includeSections.walmart       ? buildWalmartPage(monthYear)       : '',
+        includeSections.insights      ? buildSalesInsightsPage(monthYear) : '',
+        includeSections.brandMomentum ? buildBrandMomentumPages(monthYear) : '',
         includeSections.fulfillment   ? buildFulfillmentCsPage(monthYear) : '',
         includeSections.stewardship   ? buildStewardshipPage(monthYear)   : '',
         includeSections.opportunities ? buildOpportunitiesPage(monthYear) : '',
@@ -19176,64 +20085,16 @@ async function loadAuditResultsFromSheet() {
       if (typeof jsPDFCtor !== 'function') throw new Error('jsPDF constructor not found on window.jspdf.jsPDF or window.jsPDF.');
       if (typeof html2canvas !== 'function') throw new Error('html2canvas is not available as a global.');
 
-      const pdf = new jsPDFCtor({ unit: 'in', format: 'letter', orientation: 'portrait' });
-      const pageWidthIn = 8.5, pageHeightIn = 11;
-
-      for (let i = 0; i < pageEls.length; i++) {
-        const el = pageEls[i];
-        // Amazon (page 2, the FIRST content page) rendering correctly while
-        // every later page's chart images came out blank — despite all of
-        // them decoding successfully in the one big batch at the top of
-        // this function — is the signature of decoded image readiness not
-        // surviving several sequential heavy (scale:2, full-page) html2canvas
-        // render() calls. Re-decoding each page's own images immediately
-        // before ITS capture (not just once, upfront, for everything)
-        // guards against that regardless of the exact browser mechanism
-        // behind it. This resolves near-instantly if nothing was actually
-        // evicted, so it's cheap insurance either way.
-        const pageImgs = Array.from(el.querySelectorAll('img'));
-        await Promise.all(pageImgs.map(img => (typeof img.decode === 'function') ? img.decode().catch(() => {}) : Promise.resolve()));
-
-        // Better QA for next time this breaks: log each image's real pixel
-        // data size (naturalWidth/Height) alongside its actual laid-out
-        // size on THIS page right before capture. A blank chart with
-        // naturalWidth>0 but rect width/height 0 means a layout problem;
-        // naturalWidth 0 means the image itself never had real data.
-        pageImgs.forEach((img, idx) => {
-          const rect = img.getBoundingClientRect();
-          console.log('[pdf-export][qa] page', i + 1, 'img#' + idx, '— natural:', img.naturalWidth + 'x' + img.naturalHeight, '— laid out:', Math.round(rect.width) + 'x' + Math.round(rect.height), '— src:', img.src.slice(0, 40));
-        });
-
-        // html2canvas clones the ENTIRE document by default, not just `el`
-        // — it needs the full page for accurate global style computation.
-        // That clone pass was tripping over whatever live-dashboard chart
-        // canvas happened to be 0×0/tainted at that exact moment, and it
-        // wasn't just logging a harmless warning: comparing two consecutive
-        // export runs, the SPECIFIC charts that failed to render matched
-        // exactly which canvases were listed as tainted each time — when
-        // Investments/Impressions were hidden (0×0) they failed and Amazon
-        // rendered; next run Investments/Impressions happened to still be
-        // visible from the last-viewed tab, and THEY rendered while Amazon/
-        // Website/Walmart/Subscriptions (now hidden) failed instead. That's
-        // not noise, that's this. ignoreElements tells html2canvas to skip
-        // every live-dashboard canvas entirely — it only ever needs to see
-        // our own <img>-only #pdfx-root content anyway. Confirmed 2026-07-14.
-        const canvas = await html2canvas(el, {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          ignoreElements: (node) => node.tagName === 'CANVAS' && !node.closest('#pdfx-root')
-        });
-        console.log('[pdf-export] page', i + 1, 'canvas size:', canvas.width, 'x', canvas.height);
-        const imgData = canvas.toDataURL('image/jpeg', 0.97);
-        if (i > 0) pdf.addPage();
-        // Scale the captured canvas to fill the page width, preserving aspect ratio
-        const renderedHeightIn = pageWidthIn * (canvas.height / canvas.width);
-        pdf.addImage(imgData, 'JPEG', 0, 0, pageWidthIn, Math.min(renderedHeightIn, pageHeightIn));
-      }
-
+      // Real-text pipeline (porting notes 2026-10-01): embed + downscale
+      // remote images, size the Accomplished images to the free space, then
+      // render server-side with the screenshot PDF as the automatic fallback.
+      await pdfxRasterizeRemoteImages(root);
+      pdfxGrowAccomplishedImages(root);
+      const pdfResult = await pdfxRenderPagesToPdf(root, pageEls);
+      if (pdfResult.mode === 'image') pdfxToast(PDFX_FALLBACK_TOAST);
       const filename = 'MiGuard_Partnership_Report_' + (monthYear ? monthYear.replace(' ', '_') : 'Report') + '.pdf';
-      pdf.save(filename);
-      console.log('[pdf-export] pdf.save() called — download should start now');
+      pdfxDownloadBlob(pdfResult.blob, filename);
+      console.log('[pdf-export] download triggered, mode:', pdfResult.mode === 'text' ? 'text (server, real text)' : 'image (fallback)');
 
       root.style.display = 'none';
       root.style.position = ''; root.style.top = ''; root.style.left = ''; root.style.zIndex = ''; root.style.opacity = '';
@@ -20705,3 +21566,4 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
+ 
