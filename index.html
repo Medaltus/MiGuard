@@ -14982,6 +14982,14 @@ window.initBmKpis = function () {
     const scoredEl = document.getElementById('bmk-scored');
     const catsEl = document.getElementById('bmk-categories');
     try {
+      // Quarterly strategy sheets — one workbook per quarter, MiGuard's tab.
+      // Add a line here when next quarter's workbook exists. Sections and
+      // columns are found by their header text, so row positions can move.
+      const STRATEGY_SHEETS = {
+        '2026-Q4': { fileId: '1jPHJv05jfck8yM8L_6-g8vO5Sz4vEaGD8SZBxQzlPFQ', gid: '2020895447', label: "Q4' 2026 Strategies" },
+      };
+      const stratKeys = Object.keys(STRATEGY_SHEETS);
+      const stratCsvs = await Promise.all(stratKeys.map(k => csvOf(STRATEGY_SHEETS[k].fileId, STRATEGY_SHEETS[k].gid)));
       const [sales, stewCsv, goalsCsv, bizCsv, compCsv, kwCsv, pcCsv] = await Promise.all([
         window.getAmazonMonthlySales(),
         csvKey('SHEET_STEWARDSHIP_SUMMARY'),
@@ -15160,6 +15168,84 @@ window.initBmKpis = function () {
                  days: days.length, calDays, healthy, expected: skus.length, lastDate: last };
       }
 
+      // ── Strategy sheet parser ──
+      // Roles found by their heading in col A; the next "BRAND PRIORITY" row is
+      // that section's header, and every column is located by header name
+      // (STATUS, DUE DATE, COMPLETED DATE, SCORED?, TIMING/GOAL DATE, …).
+      // SMART goals: the "SUCCESS LOOKS LIKE" header row, if METRIC/TARGET
+      // columns have been added next to it.
+      const parseDate = v => {
+        v = String(v || '').trim();
+        if (!v) return null;
+        let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+        m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+        if (m) return new Date(m[3].length === 2 ? 2000 + +m[3] : +m[3], +m[1] - 1, +m[2]);
+        const d = new Date(v); // "Oct 1, 2026"
+        return isNaN(d.getTime()) || !/\d{4}/.test(v) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      };
+      const fmtD = d => d ? `${MONTHS[d.getMonth()]} ${d.getDate()}` : '';
+      function parseStrategy(csv) {
+        const g = parseCsvFull(csv);
+        if (!g.length || /^\s*</.test(csv)) return null;
+        const norm = s => String(s || '').trim().toUpperCase();
+        const ROLES = { 'BRAND MANAGER': 'Brand Manager', 'ADVERTISING SPECIALIST': 'Advertising Specialist', 'CREATIVE MANAGER': 'Creative Manager' };
+        const items = [], smart = [], warnings = [];
+        let role = null, cols = null;
+        for (let i = 0; i < g.length; i++) {
+          const r = g[i], a = norm(r[0]);
+          if (ROLES[a]) { role = ROLES[a]; cols = null; continue; }
+          if (a === 'BRAND PRIORITY' && role) {
+            cols = {}; r.forEach((h, j) => { const k = norm(h); if (k) cols[k] = j; });
+            if (!('DUE DATE' in cols)) warnings.push(`${role} section has no DUE DATE column yet`);
+            continue;
+          }
+          if (!role || !cols) continue;
+          const get = k => (k in cols) ? String(r[cols[k]] || '').trim() : '';
+          const priority = String(r[0] || '').trim(), task = get('MY DELIVERABLE / TASK');
+          if (!priority && !task) continue;
+          const scoredRaw = norm(get('SCORED?'));
+          items.push({ role, priority, task, status: get('STATUS'), timing: get('TIMING') || get('GOAL DATE'),
+            due: parseDate(get('DUE DATE')), done: parseDate(get('COMPLETED DATE')),
+            scored: !(scoredRaw === 'N' || scoredRaw === 'NO' || scoredRaw === 'FALSE'), results: get('RESULTS') });
+        }
+        // SMART goals block
+        const sIdx = g.findIndex(r => r.some(c => norm(c) === 'SUCCESS LOOKS LIKE'));
+        if (sIdx >= 0) {
+          const h = {}; g[sIdx].forEach((c, j) => { const k = norm(c); if (k) h[k] = j; });
+          if ('TARGET' in h || 'METRIC' in h) {
+            for (let i = sIdx + 1; i < g.length; i++) {
+              const r = g[i]; const name = String(r[0] || '').trim();
+              // parseCsvFull drops blank rows, so stop at the first role
+              // heading / section header instead of relying on a blank line.
+              if (!name || ROLES[norm(name)] || norm(name) === 'BRAND PRIORITY') break;
+              const get = k => (k in h) ? String(r[h[k]] || '').trim() : '';
+              smart.push({ name, metric: get('METRIC'), baseline: get('BASELINE'), target: get('TARGET'), due: parseDate(get('DUE DATE')), status: get('STATUS'), result: get('RESULT') || get('RESULTS') });
+            }
+          }
+        }
+        return { items, smart, warnings };
+      }
+      const strategies = {};
+      stratKeys.forEach((k, i) => { strategies[k] = parseStrategy(stratCsvs[i]); });
+      const todayD = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      function execution(list) {
+        const scored = list.filter(x => x.scored);
+        const blocked = scored.filter(x => /blocked/i.test(x.status));
+        const live = scored.filter(x => !/blocked/i.test(x.status));
+        const isComplete = x => /^complete/i.test(x.status) || !!x.done;
+        const complete = live.filter(isComplete);
+        const noDue = live.filter(x => !x.due);
+        // "Due" = due date has passed, or already completed (with a due date).
+        const due = live.filter(x => x.due && (x.due < todayD || isComplete(x)));
+        const onTime = due.filter(x => x.done && x.done <= x.due);
+        const doneNoDate = due.filter(x => isComplete(x) && !x.done);
+        return { total: live.length, complete: complete.length, blocked: blocked.length, noDue: noDue.length,
+                 due: due.length, onTime: onTime.length, doneNoDate: doneNoDate.length,
+                 completion: live.length ? (complete.length / live.length) * 100 : null,
+                 onTimeRate: due.length ? (onTime.length / due.length) * 100 : null };
+      }
+
       // ── rendering helpers ──
       const fmt$ = v => '$' + Math.round(v).toLocaleString();
       const pct = (v, d = 1) => v == null ? null : (Math.round(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d) + '%';
@@ -15179,6 +15265,20 @@ window.initBmKpis = function () {
         const q = quarters[idx];
         if (pills) pills.innerHTML = quarters.map((qq, i) => `<button class="period-pill${i === idx ? ' active' : ''}" onclick="window._bmkSelectQuarter(${i})">${esc(qq.label)}</button>`).join('');
         const c = compute(q), pq = prevQOf(q), pc = compute(pq), s = seo(q), rt = retail(q);
+        const stratKey = `${q.y}-Q${q.qi + 1}`, strat = strategies[stratKey] || null, stratCfg = STRATEGY_SHEETS[stratKey];
+        const exAll = strat ? execution(strat.items) : null;
+        const exBm = strat ? execution(strat.items.filter(x => x.role === 'Brand Manager')) : null;
+        const smartDue = strat ? strat.smart.filter(x => x.target) : [];
+        const smartAch = smartDue.filter(x => /achieved|complete|met/i.test(x.status));
+        const cvrGoal = strat ? strat.smart.find(x => /unit session|cvr|conversion/i.test(x.metric)) : null;
+        const cvrTarget = cvrGoal ? parseFloat(String(cvrGoal.target).replace(/[^0-9.]/g, '')) : NaN;
+        const noStrat = stratCfg ? `couldn't read ${stratCfg.label}` : `no strategy sheet for ${q.label.replace(' (QTD)', '')}`;
+        const exVal = (ex, kind) => {
+          if (!ex) return null;
+          if (kind === 'completion') return ex.total ? `<strong>${pct(ex.completion, 0)}</strong> · ${ex.complete} of ${ex.total}${ex.blocked ? ` · ${ex.blocked} blocked` : ''}` : null;
+          if (!ex.due) return `<span style="color:var(--muted);">— nothing due yet${ex.noDue ? ` (${ex.noDue} without a DUE DATE)` : ''}</span>`;
+          return `<strong>${pct(ex.onTimeRate, 0)}</strong> · ${ex.onTime} of ${ex.due} on time${ex.doneNoDate ? ` · ${ex.doneNoDate} complete w/o COMPLETED DATE` : ''}${ex.blocked ? ` · ${ex.blocked} blocked (not counted)` : ''}`;
+        };
         const goalWord = q.isCurrent ? 'goal to date' : 'goal';
         const adGap = c.missingAd.length ? `ad_sales blank for ${c.missingAd.join(', ')}` : '';
 
@@ -15195,10 +15295,13 @@ window.initBmKpis = function () {
           card('Organic Sales Attainment', orgAtt != null ? pct(orgAtt, 0) : '—',
             orgAtt != null ? `${fmt$(c.orgSales)} of ${fmt$(c.orgGoal)} ${goalWord}` : esc(adGap || 'organic goal missing'), orgAtt == null),
           card('Conversion Performance', c.cvr != null ? pct(c.cvr, 2) : '—',
-            (cvrDelta != null ? `${cvrDelta >= 0 ? '+' : ''}${cvrDelta.toFixed(2)} pts vs ${esc(pq.label)} baseline` : 'no baseline yet') + '<br>' + needs('CVR target'), c.cvr == null),
+            (cvrDelta != null ? `${cvrDelta >= 0 ? '+' : ''}${cvrDelta.toFixed(2)} pts vs ${esc(pq.label)} baseline` : 'no baseline yet') + '<br>' +
+            (!isNaN(cvrTarget) && c.cvr != null ? `${pct((c.cvr / cvrTarget) * 100, 0)} of ${cvrTarget}% target` : needs('CVR target')), c.cvr == null),
           card('SEO Visibility Growth', s && s.pctImproving != null ? pct(s.pctImproving, 0) + ' improving' : '—',
             s ? `Net Top-20: ${s.netTop20 >= 0 ? '+' : ''}${s.netTop20} (${s.top20Start} → ${s.top20})` : 'no keyword tracker data', !s),
-          card('On-Time Strategic Execution', '—', needs('BM deliverables & due dates'), true),
+          (exBm && exBm.due)
+            ? card('On-Time Strategic Execution', pct(exBm.onTimeRate, 0), `${exBm.onTime} of ${exBm.due} BM deliverables on time${exBm.blocked ? ` · ${exBm.blocked} blocked` : ''}`, false)
+            : card('On-Time Strategic Execution', '—', exBm ? `nothing due yet${exBm.noDue ? ` · ${exBm.noDue} BM rows need a DUE DATE` : ''}` : esc(noStrat), true),
           card('Risk / Retail Readiness', '—', needs('issue log with SLA dates'), true),
         ].join('');
         scoredEl.innerHTML = cardsHtml;
@@ -15215,7 +15318,7 @@ window.initBmKpis = function () {
           table('2. Conversion', true, [
             ['Unit Session % (CVR)', v(c.cvr != null ? `<strong>${pct(c.cvr, 2)}</strong> · ${c.bUnits.toLocaleString()} units / ${c.sessions.toLocaleString()} sessions${partialBiz(c, q)}` : null, 'no Business Report rows for this quarter'), 'Ordered Units ÷ Sessions × 100 (Business Report, raw units ordered)', true],
             ['CVR vs. Baseline', v(cvrDelta != null ? `${cvrDelta >= 0 ? '+' : ''}${cvrDelta.toFixed(2)} pts (${esc(pq.label)}: ${pct(pc.cvr, 2)}${partialBiz(pc, pq)})` : null, 'no prior-quarter Business Report data'), 'Current CVR − prior quarter CVR'],
-            ['CVR Target Attainment', needs('brand CVR target for the quarter'), 'Current CVR ÷ Target CVR × 100'],
+            ['CVR Target Attainment', (!isNaN(cvrTarget) && c.cvr != null) ? `${pct((c.cvr / cvrTarget) * 100, 0)} · ${pct(c.cvr, 2)} vs ${cvrTarget}% target` : needs('Unit Session % row in the strategy sheet\'s SMART goals'), 'Current CVR ÷ Target CVR × 100'],
           ], 'Brand-level CVR is the scored number; SKU CVR is diagnostic. MiGuard has one SKU, so the two are the same.'),
           table('3. SEO / Discoverability', true, [
             ['Priority Keywords Improving', v(s && s.pctImproving != null ? `<strong>${pct(s.pctImproving, 0)}</strong> · ${s.improving} of ${s.tracked}` : null, 'no tracker data'), '# priority keywords with better organic rank than quarter start ÷ # tracked × 100', true],
@@ -15226,11 +15329,11 @@ window.initBmKpis = function () {
             ['Keyword Goal Attainment', needs('designated keyword objectives'), '# designated keyword objectives achieved ÷ # designated × 100'],
           ], s ? `Priority list = the ${priorityKws.length} "Top 20 Keywords" on the Competitor Research sheet; ${s.tracked} are in the Keyword Tracker. Quarter start = ${esc(s.boqDate)} snapshot, latest = ${esc(s.eoqDate)}.` : ''),
           table('4. Strategic Execution', true, [
-            ['Initiative Completion', needs('initiatives list'), 'Completed initiatives ÷ planned initiatives × 100'],
-            ['On-Time Completion', needs('initiative due dates'), 'Initiatives completed by BM deadline ÷ initiatives due × 100'],
-            ['BM Deliverable Completion', needs('BM deliverables & due dates'), 'BM deliverables completed on time ÷ BM deliverables due × 100', true],
-            ['Strategic Goal Achievement', needs('SMART goals'), 'SMART goals achieved ÷ SMART goals due × 100'],
-          ], 'Statuses: Complete / On Track / Late / Blocked by Dependency / Not Started. "Blocked" isn\'t a miss when the BM\'s own part was done on time.'),
+            ['Initiative Completion', exAll ? (exVal(exAll, 'completion') || na('no initiatives listed')) : na(noStrat), 'Completed initiatives ÷ planned initiatives × 100 (all 3 roles, SCORED? ≠ N, Blocked excluded)'],
+            ['On-Time Completion', exAll ? exVal(exAll, 'ontime') : na(noStrat), 'Initiatives with COMPLETED DATE ≤ DUE DATE ÷ initiatives due × 100 (all roles)'],
+            ['BM Deliverable Completion', exBm ? exVal(exBm, 'ontime') : na(noStrat), 'BM deliverables completed on time ÷ BM deliverables due × 100 (Brand Manager section only)', true],
+            ['Strategic Goal Achievement', smartDue.length ? `${pct((smartAch.length / smartDue.length) * 100, 0)} · ${smartAch.length} of ${smartDue.length}` : needs('METRIC / TARGET / STATUS columns next to "Success Looks Like"'), 'SMART goals achieved ÷ SMART goals × 100'],
+          ], (stratCfg ? `Source: ${esc(stratCfg.label)} → MiGuard tab. ` : '') + '"Due" = DUE DATE has passed (or the item is already complete). Blocked by Dependency isn\'t counted as a miss; rows with SCORED? = N are tracked but not scored.' + (strat && strat.warnings.length ? ' <span style="color:var(--warn);">' + strat.warnings.map(esc).join(' · ') + '.</span>' : '')),
           table('5. Retail Readiness / Risk Management', true, [
             ['In-Stock Rate', v(rt && rt.inRate != null ? `${pct(rt.inRate)} · ${rt.inStock} of ${rt.skuDays} SKU-days` : null, 'no Products Cache snapshots'), 'In-stock SKU-days ÷ active SKU-days × 100 (FBA fulfillable + seller-fulfilled > 0)'],
             ['OOS Rate', v(rt && rt.oosRate != null ? pct(rt.oosRate) : null, 'no Products Cache snapshots'), 'OOS SKU-days ÷ active SKU-days × 100'],
@@ -15239,6 +15342,21 @@ window.initBmKpis = function () {
             ['Promo Readiness', needs('planned promo SKUs'), 'Promo-eligible/prepared SKUs ÷ planned promo SKUs × 100'],
           ], rt ? `In-stock / OOS are business health, not scored against the BM. ${rt.days} daily snapshots in this ${q.isCurrent ? 'quarter so far' : 'quarter'} (${rt.calDays} calendar days).` : ''),
         ];
+        // Deliverables from the strategy sheet
+        if (strat && strat.items.length) {
+          const stCell = x => {
+            const st = x.status || '—';
+            const col = /^complete/i.test(st) ? '#1db88a' : /late/i.test(st) ? 'var(--danger)' : /blocked/i.test(st) ? 'var(--warn)' : 'var(--muted)';
+            return `<span style="color:${col};font-weight:600;">${esc(st)}</span>`;
+          };
+          const ot = x => !x.due ? '<span style="color:var(--muted);">no due date</span>'
+            : x.done ? (x.done <= x.due ? '<span style="color:#1db88a;font-weight:700;">✓ on time</span>' : '<span style="color:var(--danger);font-weight:700;">late</span>')
+            : (x.due < todayD && !/blocked/i.test(x.status) ? '<span style="color:var(--danger);font-weight:700;">overdue</span>' : '<span style="color:var(--muted);">open</span>');
+          cats.push(`<div class="card"><div class="card-title">Deliverables <span style="font-weight:400;color:var(--muted);">(${esc(stratCfg.label)})</span></div>
+            <div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Role</th><th>Priority</th><th>Deliverable / Task</th><th>Timing</th><th>Due</th><th>Completed</th><th>Status</th><th>On Time?</th></tr></thead><tbody>
+            ${strat.items.map(x => `<tr style="${x.scored ? '' : 'opacity:.6;'}"><td style="white-space:nowrap;">${esc(x.role)}</td><td>${esc(x.priority)}${x.scored ? '' : ' <span style="color:var(--muted);font-size:10px;">(not scored)</span>'}</td><td style="font-size:11.5px;color:var(--muted);max-width:420px;">${esc(x.task)}</td><td style="white-space:nowrap;">${esc(x.timing)}</td><td style="white-space:nowrap;">${fmtD(x.due) || '—'}</td><td style="white-space:nowrap;">${fmtD(x.done) || '—'}</td><td>${stCell(x)}</td><td style="white-space:nowrap;">${ot(x)}</td></tr>`).join('')}
+            </tbody></table></div></div>`);
+        }
         // SEO keyword detail
         if (s && s.rows.length) {
           const rk = v2 => v2 == null ? '<span style="color:var(--muted);">Not ranking</span>' : '#' + v2;
@@ -15255,8 +15373,11 @@ window.initBmKpis = function () {
       }
       window._bmkSelectQuarter = render;
       // default: most recent COMPLETED quarter if there is one, else QTD
-      render(quarters.length > 1 ? quarters.length - 2 : quarters.length - 1);
-      console.log('[BMKPIs][qa] quarters:', quarters.map(q => q.label).join(', '), '| priority kws:', priorityKws.length, '| kw dates:', kwDates[0], '→', kwDates[kwDates.length - 1], '| pc dates:', pcDates[0], '→', pcDates[pcDates.length - 1]);
+      // Default: the current quarter when it has a strategy sheet (execution is
+      // tracked live), otherwise the most recent completed quarter.
+      const curKey = `${curQ.y}-Q${curQ.qi + 1}`;
+      render(strategies[curKey] ? quarters.length - 1 : (quarters.length > 1 ? quarters.length - 2 : quarters.length - 1));
+      console.log('[BMKPIs][qa] quarters:', quarters.map(q => q.label).join(', '), '| strategy rows:', Object.keys(strategies).map(k => k + '=' + (strategies[k] ? strategies[k].items.length + ' items/' + strategies[k].smart.length + ' smart' : 'unreadable')).join(', '), '| priority kws:', priorityKws.length, '| kw dates:', kwDates[0], '→', kwDates[kwDates.length - 1], '| pc dates:', pcDates[0], '→', pcDates[pcDates.length - 1]);
     } catch (err) {
       console.error('[BMKPIs]', err);
       window._bmkPromise = null;
