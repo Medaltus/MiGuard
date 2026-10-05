@@ -1476,6 +1476,17 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       </div>
     </div>
 
+    <!-- Overview tabs — added 2026-10-05 per Jaclyn: everything that was
+         already on this page now lives in the first tab ("Overview"), plus a
+         new "Projections & Goals" tab. -->
+    <div class="channel-tabs-row">
+      <div class="channel-tabs">
+        <button class="ch-tab active" onclick="showChannel('overview','ov-main',this)">Overview</button>
+        <button class="ch-tab" onclick="showChannel('overview','ov-projections',this)">Projections &amp; Goals</button>
+      </div>
+    </div>
+
+    <div class="channel-page active" id="ov-main">
     <!-- MTD/Last Month toggle — added 2026-08-28 per Jaclyn, ported from
          Skinuva's proven architecture (getOverviewPeriodConfig /
          window.__overviewSelectPeriod / renderOverviewPeriodPills). -->
@@ -1565,6 +1576,36 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
         </thead>
         <tbody id="ov-products-tbody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr></tbody>
       </table>
+    </div>
+
+    </div><!-- /ov-main -->
+
+    <!-- Projections & Goals — added 2026-10-05 per Jaclyn. Rendered by
+         window.initProjections(). -->
+    <div class="channel-page" id="ov-projections">
+      <div class="card">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px;">
+          <div class="card-title" style="margin-bottom:0;">% of Sales from Ads <span style="font-weight:400;color:var(--muted);">(last 12 months)</span></div>
+          <div id="proj-ads-latest" style="font-size:12px;color:var(--muted);"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Amazon ad-attributed sales ÷ total Amazon sales, by month.</div>
+        <div style="position:relative;height:300px;"><canvas id="proj-ads-pct-chart"></canvas></div>
+        <div class="ppc-note" id="proj-ads-note"></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+          <div class="card-title" style="margin-bottom:0;">Sales by Quarter <span style="font-weight:400;color:var(--muted);">(completed quarters)</span></div>
+          <div class="period-pills" id="proj-quarter-pills" style="display:flex;background:var(--white);border:1px solid var(--border);border-radius:999px;padding:4px;gap:2px;"></div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="proj-quarter-table">
+            <thead id="proj-quarter-thead"></thead>
+            <tbody id="proj-quarter-tbody"><tr><td style="color:var(--muted);">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="ppc-note">ℹ Amazon orders, excluding cancelled, pending and Vine — same rules as the Sales &gt; Amazon tab. Inventory Available is today's figure (FBA + inbound receiving + seller-fulfilled − reserved), same as the Inventory page. The quarter in progress appears once it ends.</div>
+      </div>
     </div>
 
   </div>
@@ -3759,6 +3800,7 @@ function showChannel(page, channelId, btn) {
     if (channelId === 'm-stewardship')   window.initStewardshipLive();
     if (channelId === 's-insights') { window.loadConsignmentKpi(); if (!window._snsChart) initSns(); }
     if (channelId === 's-reviews')  window.loadSalesReviews();
+    if (channelId === 'ov-projections') window.initProjections();
     if (channelId === 'ev-primeday')     window.initPrimeDayReport();
     if (channelId === 'ev-spring')       window.initBigSpringSaleReport();
     if (channelId === 'ev-pbdd') { window.initPBDDReport(); window.initPbddEventHeader(); }
@@ -14659,6 +14701,198 @@ async function ppcLoadBlendedPerformance(periodKey) {
 // (per-keyword AND summary tabs) and Business Report sheets already
 // confirmed and used elsewhere on this dashboard.
 // ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// OVERVIEW > PROJECTIONS & GOALS — added 2026-10-05 per Jaclyn.
+//  1) % of Sales from Ads, last 12 full months (line chart).
+//     Ad sales = SHEET_ADVERTISING monthly "sales" (Amazon ad-attributed).
+//     Total sales = Amazon order item_price, same rules as Sales > Amazon.
+//     Months with no ad-summary row count as 0% only if the brand had no ad
+//     spend at all yet (before ads started); otherwise they show as a gap.
+//  2) Sales by Quarter table: SKU | Product | Inventory Available | per-month
+//     Units + Sales $ | quarter totals, for completed quarters only.
+// Order source per month: the sync sheet (SHEET_ORDERS) for any month it
+// fully covers, the historical sheet otherwise — never both for the same
+// month, so an order can't be double-counted (same rule as Sales > Amazon).
+// ═══════════════════════════════════════════════════════════════════
+window.initProjections = function () {
+  if (window._projPromise) return window._projPromise;
+  window._projPromise = (async function () {
+    const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const amt = v => parseFloat(String(v == null ? '' : v).replace(/[$,]/g, '')) || 0;
+    const nd = v => {
+      v = String(v || '').trim();
+      if (/^\d{4}-\d{2}/.test(v)) return v.substring(0, 10);
+      const p = v.split('/');
+      if (p.length === 3) return `${p[2].length === 2 ? '20' + p[2] : p[2]}-${p[0].padStart(2, '0')}-${p[1].padStart(2, '0')}`;
+      return '';
+    };
+    const cfgOf = k => window.SHEET_CFG[k] || {};
+    const csvOf = k => fetch(ovCsvUrl(cfgOf(k).fileId || '', cfgOf(k).gid || '') + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
+    const tbody = document.getElementById('proj-quarter-tbody');
+    try {
+      const [master, syncCsv, histCsv, adCsv, invCsv] = await Promise.all([
+        getProductMaster(), csvOf('SHEET_ORDERS'), csvOf('SHEET_ORDERS_HISTORICAL'), csvOf('SHEET_ADVERTISING'), csvOf('SHEET_PRODUCT_INVENTORY'),
+      ]);
+
+      // MiGuard's own US Amazon catalog products (Product Short Name sheet).
+      const products = Object.values(master.bySku)
+        .filter(e => (e.brand || '').trim().toLowerCase() === 'miguard' && (e.channel || '').toLowerCase().includes('amazon') && (!e.skuType || e.skuType.toUpperCase() === 'CATALOG'))
+        .sort((a, b) => a.sku.localeCompare(b.sku));
+      const asinToSku = {};
+      products.forEach(p => { if (p.asin) asinToSku[p.asin] = p.sku; });
+
+      const valid = r => {
+        const s = (r.status || '').trim().toLowerCase();
+        if (s === 'cancelled' || s === 'pending') return false;
+        if ((r.promotion_ids || '').toLowerCase().includes('vine')) return false;
+        const b = (r.brand || '').trim().toLowerCase();
+        return !b || b === 'miguard';
+      };
+      const prep = rows => rows.map(r => ({ r, d: nd(r.date) })).filter(x => x.d);
+      const sync = prep(parseCsvToRows(syncCsv)), hist = prep(parseCsvToRows(histCsv));
+      const syncStart = sync.reduce((m, x) => (!m || x.d < m ? x.d : m), '');
+
+      // {'YYYY-MM': {sku: {units, sales}}} plus brand totals per month.
+      const bySkuMonth = {}, monthTotal = {};
+      const add = (list, useMonth) => list.forEach(({ r, d }) => {
+        const ym = d.substring(0, 7);
+        if (!useMonth(ym) || !valid(r)) return;
+        const asin = (r.asin || '').trim().toUpperCase();
+        const sku = asinToSku[asin];
+        if (!sku) return; // not a MiGuard US Amazon product (e.g. .ca orders)
+        const units = parseInt(r.unit_count, 10) || 0, sales = amt(r.item_price);
+        const m = bySkuMonth[ym] = bySkuMonth[ym] || {};
+        const s = m[sku] = m[sku] || { units: 0, sales: 0 };
+        s.units += units; s.sales += sales;
+        monthTotal[ym] = (monthTotal[ym] || 0) + sales;
+      });
+      const syncCovers = ym => !!syncStart && `${ym}-01` >= syncStart;
+      add(sync, ym => syncCovers(ym));
+      add(hist, ym => !syncCovers(ym));
+
+      // Last full month (the month before today's).
+      const now = new Date();
+      const lastFull = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const ymOf = dt => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+
+      // ── 1) % of Sales from Ads ──
+      const adByMonth = {};
+      parseCsvToRows(adCsv).forEach(r => {
+        const y = parseInt(r.year, 10), m = parseInt(r.month, 10);
+        if (!y || !m) return;
+        adByMonth[`${y}-${String(m).padStart(2, '0')}`] = { sales: amt(r.sales), spend: amt(r.spend) };
+      });
+      const firstAdMonth = Object.keys(adByMonth).filter(k => adByMonth[k].spend > 0 || adByMonth[k].sales > 0).sort()[0] || null;
+      const months12 = [];
+      for (let i = 11; i >= 0; i--) months12.push(new Date(lastFull.getFullYear(), lastFull.getMonth() - i, 1));
+      const pts = months12.map(dt => {
+        const ym = ymOf(dt), total = monthTotal[ym] || 0;
+        const ad = adByMonth[ym];
+        let pct = null, adSales = ad ? ad.sales : null;
+        if (ad && total > 0) pct = (ad.sales / total) * 100;
+        else if (!ad && (!firstAdMonth || ym < firstAdMonth)) { pct = 0; adSales = 0; } // before ads started
+        return { label: `${MONTHS[dt.getMonth()]} '${String(dt.getFullYear()).slice(2)}`, ym, pct: pct == null ? null : Math.round(pct * 10) / 10, adSales, total };
+      });
+      const canvas = document.getElementById('proj-ads-pct-chart');
+      if (canvas && typeof Chart === 'function') {
+        if (window._projAdsPctChart) window._projAdsPctChart.destroy();
+        const fmt$ = v => '$' + Math.round(v || 0).toLocaleString();
+        window._projAdsPctChart = new Chart(canvas, {
+          type: 'line',
+          data: { labels: pts.map(p => p.label), datasets: [{ label: '% of sales from ads', data: pts.map(p => p.pct), borderColor: '#24e9a3', backgroundColor: 'rgba(36,233,163,0.08)', fill: true, pointRadius: 3, tension: 0.3, borderWidth: 2.5, spanGaps: false }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: { label: ctx => {
+                const p = pts[ctx.dataIndex];
+                return ` ${p.pct}% — ${fmt$(p.adSales)} ad sales of ${fmt$(p.total)}`;
+              } } },
+            },
+            scales: {
+              x: { grid: { color: 'rgba(0,0,0,0.04)' } },
+              y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + '%' } },
+            },
+          },
+        });
+      }
+      const latest = [...pts].reverse().find(p => p.pct != null);
+      const latestEl = document.getElementById('proj-ads-latest');
+      if (latestEl && latest) latestEl.innerHTML = `${esc(latest.label)}: <strong style="color:var(--navy);">${latest.pct}%</strong>`;
+      const gaps = pts.filter(p => p.pct == null).map(p => p.label);
+      const noteEl = document.getElementById('proj-ads-note');
+      if (noteEl) noteEl.textContent = 'ℹ Ad sales from the Amazon ad summary sheet (ad-attributed sales); months before ads started show 0%.' + (gaps.length ? ' No ad-summary row yet for: ' + gaps.join(', ') + '.' : '');
+
+      // ── 2) Sales by Quarter ──
+      // Inventory Available = latest Products Cache snapshot, same formula as the Inventory page.
+      const invRows = parseCsvToRows(invCsv);
+      const latestInvDate = invRows.reduce((m, r) => ((r.date || '') > m ? r.date : m), '');
+      const availBySku = {};
+      invRows.filter(r => r.date === latestInvDate).forEach(r => {
+        const sku = (r.sku || '').trim().toUpperCase().replace(/-SF$/i, '');
+        const a = (parseInt(r.fulfillable_quantity, 10) || 0) + (parseInt(r.inbound_receiving, 10) || 0)
+                + (parseInt(r.seller_fulfilled_quantity, 10) || 0) - (parseInt(r.reserved_quantity, 10) || 0);
+        availBySku[sku] = (availBySku[sku] || 0) + a;
+      });
+
+      // Completed quarters that are fully covered by order data.
+      const dataMonths = Object.keys(bySkuMonth).sort();
+      const firstDataMonth = dataMonths[0];
+      const quarters = [];
+      const lastQ = Math.floor(lastFull.getMonth() / 3); // quarter index of the last full month
+      let qy = lastFull.getFullYear(), qi = (lastFull.getMonth() % 3 === 2) ? lastQ : lastQ - 1;
+      if (qi < 0) { qi = 3; qy--; }
+      for (let n = 0; n < 8; n++) {
+        const ms = [0, 1, 2].map(k => `${qy}-${String(qi * 3 + k + 1).padStart(2, '0')}`);
+        if (!firstDataMonth || ms[0] < firstDataMonth) break;
+        quarters.unshift({ label: `Q${qi + 1} ${qy}`, months: ms });
+        qi--; if (qi < 0) { qi = 3; qy--; }
+      }
+      const pills = document.getElementById('proj-quarter-pills');
+      const fmtMoney = v => '$' + (v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      function renderQuarter(idx) {
+        const q = quarters[idx];
+        if (pills) pills.innerHTML = quarters.map((qq, i) => `<button class="period-pill${i === idx ? ' active' : ''}" onclick="window._projSelectQuarter(${i})">${esc(qq.label)}</button>`).join('');
+        const mLabel = ym => MONTHS[parseInt(ym.substring(5, 7), 10) - 1];
+        document.getElementById('proj-quarter-thead').innerHTML = '<tr><th>SKU</th><th>Product</th><th>Inventory Available</th>' +
+          q.months.map(ym => `<th>${mLabel(ym)} Units</th><th>${mLabel(ym)} Sales $</th>`).join('') +
+          `<th>Q${q.label.substring(1, 2)} Units</th><th>Q${q.label.substring(1, 2)} Sales $</th></tr>`;
+        const totals = { avail: 0, months: q.months.map(() => ({ units: 0, sales: 0 })), units: 0, sales: 0 };
+        const rowsHtml = products.map(p => {
+          const avail = availBySku[p.sku];
+          if (avail != null) totals.avail += avail;
+          let qu = 0, qs = 0;
+          const cells = q.months.map((ym, i) => {
+            const v = (bySkuMonth[ym] && bySkuMonth[ym][p.sku]) || { units: 0, sales: 0 };
+            qu += v.units; qs += v.sales;
+            totals.months[i].units += v.units; totals.months[i].sales += v.sales;
+            return `<td>${v.units.toLocaleString()}</td><td>${fmtMoney(v.sales)}</td>`;
+          }).join('');
+          totals.units += qu; totals.sales += qs;
+          return `<tr><td style="font-family:var(--mono);">${esc(p.sku)}</td><td>${esc((p.name || '').trim())}</td><td>${avail == null ? '—' : avail.toLocaleString()}</td>${cells}<td><strong>${qu.toLocaleString()}</strong></td><td><strong>${fmtMoney(qs)}</strong></td></tr>`;
+        }).join('');
+        const totalRow = products.length > 1
+          ? `<tr style="background:var(--bg2);font-weight:700;"><td colspan="2">Total</td><td>${totals.avail.toLocaleString()}</td>${totals.months.map(m => `<td>${m.units.toLocaleString()}</td><td>${fmtMoney(m.sales)}</td>`).join('')}<td>${totals.units.toLocaleString()}</td><td>${fmtMoney(totals.sales)}</td></tr>`
+          : '';
+        tbody.innerHTML = rowsHtml + totalRow || '<tr><td style="color:var(--muted);">No products found.</td></tr>';
+      }
+      window._projSelectQuarter = renderQuarter;
+      if (!quarters.length) {
+        tbody.innerHTML = '<tr><td style="color:var(--muted);">No completed quarter with order data yet.</td></tr>';
+      } else {
+        renderQuarter(quarters.length - 1);
+      }
+      console.log('[Projections][qa] sync covers from', syncStart, '| months w/ data:', dataMonths.join(', '), '| quarters:', quarters.map(q => q.label).join(', '), '| ads % :', pts.map(p => p.label + '=' + p.pct).join(', '));
+    } catch (err) {
+      console.error('[Projections]', err);
+      window._projPromise = null; // allow retry
+      if (tbody) tbody.innerHTML = '<tr><td style="color:var(--danger);">Could not load — ' + esc(err.message || '') + '</td></tr>';
+    }
+  })();
+  return window._projPromise;
+};
+
 // Consignment Inventory Level KPI — added 2026-09-17 per Jaclyn on the Amazon
 // tab; MOVED 2026-10-05 to the top of Sales > Insights (MiGuard has no
 // product categories, so this replaced the category chart there). Same
@@ -21121,13 +21355,16 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
         // nothing to destroy first.
         // Sized up 2026-09-10 per Jaclyn (was looking small) — ring 96px
         // -> 140px, all text bumped up a size.
-        function buildGaugeSvg(pct, colorHex) {
+        // trackColor (added 2026-10-05): the unfilled part of the ring.
+        // Defaults to the light grey border tone; Total Sales passes white
+        // so that ring pops against the tinted Amazon panel (per Jaclyn).
+        function buildGaugeSvg(pct, colorHex, trackColor) {
           const size = 140, stroke = 14, r = (size - stroke) / 2, c = size / 2;
           const circumference = 2 * Math.PI * r;
           const clamped = Math.max(0, Math.min(100, pct));
           const dashOffset = circumference * (1 - clamped / 100);
           return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg);">
-            <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--border)" stroke-width="${stroke}"/>
+            <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${trackColor || 'var(--border)'}" stroke-width="${stroke}"/>
             <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${colorHex}" stroke-width="${stroke}"
               stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}" stroke-linecap="butt"/>
           </svg>`;
@@ -21142,18 +21379,18 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           const adsGoal = parseGoalsDollar(goalRow[23]);
           const fmtD = n => '$' + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
-          function paceGauge(sublabel, actual, goal) {
+          function paceGauge(sublabel, actual, goal, trackColor) {
             if (goal == null) {
               return `<div style="text-align:center;flex:1;">
                 <div style="font-size:15px;color:var(--muted);font-weight:700;margin-bottom:8px;">${sublabel}</div>
-                ${buildGaugeSvg(0, 'var(--border)')}
+                ${buildGaugeSvg(0, 'var(--border)', trackColor)}
                 <div style="font-size:13px;color:var(--muted);margin-top:8px;">No goal set</div>
               </div>`;
             }
             if (actual == null) {
               return `<div style="text-align:center;flex:1;">
                 <div style="font-size:15px;color:var(--muted);font-weight:700;margin-bottom:8px;">${sublabel}</div>
-                ${buildGaugeSvg(0, 'var(--border)')}
+                ${buildGaugeSvg(0, 'var(--border)', trackColor)}
                 <div style="font-size:13px;color:var(--muted);margin-top:8px;">Not available yet</div>
               </div>`;
             }
@@ -21195,7 +21432,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
             return `<div style="text-align:center;flex:1;">
               <div style="font-size:15px;color:var(--muted);font-weight:700;margin-bottom:8px;">${sublabel}</div>
               <div style="position:relative;width:140px;height:140px;margin:0 auto;">
-                ${buildGaugeSvg(actualPct, statusColor)}
+                ${buildGaugeSvg(actualPct, statusColor, trackColor)}
                 <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:${statusColor};">${actualPct}%</div>
               </div>
               <div style="font-size:14px;color:var(--navy);font-weight:700;margin-top:8px;">${statusText}</div>
@@ -21205,7 +21442,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           }
 
           return `<div style="display:flex;gap:16px;flex:1;">
-            ${paceGauge('Total Sales', actualOverall, overallGoal)}
+            ${paceGauge('Total Sales', actualOverall, overallGoal, '#ffffff')}
             ${paceGauge('Organic Sales', actualOrganic, organicGoal)}
             ${paceGauge('Ad Sales', actualAds, adsGoal)}
           </div>`;
