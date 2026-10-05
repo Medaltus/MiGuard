@@ -1585,10 +1585,13 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     <div class="channel-page" id="ov-projections">
       <div class="card">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px;">
-          <div class="card-title" style="margin-bottom:0;">% of Sales from Ads <span style="font-weight:400;color:var(--muted);">(last 12 months)</span></div>
-          <div id="proj-ads-latest" style="font-size:12px;color:var(--muted);"></div>
+          <div class="card-title" style="margin-bottom:0;">Ad vs. Organic Share of Sales <span style="font-weight:400;color:var(--muted);">(last 12 months)</span></div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div id="proj-ads-latest" style="font-size:12px;color:var(--muted);"></div>
+            <div id="legend-proj-ads" style="display:flex;align-items:center;"></div>
+          </div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Amazon ad-attributed sales ÷ total Amazon sales, by month.</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Ad sales ÷ total Amazon sales, and the organic remainder (total − ad sales), by month.</div>
         <div style="position:relative;height:300px;"><canvas id="proj-ads-pct-chart"></canvas></div>
         <div class="ppc-note" id="proj-ads-note"></div>
       </div>
@@ -14703,11 +14706,9 @@ async function ppcLoadBlendedPerformance(periodKey) {
 // ═══════════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════════════
 // OVERVIEW > PROJECTIONS & GOALS — added 2026-10-05 per Jaclyn.
-//  1) % of Sales from Ads, last 12 full months (line chart).
-//     Ad sales = SHEET_ADVERTISING monthly "sales" (Amazon ad-attributed).
-//     Total sales = Amazon order item_price, same rules as Sales > Amazon.
-//     Months with no ad-summary row count as 0% only if the brand had no ad
-//     spend at all yet (before ads started); otherwise they show as a gap.
+//  1) Ad vs. Organic share of sales, last 12 full months (2-line chart).
+//     Ad sales = Stewardship Summary ad_sales (col O). Total sales = Amazon
+//     order item_price, same rules as Sales > Amazon. Organic = total − ad.
 //  2) Sales by Quarter table: SKU | Product | Inventory Available | per-month
 //     Units + Sales $ | quarter totals, for completed quarters only.
 // Order source per month: the sync sheet (SHEET_ORDERS) for any month it
@@ -14732,7 +14733,7 @@ window.initProjections = function () {
     const tbody = document.getElementById('proj-quarter-tbody');
     try {
       const [master, syncCsv, histCsv, adCsv, invCsv] = await Promise.all([
-        getProductMaster(), csvOf('SHEET_ORDERS'), csvOf('SHEET_ORDERS_HISTORICAL'), csvOf('SHEET_ADVERTISING'), csvOf('SHEET_PRODUCT_INVENTORY'),
+        getProductMaster(), csvOf('SHEET_ORDERS'), csvOf('SHEET_ORDERS_HISTORICAL'), csvOf('SHEET_STEWARDSHIP_SUMMARY'), csvOf('SHEET_PRODUCT_INVENTORY'),
       ]);
 
       // MiGuard's own US Amazon catalog products (Product Short Name sheet).
@@ -14776,23 +14777,31 @@ window.initProjections = function () {
       const lastFull = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const ymOf = dt => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
 
-      // ── 1) % of Sales from Ads ──
+      // ── 1) Ad vs. Organic share of sales ──
+      // CHANGED 2026-10-05 per Jaclyn: ad sales now come from the Stewardship
+      // Summary sheet's ad_sales column (col O), which has history back to
+      // 2025 — not the Amazon ad summary sheet (May 2026 on only). Total sales
+      // is unchanged (the order-based monthly totals the table uses).
+      // Organic share = (total − ad sales) ÷ total. A month with a blank
+      // ad_sales cell is left as a gap on both lines rather than shown as 0%.
       const adByMonth = {};
       parseCsvToRows(adCsv).forEach(r => {
         const y = parseInt(r.year, 10), m = parseInt(r.month, 10);
-        if (!y || !m) return;
-        adByMonth[`${y}-${String(m).padStart(2, '0')}`] = { sales: amt(r.sales), spend: amt(r.spend) };
+        const raw = String(r.ad_sales == null ? '' : r.ad_sales).trim();
+        if (!y || !m || raw === '') return;
+        adByMonth[`${y}-${String(m).padStart(2, '0')}`] = amt(raw);
       });
-      const firstAdMonth = Object.keys(adByMonth).filter(k => adByMonth[k].spend > 0 || adByMonth[k].sales > 0).sort()[0] || null;
       const months12 = [];
       for (let i = 11; i >= 0; i--) months12.push(new Date(lastFull.getFullYear(), lastFull.getMonth() - i, 1));
       const pts = months12.map(dt => {
         const ym = ymOf(dt), total = monthTotal[ym] || 0;
-        const ad = adByMonth[ym];
-        let pct = null, adSales = ad ? ad.sales : null;
-        if (ad && total > 0) pct = (ad.sales / total) * 100;
-        else if (!ad && (!firstAdMonth || ym < firstAdMonth)) { pct = 0; adSales = 0; } // before ads started
-        return { label: `${MONTHS[dt.getMonth()]} '${String(dt.getFullYear()).slice(2)}`, ym, pct: pct == null ? null : Math.round(pct * 10) / 10, adSales, total };
+        const adSales = ym in adByMonth ? adByMonth[ym] : null;
+        let pct = null, orgPct = null;
+        if (adSales != null && total > 0) {
+          pct = Math.round((adSales / total) * 1000) / 10;
+          orgPct = Math.round((Math.max(0, total - adSales) / total) * 1000) / 10;
+        }
+        return { label: `${MONTHS[dt.getMonth()]} '${String(dt.getFullYear()).slice(2)}`, ym, pct, orgPct, adSales, total };
       });
       const canvas = document.getElementById('proj-ads-pct-chart');
       if (canvas && typeof Chart === 'function') {
@@ -14800,29 +14809,35 @@ window.initProjections = function () {
         const fmt$ = v => '$' + Math.round(v || 0).toLocaleString();
         window._projAdsPctChart = new Chart(canvas, {
           type: 'line',
-          data: { labels: pts.map(p => p.label), datasets: [{ label: '% of sales from ads', data: pts.map(p => p.pct), borderColor: '#24e9a3', backgroundColor: 'rgba(36,233,163,0.08)', fill: true, pointRadius: 3, tension: 0.3, borderWidth: 2.5, spanGaps: false }] },
+          data: { labels: pts.map(p => p.label), datasets: [
+            { label: 'Ad sales %', data: pts.map(p => p.pct), borderColor: '#24e9a3', backgroundColor: 'rgba(36,233,163,0.08)', fill: true, pointRadius: 3, tension: 0.3, borderWidth: 2.5, spanGaps: false },
+            { label: 'Organic sales %', data: pts.map(p => p.orgPct), borderColor: '#001f60', backgroundColor: 'transparent', fill: false, pointRadius: 3, tension: 0.3, borderWidth: 2.5, spanGaps: false },
+          ] },
           options: {
             responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-              legend: { display: false },
+              legend: { display: false }, // external legend in #legend-proj-ads
               tooltip: { callbacks: { label: ctx => {
                 const p = pts[ctx.dataIndex];
-                return ` ${p.pct}% — ${fmt$(p.adSales)} ad sales of ${fmt$(p.total)}`;
+                if (ctx.datasetIndex === 0) return ` Ad: ${p.pct}% (${fmt$(p.adSales)})`;
+                return ` Organic: ${p.orgPct}% (${fmt$(Math.max(0, p.total - p.adSales))} of ${fmt$(p.total)})`;
               } } },
             },
             scales: {
               x: { grid: { color: 'rgba(0,0,0,0.04)' } },
-              y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + '%' } },
+              y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + '%' } },
             },
           },
         });
+        if (typeof window.renderExternalLegend === 'function') window.renderExternalLegend(window._projAdsPctChart, 'legend-proj-ads');
       }
       const latest = [...pts].reverse().find(p => p.pct != null);
       const latestEl = document.getElementById('proj-ads-latest');
-      if (latestEl && latest) latestEl.innerHTML = `${esc(latest.label)}: <strong style="color:var(--navy);">${latest.pct}%</strong>`;
+      if (latestEl && latest) latestEl.innerHTML = `${esc(latest.label)}: <strong style="color:var(--navy);">${latest.pct}% ad · ${latest.orgPct}% organic</strong>`;
       const gaps = pts.filter(p => p.pct == null).map(p => p.label);
       const noteEl = document.getElementById('proj-ads-note');
-      if (noteEl) noteEl.textContent = 'ℹ Ad sales from the Amazon ad summary sheet (ad-attributed sales); months before ads started show 0%.' + (gaps.length ? ' No ad-summary row yet for: ' + gaps.join(', ') + '.' : '');
+      if (noteEl) noteEl.textContent = 'ℹ Ad sales from the Stewardship Summary sheet (ad_sales, column O); total sales from Amazon orders, same as the table below.' + (gaps.length ? ' No ad_sales value yet for: ' + gaps.join(', ') + ' — those months are left blank.' : '');
 
       // ── 2) Sales by Quarter ──
       // Inventory Available = latest Products Cache snapshot, same formula as the Inventory page.
@@ -14883,7 +14898,7 @@ window.initProjections = function () {
       } else {
         renderQuarter(quarters.length - 1);
       }
-      console.log('[Projections][qa] sync covers from', syncStart, '| months w/ data:', dataMonths.join(', '), '| quarters:', quarters.map(q => q.label).join(', '), '| ads % :', pts.map(p => p.label + '=' + p.pct).join(', '));
+      console.log('[Projections][qa] sync covers from', syncStart, '| months w/ data:', dataMonths.join(', '), '| quarters:', quarters.map(q => q.label).join(', '), '| ad/organic % :', pts.map(p => p.label + '=' + p.pct + '/' + p.orgPct).join(', '));
     } catch (err) {
       console.error('[Projections]', err);
       window._projPromise = null; // allow retry
@@ -21771,5 +21786,4 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
- 
  
