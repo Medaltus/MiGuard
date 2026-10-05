@@ -21849,18 +21849,23 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
         // nothing to destroy first.
         // Sized up 2026-09-10 per Jaclyn (was looking small) — ring 96px
         // -> 140px, all text bumped up a size.
-        // trackColor (added 2026-10-05): the unfilled part of the ring.
-        // Defaults to the light grey border tone; Total Sales passes white
-        // so that ring pops against the tinted Amazon panel (per Jaclyn).
-        function buildGaugeSvg(pct, colorHex, trackColor) {
-          const size = 140, stroke = 14, r = (size - stroke) / 2, c = size / 2;
+        // RESTYLED 2026-10-05 per Jaclyn's reference: Total Sales is the hero
+        // ring (larger, white track, center shaded green/red by whether we're
+        // projecting to hit or miss), with Organic and Ad Sales as two smaller
+        // "Sales Contribution" rings beside it. Same math as before — ring
+        // fill = actual ÷ goal; color + center shade = projection (MTD) or
+        // final result (Last Month).
+        function buildGaugeSvg(pct, colorHex, trackColor, size, stroke, centerFill) {
+          size = size || 140; stroke = stroke || 14;
+          const r = (size - stroke) / 2, c = size / 2;
           const circumference = 2 * Math.PI * r;
           const clamped = Math.max(0, Math.min(100, pct));
           const dashOffset = circumference * (1 - clamped / 100);
-          return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg);">
+          return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg);display:block;">
+            ${centerFill ? `<circle cx="${c}" cy="${c}" r="${r - stroke / 2}" fill="${centerFill}"/>` : ''}
             <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${trackColor || 'var(--border)'}" stroke-width="${stroke}"/>
             <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${colorHex}" stroke-width="${stroke}"
-              stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}" stroke-linecap="butt"/>
+              stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}" stroke-linecap="round"/>
           </svg>`;
         }
 
@@ -21871,74 +21876,93 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           const overallGoal = parseGoalsDollar(goalRow[13]);
           const organicGoal = parseGoalsDollar(goalRow[16]);
           const adsGoal = parseGoalsDollar(goalRow[23]);
-          const fmtD = n => '$' + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+          const fmtD = n => '$' + Math.round(n).toLocaleString();
+          const GREEN = '#1db88a', RED = '#db372d';
 
-          function paceGauge(sublabel, actual, goal, trackColor) {
-            if (goal == null) {
-              return `<div style="text-align:center;flex:1;">
-                <div style="font-size:15px;color:var(--muted);font-weight:700;margin-bottom:8px;">${sublabel}</div>
-                ${buildGaugeSvg(0, 'var(--border)', trackColor)}
-                <div style="font-size:13px;color:var(--muted);margin-top:8px;">No goal set</div>
-              </div>`;
-            }
-            if (actual == null) {
-              return `<div style="text-align:center;flex:1;">
-                <div style="font-size:15px;color:var(--muted);font-weight:700;margin-bottom:8px;">${sublabel}</div>
-                ${buildGaugeSvg(0, 'var(--border)', trackColor)}
-                <div style="font-size:13px;color:var(--muted);margin-top:8px;">Not available yet</div>
-              </div>`;
-            }
-            // FIXED 2026-09-10 per Jaclyn — the ring's fill and center
-            // number now reflect ACTUAL progress against the goal
-            // (actual ÷ goal), which is what "the circles should be
-            // showing actual versus goal" means — real progress so far,
-            // not a full/maxed-out ring that hides how far along we
-            // actually are. The projection is used ONLY to decide the
-            // ring's color (on-pace vs not), completely separate from
-            // what the ring is filled to. Simplified to a clean binary
-            // green/red for both periods, matching "green if projecting
-            // to meet goal and red if projecting to miss goal" exactly
-            // — no amber middle state.
+          // Shared math for one gauge — unchanged rules from the previous version.
+          function gaugeState(actual, goal) {
+            if (goal == null || actual == null) return null;
             const actualPct = goal > 0 ? Math.round((actual / goal) * 100) : 0;
-            let projected = actual, statusText, statusColor, cancelNote = '';
+            let projected = actual, onPace, statusText;
             if (cfg.isPartial) {
-              // MTD — project the full month from what we're averaging
-              // per day so far, then discount by MiGuard's own real
-              // historical cancellation rate (per Jaclyn — "actual" above
-              // already counts pending orders at full value, so a naive
-              // run-rate is blindly assuming none of them cancel). Ring
-              // fill/actualPct above is untouched by this — only the
-              // projection driving the color and the "Projecting $X" text.
+              // MTD — run-rate projection, discounted by the historical cancel rate.
               const daysInMonth = new Date(cfg.year, cfg.month, 0).getDate();
               const rawProjected = cfg.day > 0 ? (actual / cfg.day) * daysInMonth : actual;
               projected = cancelRate != null ? rawProjected * (1 - cancelRate) : rawProjected;
-              const projectedPct = goal > 0 ? Math.round((projected / goal) * 100) : 0;
+              onPace = goal > 0 && projected >= goal;
               statusText = `Projecting ${fmtD(projected)}`;
-              statusColor = projectedPct >= 100 ? 'var(--green)' : 'var(--danger)';
-              cancelNote = cancelRate != null
-                ? `<div style="font-size:10.5px;color:var(--muted);margin-top:2px;">adj. for ${Math.round(cancelRate * 100)}% avg. cancel rate</div>`
-                : `<div style="font-size:10.5px;color:var(--muted);margin-top:2px;">no cancel-rate history yet</div>`;
             } else {
-              // Last Full Month — the month is over, actual IS final, no separate projection.
-              statusText = actualPct >= 100 ? 'Hit goal' : 'Missed goal';
-              statusColor = actualPct >= 100 ? 'var(--green)' : 'var(--danger)';
+              onPace = actualPct >= 100;
+              statusText = onPace ? 'Hit goal' : 'Missed goal';
             }
-            return `<div style="text-align:center;flex:1;">
-              <div style="font-size:15px;color:var(--muted);font-weight:700;margin-bottom:8px;">${sublabel}</div>
-              <div style="position:relative;width:140px;height:140px;margin:0 auto;">
-                ${buildGaugeSvg(actualPct, statusColor, trackColor)}
-                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:${statusColor};">${actualPct}%</div>
+            return { actualPct, onPace, statusText, color: onPace ? GREEN : RED };
+          }
+          const cancelLine = () => cfg.isPartial
+            ? `<div style="font-size:10.5px;color:var(--muted);margin-top:3px;">${cancelRate != null ? `adj. ${Math.round(cancelRate * 100)}% cancel rate` : 'no cancel-rate history yet'}</div>` : '';
+
+          // Hero: Total Sales
+          function heroGauge(actual, goal) {
+            const st = gaugeState(actual, goal);
+            const size = 170, stroke = 16;
+            if (!st) {
+              return `<div style="text-align:center;flex:0 0 auto;min-width:220px;">
+                <div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:10px;">Total Sales</div>
+                <div style="position:relative;width:${size}px;height:${size}px;margin:0 auto;">
+                  ${buildGaugeSvg(0, '#ffffff', '#ffffff', size, stroke, 'rgba(255,255,255,.55)')}
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);font-weight:600;">${goal == null ? 'No goal set' : 'Not available yet'}</div>
+                </div>
+                <div style="font-size:14px;color:var(--navy);margin-top:12px;">Goal <strong>${goal == null ? '—' : fmtD(goal)}</strong></div>
+              </div>`;
+            }
+            const fill = st.onPace ? 'rgba(36,233,163,.16)' : 'rgba(219,55,45,.10)';
+            return `<div style="text-align:center;flex:0 0 auto;min-width:220px;">
+              <div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:10px;">Total Sales</div>
+              <div style="position:relative;width:${size}px;height:${size}px;margin:0 auto;">
+                ${buildGaugeSvg(st.actualPct, st.color, '#ffffff', size, stroke, fill)}
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:700;color:${st.color};">${st.actualPct}%</div>
               </div>
-              <div style="font-size:14px;color:var(--navy);font-weight:700;margin-top:8px;">${statusText}</div>
-              <div style="font-size:14px;color:var(--navy);font-weight:700;">Goal ${fmtD(goal)}</div>
-              ${cancelNote}
+              <div style="font-size:15px;font-weight:600;color:${st.color};margin-top:12px;">${st.statusText}</div>
+              <div style="font-size:15px;color:var(--navy);margin-top:2px;">Goal <strong>${fmtD(goal)}</strong></div>
+              ${cancelLine()}
             </div>`;
           }
 
-          return `<div style="display:flex;gap:16px;flex:1;">
-            ${paceGauge('Total Sales', actualOverall, overallGoal, '#ffffff')}
-            ${paceGauge('Organic Sales', actualOrganic, organicGoal)}
-            ${paceGauge('Ad Sales', actualAds, adsGoal)}
+          // Contribution: Organic / Ad
+          function contribGauge(label, actual, goal) {
+            const st = gaugeState(actual, goal);
+            const size = 112, stroke = 11, track = '#d7dceb';
+            if (!st) {
+              return `<div style="text-align:center;flex:0 0 150px;">
+                <div style="font-size:14px;color:var(--muted);margin-bottom:8px;">${label}</div>
+                <div style="position:relative;width:${size}px;height:${size}px;margin:0 auto;">
+                  ${buildGaugeSvg(0, track, track, size, stroke)}
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11.5px;font-weight:600;color:var(--muted);line-height:1.3;padding:0 22px;">${goal == null ? 'No goal set' : 'Not available yet'}</div>
+                </div>
+                <div style="font-size:12.5px;color:var(--navy);margin-top:10px;">${cfg.isPartial && actual != null ? `Projecting ${fmtD(actual && cfg.day > 0 ? (actual / cfg.day) * new Date(cfg.year, cfg.month, 0).getDate() * (cancelRate != null ? 1 - cancelRate : 1) : 0)}` : '&nbsp;'}</div>
+                <div style="font-size:12.5px;color:var(--navy);">Goal <strong>—</strong></div>
+              </div>`;
+            }
+            return `<div style="text-align:center;flex:0 0 150px;">
+              <div style="font-size:14px;color:var(--muted);margin-bottom:8px;">${label}</div>
+              <div style="position:relative;width:${size}px;height:${size}px;margin:0 auto;">
+                ${buildGaugeSvg(st.actualPct, st.color, track, size, stroke)}
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:${st.color};">${st.actualPct}%</div>
+              </div>
+              <div style="font-size:12.5px;font-weight:600;color:${st.color};margin-top:10px;">${st.statusText}</div>
+              <div style="font-size:12.5px;color:var(--navy);">Goal <strong>${fmtD(goal)}</strong></div>
+              ${cfg.isPartial ? `<div style="font-size:10px;color:var(--muted);margin-top:2px;">${cancelRate != null ? `adj. ${Math.round(cancelRate * 100)}% cancel rate` : ''}</div>` : ''}
+            </div>`;
+          }
+
+          return `<div style="display:flex;align-items:center;justify-content:center;gap:72px;flex:1;flex-wrap:wrap;">
+            ${heroGauge(actualOverall, overallGoal)}
+            <div style="flex:0 1 auto;">
+              <div style="text-align:center;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Sales Contribution</div>
+              <div style="display:flex;gap:36px;justify-content:center;">
+                ${contribGauge('Organic Sales', actualOrganic, organicGoal)}
+                ${contribGauge('Ad Sales', actualAds, adsGoal)}
+              </div>
+            </div>
           </div>`;
         }
 
