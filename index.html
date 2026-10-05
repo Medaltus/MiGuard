@@ -1873,31 +1873,23 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
           <button class="btn-save-stage" id="tp-insight-save">Save</button>
         </div>
       </div>
-      <!-- Consignment Inventory Level — added 2026-09-17 per Jaclyn. Own
-           small kpi-row (not merged into the main 5-card row above) so it
-           doesn't force that row's existing auto-fit columns to
-           re-flow — this metric is conceptually separate (a stock level,
-           not a sales figure) and sits right below Sales by Product per
-           her request. max-width keeps a lone kpi-row from stretching to
-           the full page width the way it would with nothing else to
-           share the auto-fit grid with. -->
-      <div class="kpi-row" style="max-width:220px;">
-        <div class="kpi-card" id="kpi-consignment-inventory"><div class="kpi-label">Consignment Inventory Level</div><div class="kpi-value">—</div><div class="kpi-sub">Loading…</div></div>
-      </div>
     </div>
 
 
     <!-- Insights tab — added 2026-10-05 per Jaclyn, matches Dazzle Dry's
-         Insights tab (VBC reference) / évolis's s-insights: Unit Sales by
-         Product Category chart, Subscriptions card (moved here from
+         Insights tab (VBC reference) / évolis's s-insights. MiGuard
+         version (2026-10-05): Consignment Inventory Level KPI on top in
+         place of the category chart, then the Subscriptions card (moved here from
          Opportunities), Key Insight. Same element ids évolis uses
-         (ins-category-chart, kpi-active-subs, kpi-retention, legend-sns,
+         (kpi-active-subs, kpi-retention, legend-sns,
          chart-sns, ins-catinsight-*) so the existing initSns() keeps
          working unchanged. -->
     <div class="channel-page" id="s-insights">
-      <div class="card">
-        <div class="card-title">Unit Sales by Product Category</div>
-        <div style="position:relative;height:320px;"><canvas id="ins-category-chart"></canvas></div>
+      <!-- Consignment Inventory Level — moved here from the Amazon tab
+           2026-10-05, replacing the Unit Sales by Product Category chart
+           (MiGuard has only one product type). -->
+      <div class="kpi-row" style="max-width:260px;">
+        <div class="kpi-card" id="kpi-consignment-inventory"><div class="kpi-label">Consignment Inventory Level</div><div class="kpi-value">—</div><div class="kpi-sub">Loading…</div></div>
       </div>
       <div class="card">
         <div class="card-title">Subscriptions</div>
@@ -3765,7 +3757,7 @@ function showChannel(page, channelId, btn) {
     if (channelId.indexOf('mx-') === 0)  window.initMarketingExternalPage();
     if (channelId.indexOf('ix-') === 0)  window.initInventoryExternalPage();
     if (channelId === 'm-stewardship')   window.initStewardshipLive();
-    if (channelId === 's-insights') { window.loadInsCategoryChart(); if (!window._snsChart) initSns(); }
+    if (channelId === 's-insights') { window.loadConsignmentKpi(); if (!window._snsChart) initSns(); }
     if (channelId === 's-reviews')  window.loadSalesReviews();
     if (channelId === 'ev-primeday')     window.initPrimeDayReport();
     if (channelId === 'ev-spring')       window.initBigSpringSaleReport();
@@ -4137,22 +4129,57 @@ async function initSns() {
         // Color by calendar year: 2024 sand, 2025 slate, 2026 navy. Falls
         // back gracefully for any other year (older -> sand-ish, newer ->
         // navy) so this doesn't quietly break once 2027 data shows up.
-        const YEAR_COLORS = { 2024: '#f4dfd0', 2025: '#6b7ba2', 2026: '#001f60' };
-        const distinctYears = [...new Set(trimmedYears)].sort((a, b) => a - b);
-        const bg = trimmedYears.map(y => {
-          if (YEAR_COLORS[y]) return YEAR_COLORS[y];
-          const idx = distinctYears.indexOf(y);
-          return idx <= 0 ? '#f4dfd0' : (idx === distinctYears.length - 1 ? '#001f60' : '#6b7ba2');
-        });
+        // CHANGED 2026-10-05 per Jaclyn — year-over-year LINE chart matching
+        // VB Cosmetics / Dazzle Dry's Subscriptions chart (and this file's own
+        // Amazon Sales chart): Jan–Dec on the x-axis, one line per year (up
+        // to 4), current year green + filled, external legend. Replaces the
+        // trailing-13-month bar chart. The current, still-open month is left
+        // off the line, same "last full month" rule as Dazzle Dry. KPIs below
+        // are unchanged.
+        const SNS_YOY_COLORS = {
+          0: { border: '#24e9a3', bg: 'rgba(36,233,163,0.08)', fill: true  },
+          1: { border: '#001f60', bg: 'transparent',           fill: false },
+          2: { border: '#f4dfd0', bg: 'transparent',           fill: false },
+          3: { border: '#ccd3d5', bg: 'transparent',           fill: false },
+        };
+        const snsPoints = withDate.map(x => {
+          const r = x.row;
+          return { y: x.y, m: x.m, v: num(r.total_subscriptions ?? r.total_subs ?? r.subscriptions ?? r.active_subscriptions) };
+        }).filter(p => p.v);
+        const snsNow = new Date();
+        const snsCurYear = snsNow.getFullYear(), snsStopMonth = snsNow.getMonth(); // 0-indexed = last full month (1-indexed)
+        const SNS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const snsDatasets = [];
+        for (let offset = 0; offset <= 3; offset++) {
+          const yr = snsCurYear - offset;
+          const c = SNS_YOY_COLORS[offset];
+          const data = SNS_MONTHS.map((_, idx) => {
+            const mo = idx + 1;
+            if (yr === snsCurYear && mo > snsStopMonth) return null;
+            const p = snsPoints.find(q => q.y === yr && q.m === mo);
+            return p ? p.v : null;
+          });
+          if (data.every(v => v === null)) continue;
+          snsDatasets.push({ label: String(yr), data, borderColor: c.border, backgroundColor: c.bg, fill: c.fill, pointRadius: 2, tension: 0.3, borderWidth: 2.5, spanGaps: false });
+        }
+        const snsFmt = v => v == null ? '' : Math.round(v).toLocaleString();
+        if (window._snsChart) window._snsChart.destroy();
         window._snsChart = new Chart(canvas, {
-          type: 'bar',
-          data: { labels: trimmedLabels, datasets: [{ label: 'Active Subscriptions', data: trimmedValues, backgroundColor: bg }] },
+          type: 'line',
+          data: { labels: SNS_MONTHS, datasets: snsDatasets },
           options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true } }
-          }
+            plugins: {
+              legend: { display: false }, // external legend in #legend-sns
+              tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${snsFmt(ctx.parsed.y)}` } },
+            },
+            scales: {
+              x: { grid: { color: 'rgba(0,0,0,0.04)' } },
+              y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: snsFmt } },
+            },
+          },
         });
+        if (typeof window.renderExternalLegend === 'function') window.renderExternalLegend(window._snsChart, 'legend-sns');
         if (subsKpiEl) subsKpiEl.textContent = Math.round(values[values.length - 1]).toLocaleString();
         const subsMomEl = subsKpiEl ? subsKpiEl.nextElementSibling : null;
         if (subsMomEl) {
@@ -4558,65 +4585,8 @@ async function initSns() {
         fetch(sheetCsvUrl(OV_RETURNS_SHEET_ID, OV_RETURNS_MIGUARD_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
       ]);
 
-      // Consignment Inventory Level KPI — added 2026-09-17 per Jaclyn.
-      // Independent fetch, deliberately not folded into the Promise.all
-      // above: this KPI has nothing to do with the sales data the rest
-      // of this function computes, so keeping it separate means a slow
-      // or failed consignment fetch can never delay or break the KPIs
-      // that already work. Declared locally rather than reusing
-      // CONSIGNMENT_SHEET_ID/OV_CONSIGNMENT_SHEET_ID from other scopes
-      // in this file, to avoid any cross-scope assumption — same
-      // defensive convention already used elsewhere in this file.
-      // AWAITED (not fire-and-forget) — the PDF export calls
-      // window.initAmazonLive() and reads this KPI's DOM value right
-      // after it resolves; an un-awaited inner fetch here would race
-      // against that read and could export "Loading…" instead of the
-      // real number.
-      await (async function () {
-        const consEl = document.getElementById('kpi-consignment-inventory');
-        if (!consEl) return;
-        try {
-          const CONS_SHEET_ID = window.SHEET_CFG.SHEET_CONSIGNMENT_INVENTORY?.fileId || '';
-          const CONS_GID = window.SHEET_CFG.SHEET_CONSIGNMENT_INVENTORY?.gid || '';
-          const consCsv = await fetch(sheetCsvUrl(CONS_SHEET_ID, CONS_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
-          const valEl = consEl.querySelector('.kpi-value');
-          const subEl = consEl.querySelector('.kpi-sub');
-          if (!isCsv(consCsv)) {
-            if (valEl) valEl.textContent = '—';
-            if (subEl) subEl.textContent = 'No data yet';
-            return;
-          }
-          const rows = parseCsv(consCsv);
-          // Single-SKU brand — MIG0001 is the only row expected, but
-          // matching by SKU rather than just taking rows[0] means this
-          // keeps working correctly if a second SKU is ever added to
-          // this sheet.
-          const row = rows.find(r => (r.sku || '').trim().toUpperCase() === 'MIG0001') || rows[0];
-          if (!row) {
-            if (valEl) valEl.textContent = '—';
-            if (subEl) subEl.textContent = 'No data yet';
-            return;
-          }
-          const available = parseFloat(row.available);
-          if (valEl) valEl.textContent = !isNaN(available) ? available.toLocaleString() : '—';
-          if (subEl) {
-            const iso = row.last_updated || '';
-            const d = iso ? new Date(iso) : null;
-            if (d && !isNaN(d.getTime())) {
-              const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-              subEl.textContent = `Updated: ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-            } else {
-              subEl.textContent = 'Updated: —';
-            }
-          }
-        } catch (err) {
-          console.warn('[MiGuard] Consignment Inventory KPI failed:', err.message);
-          const valEl = consEl.querySelector('.kpi-value');
-          const subEl = consEl.querySelector('.kpi-sub');
-          if (valEl) valEl.textContent = '—';
-          if (subEl) subEl.textContent = 'Error loading';
-        }
-      })();
+      // Consignment Inventory Level KPI moved to Sales > Insights 2026-10-05 —
+      // see window.loadConsignmentKpi().
 
 
       console.log('[MiGuard] syncCsv length:', syncCsv.length, 'isCsv:', isCsv(syncCsv));
@@ -9039,22 +9009,57 @@ async function initSnsExternal() {
         // Color by calendar year: 2024 sand, 2025 slate, 2026 navy. Falls
         // back gracefully for any other year (older -> sand-ish, newer ->
         // navy) so this doesn't quietly break once 2027 data shows up.
-        const YEAR_COLORS = { 2024: '#f4dfd0', 2025: '#6b7ba2', 2026: '#001f60' };
-        const distinctYears = [...new Set(trimmedYears)].sort((a, b) => a - b);
-        const bg = trimmedYears.map(y => {
-          if (YEAR_COLORS[y]) return YEAR_COLORS[y];
-          const idx = distinctYears.indexOf(y);
-          return idx <= 0 ? '#f4dfd0' : (idx === distinctYears.length - 1 ? '#001f60' : '#6b7ba2');
-        });
+        // CHANGED 2026-10-05 per Jaclyn — year-over-year LINE chart matching
+        // VB Cosmetics / Dazzle Dry's Subscriptions chart (and this file's own
+        // Amazon Sales chart): Jan–Dec on the x-axis, one line per year (up
+        // to 4), current year green + filled, external legend. Replaces the
+        // trailing-13-month bar chart. The current, still-open month is left
+        // off the line, same "last full month" rule as Dazzle Dry. KPIs below
+        // are unchanged.
+        const SNS_YOY_COLORS = {
+          0: { border: '#24e9a3', bg: 'rgba(36,233,163,0.08)', fill: true  },
+          1: { border: '#001f60', bg: 'transparent',           fill: false },
+          2: { border: '#f4dfd0', bg: 'transparent',           fill: false },
+          3: { border: '#ccd3d5', bg: 'transparent',           fill: false },
+        };
+        const snsPoints = withDate.map(x => {
+          const r = x.row;
+          return { y: x.y, m: x.m, v: num(r.total_subscriptions ?? r.total_subs ?? r.subscriptions ?? r.active_subscriptions) };
+        }).filter(p => p.v);
+        const snsNow = new Date();
+        const snsCurYear = snsNow.getFullYear(), snsStopMonth = snsNow.getMonth(); // 0-indexed = last full month (1-indexed)
+        const SNS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const snsDatasets = [];
+        for (let offset = 0; offset <= 3; offset++) {
+          const yr = snsCurYear - offset;
+          const c = SNS_YOY_COLORS[offset];
+          const data = SNS_MONTHS.map((_, idx) => {
+            const mo = idx + 1;
+            if (yr === snsCurYear && mo > snsStopMonth) return null;
+            const p = snsPoints.find(q => q.y === yr && q.m === mo);
+            return p ? p.v : null;
+          });
+          if (data.every(v => v === null)) continue;
+          snsDatasets.push({ label: String(yr), data, borderColor: c.border, backgroundColor: c.bg, fill: c.fill, pointRadius: 2, tension: 0.3, borderWidth: 2.5, spanGaps: false });
+        }
+        const snsFmt = v => v == null ? '' : Math.round(v).toLocaleString();
+        if (window._snsChartExternal) window._snsChartExternal.destroy();
         window._snsChartExternal = new Chart(canvas, {
-          type: 'bar',
-          data: { labels: trimmedLabels, datasets: [{ label: 'Active Subscriptions', data: trimmedValues, backgroundColor: bg }] },
+          type: 'line',
+          data: { labels: SNS_MONTHS, datasets: snsDatasets },
           options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true } }
-          }
+            plugins: {
+              legend: { display: false }, // external legend in #legend-mx-sns
+              tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${snsFmt(ctx.parsed.y)}` } },
+            },
+            scales: {
+              x: { grid: { color: 'rgba(0,0,0,0.04)' } },
+              y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: snsFmt } },
+            },
+          },
         });
+        if (typeof window.renderExternalLegend === 'function') window.renderExternalLegend(window._snsChartExternal, 'legend-mx-sns');
         if (subsKpiEl) subsKpiEl.textContent = Math.round(values[values.length - 1]).toLocaleString();
         const subsMomEl = subsKpiEl ? subsKpiEl.nextElementSibling : null;
         if (subsMomEl) {
@@ -14654,100 +14659,70 @@ async function ppcLoadBlendedPerformance(periodKey) {
 // (per-keyword AND summary tabs) and Business Report sheets already
 // confirmed and used elsewhere on this dashboard.
 // ═══════════════════════════════════════════════════════════════════
+// Consignment Inventory Level KPI — added 2026-09-17 per Jaclyn on the Amazon
+// tab; MOVED 2026-10-05 to the top of Sales > Insights (MiGuard has no
+// product categories, so this replaced the category chart there). Same
+// sheet/logic as before: SHEET_CONSIGNMENT_INVENTORY, the "available" column,
+// "Updated: <date>" from last_updated. Promise-cached so the tab and the PDF
+// export share one fetch.
+window.loadConsignmentKpi = function () {
+  if (window._consignmentKpiPromise) return window._consignmentKpiPromise;
+  window._consignmentKpiPromise = (async function () {
+        const consEl = document.getElementById('kpi-consignment-inventory');
+        if (!consEl) return;
+        try {
+          const CONS_SHEET_ID = window.SHEET_CFG.SHEET_CONSIGNMENT_INVENTORY?.fileId || '';
+          const CONS_GID = window.SHEET_CFG.SHEET_CONSIGNMENT_INVENTORY?.gid || '';
+          // ovCsvUrl/parseCsvToRows — the helpers in THIS scope (initAmazonLive's
+          // sheetCsvUrl/isCsv/parseCsv aren't reachable from here).
+          const consCsv = await fetch(ovCsvUrl(CONS_SHEET_ID, CONS_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
+          const valEl = consEl.querySelector('.kpi-value');
+          const subEl = consEl.querySelector('.kpi-sub');
+          if (!consCsv || consCsv.trim().startsWith('<')) {
+            if (valEl) valEl.textContent = '—';
+            if (subEl) subEl.textContent = 'No data yet';
+            return;
+          }
+          const rows = parseCsvToRows(consCsv);
+          // Single-SKU brand — MIG0001 is the only row expected, but
+          // matching by SKU rather than just taking rows[0] means this
+          // keeps working correctly if a second SKU is ever added to
+          // this sheet.
+          const row = rows.find(r => (r.sku || '').trim().toUpperCase() === 'MIG0001') || rows[0];
+          if (!row) {
+            if (valEl) valEl.textContent = '—';
+            if (subEl) subEl.textContent = 'No data yet';
+            return;
+          }
+          const available = parseFloat(row.available);
+          if (valEl) valEl.textContent = !isNaN(available) ? available.toLocaleString() : '—';
+          if (subEl) {
+            const iso = row.last_updated || '';
+            const d = iso ? new Date(iso) : null;
+            if (d && !isNaN(d.getTime())) {
+              const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+              subEl.textContent = `Updated: ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+            } else {
+              subEl.textContent = 'Updated: —';
+            }
+          }
+        } catch (err) {
+          console.warn('[MiGuard] Consignment Inventory KPI failed:', err.message);
+          const valEl = consEl.querySelector('.kpi-value');
+          const subEl = consEl.querySelector('.kpi-sub');
+          if (valEl) valEl.textContent = '—';
+          if (subEl) subEl.textContent = 'Error loading';
+        }
+        })();
+  return window._consignmentKpiPromise;
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // SALES > INSIGHTS + REVIEWS — added 2026-10-05 per Jaclyn.
-// Insights category chart ported from évolis's loadInsCategoryChart(); the
-// Reviews tab ported from Vivian Valenty's loadVVSReviews() (VBC reference).
+// The Reviews tab ported from Vivian Valenty's loadVVSReviews() (VBC reference).
 // Both reuse helpers this file already has in this same scope
 // (getProductMaster, fetchAmazonReviews, ovCsvUrl, parseCsvToRows).
 // ═══════════════════════════════════════════════════════════════════
-const INS_CATEGORY_PALETTE = ['#001F60', '#24E9A3', '#6B7BA2', '#F4DFD0', '#CCD3D5'];
-async function _loadInsCategoryChartImpl() {
-  if (window._insCategoryChart) return;
-  const canvas = document.getElementById('ins-category-chart');
-  if (!canvas) return;
-  // MiGuard's own historical-orders tab (SHEET_ORDERS_HISTORICAL) — évolis
-  // hardcodes its own gid here; this reads the per-brand config instead.
-  const HIST_SHEET_ID = window.SHEET_CFG.SHEET_ORDERS_HISTORICAL?.fileId || '';
-  const HIST_GID = window.SHEET_CFG.SHEET_ORDERS_HISTORICAL?.gid || '';
-  try {
-    const [master, histCsv] = await Promise.all([
-      getProductMaster(),
-      fetch(ovCsvUrl(HIST_SHEET_ID, HIST_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
-    ]);
-    const histRows = parseCsvToRows(histCsv);
-    const f = v => parseFloat((v || '0').toString().replace(/[^0-9.-]/g, '')) || 0;
-    const byPeriod = {};   // 'YYYY-M' -> { category: units }
-    const totals = {};     // category -> units across the whole window (orders the legend)
-    histRows.forEach(r => {
-      if ((r.status || '').trim().toLowerCase() === 'cancelled') return;
-      const m = (r.date || '').trim().match(/^(\d{4})-(\d{2})/);
-      if (!m) return;
-      const yr = Number(m[1]), mo = Number(m[2]);
-      const skus = (r.skus || r.sku || '').split(',').map(s => s.trim().toUpperCase().replace(/-SF$/, '')).filter(Boolean);
-      if (!skus.length) return;
-      const perSkuUnits = (f(r.unit_count) || f(r.quantity_ordered)) / skus.length;
-      skus.forEach(sku => {
-        const entry = master.bySku[sku];
-        if (!entry) return;
-        // MiGuard is a one-product brand and its Product Category column is
-        // blank on the Product Short Name sheet, so fall back to the product
-        // name — the chart then shows MiGuard Supplements as its own series
-        // instead of silently plotting nothing. Fills in automatically if
-        // categories are ever added to that sheet.
-        const cat = (entry.category || entry.name || sku).trim();
-        const key = `${yr}-${mo}`;
-        byPeriod[key] = byPeriod[key] || {};
-        byPeriod[key][cat] = (byPeriod[key][cat] || 0) + perSkuUnits;
-        totals[cat] = (totals[cat] || 0) + perSkuUnits;
-      });
-    });
-    const periods = Object.keys(byPeriod)
-      .map(k => { const [yr, mo] = k.split('-'); return { key: k, year: Number(yr), month: Number(mo) }; })
-      .sort((a, b) => (a.year * 12 + a.month) - (b.year * 12 + b.month))
-      .slice(-13);
-    if (!periods.length) return;
-    const cats = Object.keys(totals).sort((a, b) => totals[b] - totals[a]);
-    const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const labels = periods.map(p => MONTH_ABBR[p.month - 1] || p.month);
-    const datasets = cats.map((c, i) => ({
-      label: c,
-      data: periods.map(p => Math.round(((byPeriod[p.key] && byPeriod[p.key][c]) || 0) * 10) / 10),
-      backgroundColor: INS_CATEGORY_PALETTE[i % INS_CATEGORY_PALETTE.length],
-      borderRadius: 2,
-    }));
-    window._insCategoryChart = new Chart(canvas, {
-      type: 'bar',
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top', align: 'end', labels: { boxWidth: 12, boxHeight: 12, font: { family: 'DM Sans, sans-serif', size: 11 }, color: '#001F60', padding: 10 } },
-          tooltip: {
-            backgroundColor: '#fff', borderColor: 'rgba(0,31,96,0.1)', borderWidth: 1,
-            titleColor: '#001F60', bodyColor: '#6B7BA2',
-            titleFont: { family: 'DM Sans, sans-serif', size: 11, weight: '600' },
-            bodyFont: { family: 'DM Sans, sans-serif', size: 11 },
-            padding: 12,
-          },
-        },
-        scales: {
-          x: { border: { display: false }, grid: { display: false }, ticks: { font: { family: 'DM Sans, sans-serif', size: 10 }, color: '#6B7BA2' } },
-          y: { border: { display: false }, grid: { color: 'rgba(0,31,96,0.05)' }, ticks: { font: { family: 'DM Sans, sans-serif', size: 10 }, color: '#6B7BA2' } },
-        },
-      },
-    });
-  } catch (err) {
-    console.error('[loadInsCategoryChart]', err);
-  }
-}
-// Promise-cached: a second caller (e.g. PDF export while the tab is still
-// loading) waits on the same in-flight load instead of drawing a 2nd chart.
-window.loadInsCategoryChart = function () {
-  if (!window._insCategoryChartPromise) window._insCategoryChartPromise = _loadInsCategoryChartImpl();
-  return window._insCategoryChartPromise;
-};
 
 // ── Accomplished image upload — added 2026-10-05 per Jaclyn ──────────────
 // Ported from the VBC reference's ddUploadInsightImage. Sends the file as
@@ -18489,7 +18464,6 @@ async function loadAuditResultsFromSheet() {
     _investChart: 'chart-invest',
     _impressChart: 'chart-impressions',
     _snsChart: 'chart-sns',
-    _insCategoryChart: 'ins-category-chart', // Sales > Insights, added 2026-10-05
     // Added 2026-07-21 — was never registered here at all, so it fell
     // through to the naive pdfxRawChartImg fallback (no force-visible
     // ancestors, no correct-size capture), which is exactly why it showed
@@ -18522,7 +18496,7 @@ async function loadAuditResultsFromSheet() {
   // old dashboard-height x 0.9 rule. Tune per chart from the export log.
   const PDFX_CHART_TARGET_HEIGHT_PX = {
     _amazonChart: 190, _webChart: 190, _walmartChart: 190,
-    _insCategoryChart: 220, _snsChart: 190,
+    _snsChart: 190,
     _investChart: 170, _impressChart: 150,
     mfcShippedChartInstance: 150,
   };
@@ -19049,16 +19023,6 @@ async function loadAuditResultsFromSheet() {
     const kpis = ['kpi-total-units', 'kpi-total-orders', 'kpi-avg-order', 'kpi-units-ads', 'kpi-units-organic'].map(pdfxKpi);
     const rows = pdfxTableRows('tp-tbody');
     const insight = pdfxText('#tp-insight-text');
-    // Consignment Inventory Level — added 2026-09-17 per Jaclyn. Kept out
-    // of the kpis array above on purpose: .pdfx-kpis is a fixed 5-column
-    // grid, and a 6th item would squeeze in as an unevenly-sized column
-    // rather than laying out cleanly. Rendered as its own small block
-    // instead, positioned after Top Selling Products to match where it
-    // sits on the live page.
-    const consKpi = pdfxKpi('kpi-consignment-inventory');
-    const consHtml = consKpi.label
-      ? '<div class="pdfx-kpis" style="grid-template-columns:220px;margin-top:14px;">' + pdfxKpiCardHtml(consKpi) + '</div>'
-      : '';
     return '' +
       '<div class="pdfx-page">' +
         '<div class="pdfx-inner">' +
@@ -19070,7 +19034,6 @@ async function loadAuditResultsFromSheet() {
           '<div class="pdfx-card"><div class="pdfx-card-title">Top Selling Products <span style="font-weight:400;color:var(--muted);">(by Units)</span></div>' +
             pdfxTableHtml(['#', 'Product', 'Units', 'Units (Ads)', 'Units (Organic)'], rows) +
           '</div>' +
-          consHtml +
           (insight ? '<div class="pdfx-insight"><strong>Key Insight:</strong> ' + pdfxEscape(insight) + '</div>' : '') +
         '</div>' +
       '</div>';
@@ -19355,10 +19318,12 @@ async function loadAuditResultsFromSheet() {
   }
 
   // Sales > Insights — added 2026-10-05, ported from évolis's
-  // buildInsightsPage: category chart, Subscriptions (2 KPIs + chart, moved
-  // here from Opportunities), Key Insight.
+  // buildInsightsPage: Consignment Inventory Level (in place of the category
+  // chart — MiGuard has one product type), Subscriptions (2 KPIs + YoY line
+  // chart, moved here from Opportunities), Key Insight.
   function buildSalesInsightsPage(monthYear) {
     const snsKpis = ['kpi-active-subs', 'kpi-retention'].map(pdfxKpi);
+    const consKpi = pdfxKpi('kpi-consignment-inventory'); // moved here from the Amazon page 2026-10-05
     const insight = pdfxText('#ins-catinsight-disp');
     const hasInsight = insight && !/^No insight added yet/i.test(insight) && insight !== 'Loading…';
     return '' +
@@ -19366,9 +19331,10 @@ async function loadAuditResultsFromSheet() {
         '<div class="pdfx-inner">' +
           pdfxHeaderBand(monthYear, 'Sales') +
           '<div class="pdfx-chlabel">Insights</div>' +
-          '<div class="pdfx-card"><div class="pdfx-card-title">Unit Sales by Product Category</div>' + pdfxChartBlock('_insCategoryChart') + '</div>' +
-          '<div class="pdfx-kpis n2" style="margin-top:14px;">' + snsKpis.map(pdfxKpiCardHtml).join('') + '</div>' +
-          '<div class="pdfx-card"><div class="pdfx-card-title">Active Subscriptions by Month</div>' + pdfxChartBlock('_snsChart') + '</div>' +
+          (consKpi.label ? '<div class="pdfx-kpis" style="grid-template-columns:240px;margin-top:6px;margin-bottom:14px;">' + pdfxKpiCardHtml(consKpi) + '</div>' : '') +
+          '<div class="pdfx-card-title" style="margin-bottom:8px;">Subscriptions</div>' +
+          '<div class="pdfx-kpis n2">' + snsKpis.map(pdfxKpiCardHtml).join('') + '</div>' +
+          '<div class="pdfx-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><div class="pdfx-card-title" style="margin-bottom:0;">Active Subscriptions by Month</div><div>' + pdfxLegendHtml('legend-sns') + '</div></div>' + pdfxChartBlock('_snsChart') + '</div>' +
           (hasInsight ? '<div class="pdfx-insight"><strong>Key Insight:</strong> ' + pdfxEscape(insight) + '</div>' : '') +
         '</div>' +
       '</div>';
@@ -19904,7 +19870,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
         (includeSections.stewardship   && typeof window.initStewardshipLive === 'function')        ? window.initStewardshipLive()        : null,
         (includeSections.fulfillment   && typeof window.initMarketingFulfillmentCS === 'function')  ? window.initMarketingFulfillmentCS() : null,
         // Subscriptions now lives on Sales > Insights (moved from Opportunities 2026-10-05).
-        (includeSections.insights && typeof window.loadInsCategoryChart === 'function')           ? window.loadInsCategoryChart()       : null,
+        (includeSections.insights && typeof window.loadConsignmentKpi === 'function')            ? window.loadConsignmentKpi()         : null,
         (includeSections.insights && !window._snsChart && typeof initSns === 'function')          ? initSns()                           : null,
         (includeSections.brandMomentum && typeof window.initBrandMomentum === 'function')         ? window.initBrandMomentum()          : null,
         // Prime Day's KPIs/chart are lazy-loaded on tab click — if it's
@@ -19959,7 +19925,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
       const chartsBySection = {
         amazon: ['_amazonChart'], website: ['_webChart'], walmart: ['_walmartChart'],
         stewardship: ['_investChart', '_impressChart'],
-        insights: ['_snsChart', '_insCategoryChart'],
+        insights: ['_snsChart'],
         fulfillment: ['mfcShippedChartInstance'],
       };
       const expectedCharts = Object.keys(chartsBySection)
