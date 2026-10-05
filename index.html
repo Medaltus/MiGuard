@@ -21914,7 +21914,9 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
                 <div style="font-size:14px;color:var(--navy);margin-top:12px;">Goal <strong>${goal == null ? '—' : fmtD(goal)}</strong></div>
               </div>`;
             }
-            const fill = st.onPace ? 'rgba(36,233,163,.16)' : 'rgba(219,55,45,.10)';
+            // Opaque tints (not transparent) so they read clearly against the sand panel:
+            // ~30% of our red (#db372d) / green (#24e9a3) mixed with white.
+            const fill = st.onPace ? '#c4f6e4' : '#f4c3c0';
             return `<div style="text-align:center;flex:0 0 auto;min-width:220px;">
               <div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:10px;">Total Sales</div>
               <div style="position:relative;width:${size}px;height:${size}px;margin:0 auto;">
@@ -21954,11 +21956,13 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
             </div>`;
           }
 
-          return `<div style="display:flex;align-items:center;justify-content:center;gap:72px;flex:1;flex-wrap:wrap;">
-            ${heroGauge(actualOverall, overallGoal)}
-            <div style="flex:0 1 auto;">
+          // Spread across the full panel width: Total Sales takes the left third,
+          // the two contribution rings share the remaining two thirds.
+          return `<div style="display:flex;align-items:center;justify-content:space-around;gap:24px;flex:1;flex-wrap:wrap;width:100%;">
+            <div style="flex:1 1 0;display:flex;justify-content:center;min-width:240px;">${heroGauge(actualOverall, overallGoal)}</div>
+            <div style="flex:2 1 0;min-width:320px;">
               <div style="text-align:center;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Sales Contribution</div>
-              <div style="display:flex;gap:36px;justify-content:center;">
+              <div style="display:flex;gap:24px;justify-content:space-around;">
                 ${contribGauge('Organic Sales', actualOrganic, organicGoal)}
                 ${contribGauge('Ad Sales', actualAds, adsGoal)}
               </div>
