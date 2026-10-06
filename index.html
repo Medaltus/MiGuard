@@ -21911,14 +21911,18 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
             ? `<div style="font-size:10.5px;color:var(--muted);margin-top:3px;">${cancelRate != null ? `adj. ${Math.round(cancelRate * 100)}% cancel rate` : 'no cancel-rate history yet'}</div>` : '';
 
           // Hero: Total Sales
-          function bigGauge(label, actual, goal) {
+          // highlight = true only for Total Sales (per Jaclyn 2026-10-06): white
+          // track + shaded center. Organic/Ad keep the original grey track and
+          // no center fill, at the same large size.
+          function bigGauge(label, actual, goal, highlight) {
+            const track = highlight ? '#ffffff' : 'var(--border)';
             const st = gaugeState(actual, goal);
             const size = 170, stroke = 16;
             if (!st) {
               return `<div style="text-align:center;flex:0 0 auto;min-width:220px;">
                 <div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:10px;">${label}</div>
                 <div style="position:relative;width:${size}px;height:${size}px;margin:0 auto;">
-                  ${buildGaugeSvg(0, '#ffffff', '#ffffff', size, stroke, 'rgba(255,255,255,.55)')}
+                  ${buildGaugeSvg(0, track, track, size, stroke, highlight ? 'rgba(255,255,255,.55)' : null)}
                   <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);font-weight:600;">${goal == null ? 'No goal set' : 'Not available yet'}</div>
                 </div>
                 <div style="font-size:14px;color:var(--navy);margin-top:12px;">Goal <strong>${goal == null ? '—' : fmtD(goal)}</strong></div>
@@ -21926,11 +21930,11 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
             }
             // Opaque tints (not transparent) so they read clearly against the sand panel:
             // ~30% of our red (#db372d) / green (#24e9a3) mixed with white.
-            const fill = st.onPace ? '#c4f6e4' : '#f4c3c0';
+            const fill = highlight ? (st.onPace ? '#c4f6e4' : '#f4c3c0') : null;
             return `<div style="text-align:center;flex:0 0 auto;min-width:220px;">
               <div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:10px;">${label}</div>
               <div style="position:relative;width:${size}px;height:${size}px;margin:0 auto;">
-                ${buildGaugeSvg(st.actualPct, st.color, '#ffffff', size, stroke, fill)}
+                ${buildGaugeSvg(st.actualPct, st.color, track, size, stroke, fill)}
                 <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:700;color:${st.color};">${st.actualPct}%</div>
               </div>
               <div style="font-size:15px;font-weight:600;color:${st.color};margin-top:12px;">${st.statusText}</div>
@@ -21939,12 +21943,11 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
             </div>`;
           }
 
-          // CHANGED 2026-10-05 per Jaclyn: all three rings are the same large
-          // size (no hero/contribution split), each with the white track and a
-          // shaded center behind the % (light red = projecting to miss, light
-          // green = on pace), spread evenly across the full panel width.
+          // All three rings the same large size, spread across the full panel
+          // width. Only Total Sales gets the white track + shaded center (light
+          // red = projecting to miss, light green = on pace).
           return `<div style="display:flex;align-items:flex-start;justify-content:space-around;gap:24px;flex:1;flex-wrap:wrap;width:100%;">
-            ${bigGauge('Total Sales', actualOverall, overallGoal)}
+            ${bigGauge('Total Sales', actualOverall, overallGoal, true)}
             ${bigGauge('Organic Sales', actualOrganic, organicGoal)}
             ${bigGauge('Ad Sales', actualAds, adsGoal)}
           </div>`;
