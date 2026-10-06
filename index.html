@@ -4446,18 +4446,25 @@ async function initSns() {
   }
 
   // ── CSV parser ────────────────────────────────────────────────────────────
+  // FIXED 2026-10-06: quote-aware parser (was a naive split on '\n', which
+  // breaks rows whose quoted fields contain line breaks — same fix already
+  // applied to the Rank Tracker's parser).
   function parseCsv(text) {
-    const lines = text.trim().split('\n');
-    if (lines.length < 2) return [];
-    const headers = parseCsvLine(lines[0]).map(h => h.replace(/^"|"$/g,'').trim());
-    const rows = [];
-    for (let i = 1; i < lines.length; i++) {
-      const vals = parseCsvLine(lines[i]);
-      const obj = {};
-      headers.forEach((h, idx) => { obj[h] = (vals[idx] || '').replace(/^"|"$/g,'').trim(); });
-      rows.push(obj);
+    text = (text || '').replace(/^\uFEFF/, '');
+    const raw = []; let row = [], field = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; } else field += ch; continue; }
+      if (ch === '"') q = true;
+      else if (ch === ',') { row.push(field); field = ''; }
+      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(field); raw.push(row); row = []; field = ''; }
+      else field += ch;
     }
-    return rows;
+    if (field || row.length) { row.push(field); raw.push(row); }
+    const data = raw.filter(r => r.some(v => String(v).trim()));
+    if (data.length < 2) return [];
+    const headers = data[0].map(h => String(h).trim());
+    return data.slice(1).map(vals => { const obj = {}; headers.forEach((h, idx) => { obj[h] = String(vals[idx] || '').trim(); }); return obj; });
   }
 
   function parseCsvLine(line) {
@@ -6825,11 +6832,24 @@ async function initSns() {
 
       console.log('[MiGuard] syncCsv length:', syncCsv.length, 'isCsv:', isCsv(syncCsv));
       console.log('[MiGuard] histCsv length:', histCsv.length, 'isCsv:', isCsv(histCsv));
-      const syncRows = isCsv(syncCsv) ? filterRows(parseCsv(syncCsv)) : [];
+      const syncAll  = isCsv(syncCsv) ? parseCsv(syncCsv) : [];
+      const syncRows = filterRows(syncAll);
       const histRows = isCsv(histCsv) ? filterRows(parseCsv(histCsv)) : [];
 
       // Combine all rows (sync is more up-to-date; for dedup we rely on order_id coverage being correct per sheet)
-      const allRows = [...syncRows, ...histRows];
+      // FIXED 2026-10-06 per Jaclyn: this used to be [...syncRows, ...histRows],
+      // which double-counted every month present in BOTH sheets (e.g. August
+      // 2026 showed 135 units = 71 from the sync sheet + 64 from the historical
+      // sheet, vs 71 on the internal Amazon tab). Now each month comes from
+      // exactly one sheet, the same rule the internal tabs use: the sync sheet
+      // for any month it fully covers (first day on/after its earliest order
+      // date), the historical sheet otherwise.
+      const syncStart = syncAll.reduce((m, r) => { const d = normalizeDate(r.date); return /^\d{4}-\d{2}-\d{2}$/.test(d) && (!m || d < m) ? d : m; }, '');
+      const syncCovers = ym => !!syncStart && `${ym}-01` >= syncStart;
+      const allRows = [
+        ...syncRows.filter(r => syncCovers(normalizeDate(r.date).substring(0, 7))),
+        ...histRows.filter(r => !syncCovers(normalizeDate(r.date).substring(0, 7))),
+      ];
 
       // Amazon returns — dated by return_date (when the return happened),
       // not the original order date, same convention as Overview and the
@@ -21903,7 +21923,10 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
               statusText = `Projecting ${fmtD(projected)}`;
             } else {
               onPace = actualPct >= 100;
-              statusText = onPace ? 'Hit goal' : 'Missed goal';
+              // Per Jaclyn 2026-10-06: show the actual total reached (colored
+              // green if the goal was hit, red if missed) instead of the words
+              // "Hit goal" / "Missed goal".
+              statusText = fmtD(actual);
             }
             return { actualPct, onPace, statusText, color: onPace ? GREEN : RED };
           }
