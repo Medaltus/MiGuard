@@ -15754,10 +15754,14 @@ window.initBrandMomentum = async function () {
     });
     const kwTbody = document.getElementById('bm-keyword-tbody');
     if (kwTbody) {
-      const top10 = keywordRows.slice(0, 10);
+      // Per Jaclyn 2026-10-06: leave out keywords with 0 (or blank) search
+      // volume — a rank on a term nobody searches isn't useful here. This only
+      // filters the table; the per-product organic keyword counts below still
+      // use every keyword.
+      const top10 = keywordRows.filter(r => r.volume > 0).slice(0, 10);
       kwTbody.innerHTML = top10.length ? top10.map(r =>
         `<tr><td>${r.keyword}</td><td>${r.product}</td><td>${r.rank == null ? 'Not ranking' : '#' + r.rank}</td><td>${r.volume.toLocaleString()}</td></tr>`
-      ).join('') : '<tr><td colspan="4" style="color:var(--muted);">No keyword data available</td></tr>';
+      ).join('') : '<tr><td colspan="4" style="color:var(--muted);">No ranked keywords with search volume yet</td></tr>';
     }
     // ADDED for the card rebuild — per-product organic keyword COUNT
     // (distinct from the top-10 table above), keyed by SKU to match
