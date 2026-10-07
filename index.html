@@ -2279,7 +2279,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       <div class="section-label">Key Performance Metrics</div>
       <div class="kpi-row">
         <div class="kpi-card" id="kpi-pct-revenue-invested"><div class="kpi-label">% Revenue Invested</div><div class="kpi-value">5%</div><div class="kpi-mom flat"></div></div>
-        <div class="kpi-card" id="kpi-amazon-fees"><div class="kpi-label">Amazon Fees</div><div class="kpi-value sm">$613.86</div><div class="kpi-mom flat"></div></div>
+        <div class="kpi-card" id="kpi-amazon-fees"><div class="kpi-label">Amazon Fees</div><div class="kpi-value sm">—</div><div class="kpi-mom flat"></div></div>
         <div class="kpi-card" id="kpi-pct-units-ads"><div class="kpi-label">% Units from Ads</div><div class="kpi-value">26%</div><div class="kpi-mom flat"></div></div>
         <div class="kpi-card" id="kpi-ad-clicks"><div class="kpi-label">Ad Clicks</div><div class="kpi-value">272</div><div class="kpi-mom flat">0% MOM</div></div>
         <div class="kpi-card" id="kpi-ad-impressions"><div class="kpi-label">Ad Impressions</div><div class="kpi-value">85K</div><div class="kpi-mom dn">▼ 38% MOM</div></div>
@@ -2558,7 +2558,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       <div class="section-label">Key Performance Metrics</div>
       <div class="kpi-row">
         <div class="kpi-card" id="mx-kpi-pct-revenue-invested"><div class="kpi-label">% Revenue Invested</div><div class="kpi-value">—</div><div class="kpi-mom flat"></div></div>
-        <div class="kpi-card" id="mx-kpi-amazon-fees"><div class="kpi-label">Amazon Fees</div><div class="kpi-value sm">$613.86</div><div class="kpi-mom flat"></div></div>
+        <div class="kpi-card" id="mx-kpi-amazon-fees"><div class="kpi-label">Amazon Fees</div><div class="kpi-value sm">—</div><div class="kpi-mom flat"></div></div>
         <div class="kpi-card" id="mx-kpi-pct-units-ads"><div class="kpi-label">% Units from Ads</div><div class="kpi-value">—</div><div class="kpi-mom flat"></div></div>
         <div class="kpi-card" id="mx-kpi-ad-clicks"><div class="kpi-label">Ad Clicks</div><div class="kpi-value">—</div><div class="kpi-mom flat"></div></div>
         <div class="kpi-card" id="mx-kpi-ad-impressions"><div class="kpi-label">Ad Impressions</div><div class="kpi-value">—</div><div class="kpi-mom flat"></div></div>
@@ -6025,9 +6025,10 @@ async function initSns() {
         ltdEl.textContent = '$' + Math.round(ltdTotal).toLocaleString();
       }
 
-      // Amazon Fees KPI intentionally left as-is — pending a Finances/Product Fees
-      // API sync (net-new backend job), same shape as AD_SUMMARY. Do not overwrite
-      // with a guess in the meantime.
+      // Amazon Fees — FIXED 2026-10-06 per Jaclyn: was a hardcoded $613.86
+      // left over from the template. Now column P ("Amazon Estimated fees")
+      // of the Amazon orders sheet for this month — see getAmazonFeesByMonth().
+      await window.renderAmazonFeesKpi('kpi-amazon-fees', year, month, prevYear, prevMonth);
 
     } catch (err) {
       console.warn('[MiGuard] initStewardshipLive failed, charts/KPIs remain at last rendered values:', err.message);
@@ -8824,9 +8825,8 @@ async function initSns() {
         ltdEl.textContent = '$' + Math.round(ltdTotal).toLocaleString();
       }
 
-      // Amazon Fees KPI intentionally left as-is — pending a Finances/Product Fees
-      // API sync (net-new backend job), same shape as AD_SUMMARY. Do not overwrite
-      // with a guess in the meantime.
+      // Amazon Fees — same fix as the internal page, for the approved month.
+      await window.renderAmazonFeesKpi('mx-kpi-amazon-fees', year, month, prevYear, prevMonth);
 
     } catch (err) {
       console.warn('[MiGuard] initStewardshipExternal failed, charts/KPIs remain at last rendered values:', err.message);
@@ -14759,6 +14759,68 @@ async function ppcLoadBlendedPerformance(periodKey) {
 // (per-keyword AND summary tabs) and Business Report sheets already
 // confirmed and used elsewhere on this dashboard.
 // ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// Amazon fees by month — added 2026-10-06 per Jaclyn. Sums column P
+// ("Amazon Estimated fees") of the Amazon orders sync sheet (SHEET_ORDERS)
+// for MiGuard rows, excluding cancelled orders (Amazon doesn't charge fees on
+// them). The historical orders sheet has no fees column, so only months the
+// sync sheet fully covers get a value; earlier months return null ("—").
+// Used by the Amazon Fees KPI on Marketing > Brand Stewardship (internal and
+// external).
+// ═══════════════════════════════════════════════════════════════════
+window.getAmazonFeesByMonth = function () {
+  if (window._amzFeesPromise) return window._amzFeesPromise;
+  window._amzFeesPromise = (async function () {
+    const c = window.SHEET_CFG.SHEET_ORDERS || {};
+    const csv = await fetch(ovCsvUrl(c.fileId || '', c.gid || '') + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
+    const nd = v => {
+      v = String(v || '').trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v.substring(0, 10);
+      const p = v.split('/');
+      return p.length === 3 ? `${p[2].length === 2 ? '20' + p[2] : p[2]}-${p[0].padStart(2, '0')}-${p[1].padStart(2, '0')}` : '';
+    };
+    const amt = v => parseFloat(String(v == null ? '' : v).replace(/[$,]/g, '')) || 0;
+    const rows = parseCsvToRows(csv); // header keys are lowercased by parseCsvToRows
+    const feeKey = rows.length ? Object.keys(rows[0]).find(k => /amazon.*fee/i.test(k)) : null;
+    const byMonth = {};
+    let syncStart = '';
+    rows.forEach(r => {
+      const d = nd(r.date);
+      if (!d) return;
+      if (!syncStart || d < syncStart) syncStart = d;
+      const b = (r.brand || '').trim().toLowerCase(), sku = (r.sku || '').trim().toUpperCase();
+      if (!(b === 'miguard' || sku.startsWith('MIG'))) return;
+      if ((r.status || '').trim().toLowerCase() === 'cancelled') return;
+      const ym = d.substring(0, 7);
+      byMonth[ym] = (byMonth[ym] || 0) + (feeKey ? amt(r[feeKey]) : 0);
+    });
+    const covered = ym => !!syncStart && `${ym}-01` >= syncStart;
+    return { feeKey, syncStart, get: (y, m) => { const ym = `${y}-${String(m).padStart(2, '0')}`; return (feeKey && covered(ym)) ? (byMonth[ym] || 0) : null; } };
+  })().catch(err => { window._amzFeesPromise = null; throw err; });
+  return window._amzFeesPromise;
+};
+
+// Fills an Amazon Fees KPI card for (year, month) with a neutral MOM line.
+window.renderAmazonFeesKpi = async function (cardId, year, month, prevYear, prevMonth) {
+  const el = document.getElementById(cardId);
+  if (!el) return;
+  const valEl = el.querySelector('.kpi-value'), momEl = el.querySelector('.kpi-mom');
+  try {
+    const fees = await window.getAmazonFeesByMonth();
+    const cur = fees.get(year, month), prv = fees.get(prevYear, prevMonth);
+    if (valEl) valEl.textContent = cur == null ? '—' : '$' + cur.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (momEl) {
+      momEl.className = 'kpi-mom flat';
+      if (cur == null) momEl.textContent = fees.feeKey ? 'No fee data for this month' : 'Fees column not found';
+      else if (prv) { const p = Math.round(((cur - prv) / prv) * 100); momEl.textContent = `${p > 0 ? '+' : ''}${p}% MOM`; }
+      else momEl.textContent = '';
+    }
+  } catch (err) {
+    console.warn('[AmazonFees]', err.message);
+    if (valEl) valEl.textContent = '—';
+  }
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // Shared Amazon monthly sales by SKU — added 2026-10-05, used by both
 // Overview > Projections & Goals and Overview > Brand Manager KPIs so the two
