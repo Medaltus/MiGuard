@@ -15745,7 +15745,7 @@ window.initBrandMomentum = async function () {
       const prevRank = (prevRankStr && !prevRankStr.startsWith('>')) ? parseInt(prevRankStr.replace(/[^\d]/g, ''), 10) : null;
       const hasMovement = rank != null && prevRank != null && rank !== prevRank;
       const entry = master.byAsin[asin];
-      keywordRows.push({ keyword: r.keyword, asin, product: entry ? entry.name : r.asin, rank, hasMovement, volume: parseInt(r.search_volume, 10) || 0 });
+      keywordRows.push({ keyword: r.keyword, asin, product: entry ? entry.name : r.asin, rank, prevRank, hadPrior: !!prevRow, hasMovement, volume: parseInt(r.search_volume, 10) || 0 });
     });
     keywordRows.sort((a, b) => {
       if (a.hasMovement !== b.hasMovement) return a.hasMovement ? -1 : 1;
@@ -15759,8 +15759,19 @@ window.initBrandMomentum = async function () {
       // filters the table; the per-product organic keyword counts below still
       // use every keyword.
       const top10 = keywordRows.filter(r => r.volume > 0).slice(0, 10);
+      // Rank change vs the previous Keyword Tracker snapshot — same ▲/▼ badge
+      // styling as the Top Selling Products table (added 2026-10-06 per Jaclyn).
+      // A lower rank number is better, so moving #20 → #15 shows ▲ 5 (green).
+      const rankChange = r => {
+        if (r.rank == null) return '';
+        if (r.prevRank == null) return r.hadPrior ? '<span class="tp-mom-up">▲ New</span>' : '';
+        const d = r.prevRank - r.rank;
+        if (d > 0) return `<span class="tp-mom-up">▲ ${d}</span>`;
+        if (d < 0) return `<span class="tp-mom-dn">▼ ${-d}</span>`;
+        return '';
+      };
       kwTbody.innerHTML = top10.length ? top10.map(r =>
-        `<tr><td>${r.keyword}</td><td>${r.product}</td><td>${r.rank == null ? 'Not ranking' : '#' + r.rank}</td><td>${r.volume.toLocaleString()}</td></tr>`
+        `<tr><td>${r.keyword}</td><td>${r.product}</td><td>${r.rank == null ? 'Not ranking' : '#' + r.rank}${rankChange(r)}</td><td>${r.volume.toLocaleString()}</td></tr>`
       ).join('') : '<tr><td colspan="4" style="color:var(--muted);">No ranked keywords with search volume yet</td></tr>';
     }
     // ADDED for the card rebuild — per-product organic keyword COUNT
