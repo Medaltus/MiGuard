@@ -2910,7 +2910,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       </div>
 
       <div class="kpi-row" style="margin-bottom:20px;">
-        <div class="kpi-card" id="bss-kpi-total-units"><div class="kpi-label">Total Units</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+        <div class="kpi-card" id="bss-kpi-total-units"><div class="kpi-label">Total Units Ordered</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="bss-kpi-total-orders"><div class="kpi-label">Total Orders</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="bss-kpi-avg-order"><div class="kpi-label">Average Order</div><div class="kpi-value sm">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="bss-kpi-units-ads"><div class="kpi-label">Units (Ads)</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
@@ -2954,7 +2954,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       </div>
 
       <div class="kpi-row" style="margin-bottom:20px;">
-        <div class="kpi-card" id="pd-kpi-total-units"><div class="kpi-label">Total Units</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+        <div class="kpi-card" id="pd-kpi-total-units"><div class="kpi-label">Total Units Ordered</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="pd-kpi-total-orders"><div class="kpi-label">Total Orders</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="pd-kpi-avg-order"><div class="kpi-label">Average Order</div><div class="kpi-value sm">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="pd-kpi-units-ads"><div class="kpi-label">Units (Ads)</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
@@ -2997,7 +2997,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       </div>
 
       <div class="kpi-row" style="margin-bottom:20px;">
-        <div class="kpi-card" id="pbdd-kpi-total-units"><div class="kpi-label">Total Units</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+        <div class="kpi-card" id="pbdd-kpi-total-units"><div class="kpi-label">Total Units Ordered</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="pbdd-kpi-total-orders"><div class="kpi-label">Total Orders</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="pbdd-kpi-avg-order"><div class="kpi-label">Average Order</div><div class="kpi-value sm">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="pbdd-kpi-units-ads"><div class="kpi-label">Units (Ads)</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
@@ -3040,7 +3040,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       </div>
 
       <div class="kpi-row" style="margin-bottom:20px;">
-        <div class="kpi-card" id="bfcm-kpi-total-units"><div class="kpi-label">Total Units</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+        <div class="kpi-card" id="bfcm-kpi-total-units"><div class="kpi-label">Total Units Ordered</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="bfcm-kpi-total-orders"><div class="kpi-label">Total Orders</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="bfcm-kpi-avg-order"><div class="kpi-label">Average Order</div><div class="kpi-value sm">—</div><div class="kpi-mom flat">Loading…</div></div>
         <div class="kpi-card" id="bfcm-kpi-units-ads"><div class="kpi-label">Units (Ads)</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
@@ -11303,15 +11303,11 @@ async function initSnsExternal() {
         const fmt  = n => (n ?? 0).toLocaleString();
         const fmt2 = n => parseFloat(n ?? 0).toFixed(2);
 
-        // Pending orders discounted by the historical cancel rate (2026-10-08).
-        const adj = await window.eventCancelAdjust(curr);
-        window.renderEventCancelNote('pd', adj);
+        setKpiValue('pd-kpi-total-units', fmt(curr.totalUnits));
+        setBadge('pd-kpi-total-units', prev ? pct(curr.totalUnits, prev.totalUnits) : null);
 
-        setKpiValue('pd-kpi-total-units', fmt(adj.units));
-        setBadge('pd-kpi-total-units', prev ? pct(adj.units, prev.totalUnits) : null);
-
-        setKpiValue('pd-kpi-total-orders', fmt(adj.orders));
-        setBadge('pd-kpi-total-orders', prev ? pct(adj.orders, prev.totalOrders) : null);
+        setKpiValue('pd-kpi-total-orders', fmt(curr.totalOrders));
+        setBadge('pd-kpi-total-orders', prev ? pct(curr.totalOrders, prev.totalOrders) : null);
 
         setKpiValue('pd-kpi-avg-order', '$' + fmt2(curr.avgOrder));
         setBadge('pd-kpi-avg-order', prev ? pct(Math.round(curr.avgOrder * 100), Math.round(prev.avgOrder * 100)) : null);
@@ -11319,7 +11315,7 @@ async function initSnsExternal() {
         setKpiValue('pd-kpi-units-ads', fmt(adUnits));
         setBadge('pd-kpi-units-ads', prev ? pct(adUnits, prevAdUnits) : null);
 
-        const organicUnits = Math.max(0, adj.units - adUnits);
+        const organicUnits = curr.totalUnits - adUnits;
         const prevOrganic  = prev ? prev.totalUnits - prevAdUnits : null;
         setKpiValue('pd-kpi-units-organic', fmt(organicUnits));
         setBadge('pd-kpi-units-organic', prevOrganic != null ? pct(organicUnits, prevOrganic) : null);
@@ -11723,15 +11719,11 @@ async function initSnsExternal() {
           const fmt  = n => (n ?? 0).toLocaleString();
           const fmt2 = n => parseFloat(n ?? 0).toFixed(2);
 
-          // Pending orders discounted by the historical cancel rate (2026-10-08).
-          const adj = await window.eventCancelAdjust(curr);
-          window.renderEventCancelNote(cfg.prefix, adj);
+          setKpiValue(`${cfg.prefix}-kpi-total-units`, fmt(curr.totalUnits));
+          setBadge(`${cfg.prefix}-kpi-total-units`, prev ? pct(curr.totalUnits, prev.totalUnits) : null);
 
-          setKpiValue(`${cfg.prefix}-kpi-total-units`, fmt(adj.units));
-          setBadge(`${cfg.prefix}-kpi-total-units`, prev ? pct(adj.units, prev.totalUnits) : null);
-
-          setKpiValue(`${cfg.prefix}-kpi-total-orders`, fmt(adj.orders));
-          setBadge(`${cfg.prefix}-kpi-total-orders`, prev ? pct(adj.orders, prev.totalOrders) : null);
+          setKpiValue(`${cfg.prefix}-kpi-total-orders`, fmt(curr.totalOrders));
+          setBadge(`${cfg.prefix}-kpi-total-orders`, prev ? pct(curr.totalOrders, prev.totalOrders) : null);
 
           setKpiValue(`${cfg.prefix}-kpi-avg-order`, '$' + fmt2(curr.avgOrder));
           setBadge(`${cfg.prefix}-kpi-avg-order`, prev ? pct(Math.round(curr.avgOrder * 100), Math.round(prev.avgOrder * 100)) : null);
@@ -11739,7 +11731,7 @@ async function initSnsExternal() {
           setKpiValue(`${cfg.prefix}-kpi-units-ads`, fmt(adUnits));
           setBadge(`${cfg.prefix}-kpi-units-ads`, prev ? pct(adUnits, prevAdUnits) : null);
 
-          const organicUnits = Math.max(0, adj.units - adUnits);
+          const organicUnits = curr.totalUnits - adUnits;
           const prevOrganic  = prev ? prev.totalUnits - prevAdUnits : null;
           setKpiValue(`${cfg.prefix}-kpi-units-organic`, fmt(organicUnits));
           setBadge(`${cfg.prefix}-kpi-units-organic`, prevOrganic != null ? pct(organicUnits, prevOrganic) : null);
@@ -14770,78 +14762,6 @@ async function ppcLoadBlendedPerformance(periodKey) {
 // (per-keyword AND summary tabs) and Business Report sheets already
 // confirmed and used elsewhere on this dashboard.
 // ═══════════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════════
-// Event recaps — cancellation-rate adjustment for PENDING orders.
-// Added 2026-10-08 per Jaclyn: event recaps count pending orders (right after
-// an event most orders are still pending), which overstates the result since
-// some will cancel. Pending orders/units are discounted by MiGuard's
-// historical order cancellation rate; shipped orders count in full.
-// Rate = cancelled orders ÷ all orders on the Amazon orders sync sheet
-// (MiGuard, Vine excluded, current partial month excluded) — the same rule
-// the Goal Tracker's "adj. X% cancel rate" uses.
-// ═══════════════════════════════════════════════════════════════════
-window.getAmazonCancelRate = function () {
-  if (window._amzCancelRatePromise) return window._amzCancelRatePromise;
-  window._amzCancelRatePromise = (async function () {
-    const c = window.SHEET_CFG.SHEET_ORDERS || {};
-    const csv = await fetch(ovCsvUrl(c.fileId || '', c.gid || '') + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
-    const nd = v => {
-      v = String(v || '').trim();
-      if (/^\d{4}-\d{2}/.test(v)) return v.substring(0, 7);
-      const p = v.split('/');
-      return p.length === 3 ? `${p[2].length === 2 ? '20' + p[2] : p[2]}-${p[0].padStart(2, '0')}` : '';
-    };
-    const now = new Date();
-    const curYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const orders = {}; // order_id -> cancelled?
-    parseCsvToRows(csv).forEach(r => {
-      const b = (r.brand || '').trim().toLowerCase(), sku = (r.sku || '').trim().toUpperCase();
-      if (!(b === 'miguard' || sku.startsWith('MIG'))) return;
-      if ((r.promotion_ids || '').toLowerCase().includes('vine')) return;
-      const ym = nd(r.date);
-      if (!ym || ym >= curYm || !r.order_id) return;
-      const isC = (r.status || '').trim().toLowerCase() === 'cancelled';
-      orders[r.order_id] = !!orders[r.order_id] || isC;
-    });
-    const ids = Object.keys(orders);
-    if (!ids.length) return null;
-    return ids.filter(id => orders[id]).length / ids.length;
-  })().catch(() => { window._amzCancelRatePromise = null; return null; });
-  return window._amzCancelRatePromise;
-};
-
-// curr = aggregateYear() result for the event (rows = cancelled/Vine removed).
-window.eventCancelAdjust = async function (curr) {
-  const rate = await window.getAmazonCancelRate();
-  const pendingRows = (curr.rows || []).filter(r => (r.status || '').trim().toLowerCase() === 'pending');
-  const pendingOrders = new Set(pendingRows.map(r => r.order_id).filter(Boolean)).size;
-  const pendingUnits = pendingRows.reduce((s, r) => s + (parseInt(r.unit_count, 10) || 0), 0);
-  if (rate == null || !pendingOrders) return { units: curr.totalUnits, orders: curr.totalOrders, pendingOrders, pendingUnits, rate, adjusted: false };
-  return {
-    units: Math.round((curr.totalUnits - pendingUnits) + pendingUnits * (1 - rate)),
-    orders: Math.round((curr.totalOrders - pendingOrders) + pendingOrders * (1 - rate)),
-    pendingOrders, pendingUnits, rate, adjusted: true,
-  };
-};
-
-// Small note under the event's KPI row (also carried into the PDF).
-window.renderEventCancelNote = function (prefix, adj) {
-  const kpi = document.getElementById(`${prefix}-kpi-total-units`);
-  const row = kpi && kpi.closest('.kpi-row, .pdfx-kpis') || (kpi && kpi.parentElement);
-  if (!row) return;
-  let note = document.getElementById(`${prefix}-cancel-note`);
-  if (!note) {
-    note = document.createElement('div');
-    note.id = `${prefix}-cancel-note`;
-    note.style.cssText = 'font-size:11px;color:var(--muted);margin:-8px 0 16px;';
-    row.insertAdjacentElement('afterend', note);
-  }
-  note.textContent = adj.adjusted
-    ? `Units and orders are expected totals: ${adj.pendingOrders} order${adj.pendingOrders === 1 ? '' : 's'} (${adj.pendingUnits} unit${adj.pendingUnits === 1 ? '' : 's'}) still pending, adjusted for MiGuard's ${Math.round(adj.rate * 100)}% avg. cancel rate. Shipped orders count in full.`
-    : '';
-  note.style.display = adj.adjusted ? '' : 'none';
-};
-
 // ═══════════════════════════════════════════════════════════════════
 // Amazon fees by month — added 2026-10-06 per Jaclyn. Sums column P
 // ("Amazon Estimated fees") of the Amazon orders sync sheet (SHEET_ORDERS)
@@ -20414,10 +20334,8 @@ async function loadAuditResultsFromSheet() {
             .map(pdfxKpiCardHtml).join('') +
         '</div>'
       : '';
-    const cancelNote = pdfxText('#' + prefix + '-cancel-note');
-    const cancelNoteHtml = cancelNote ? '<div style="font-size:9.5px;color:#6B7BA2;margin-top:6px;">' + pdfxEscape(cancelNote) + '</div>' : '';
     const chartHtml = hasKpis
-      ? cancelNoteHtml + '<div class="pdfx-card" style="margin-top:14px;"><div class="pdfx-card-title">Top Sellers — Units Sold</div>' + pdfxChartBlock('_' + prefix + 'TopSellersChart') + '</div>'
+      ? '<div class="pdfx-card" style="margin-top:14px;"><div class="pdfx-card-title">Top Sellers — Units Sold</div>' + pdfxChartBlock('_' + prefix + 'TopSellersChart') + '</div>'
       : '';
 
     return '' +
