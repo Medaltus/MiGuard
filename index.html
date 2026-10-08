@@ -11288,6 +11288,7 @@ async function initSnsExternal() {
           getProductNames(),
         ]);
 
+        (window._eventCurrentDates = window._eventCurrentDates || {}).pd = dates.current || null; // PDF header (2026-10-08)
         const dateEl = document.getElementById('pd-event-dates');
         if (dates.current) {
           if (dateEl) dateEl.innerHTML = eventDatesHtml(dates.current, dates.previous);
@@ -11705,6 +11706,7 @@ async function initSnsExternal() {
           // same element. bss/bfcm are untouched — they still use this
           // exact-name-matched date, which is what their KPI/chart data
           // below is also scoped to.
+          (window._eventCurrentDates = window._eventCurrentDates || {})[cfg.prefix] = dates.current || null; // PDF header (2026-10-08)
           const dateEl = cfg.prefix === 'pbdd' ? null : document.getElementById(`${cfg.prefix}-event-dates`);
           if (dates.current) {
             if (dateEl) dateEl.innerHTML = eventDatesHtml(dates.current, dates.previous);
@@ -19357,6 +19359,9 @@ async function loadAuditResultsFromSheet() {
     _snsChart: 190,
     _investChart: 170, _impressChart: 150,
     mfcShippedChartInstance: 150,
+    // Event pages' Top Sellers chart (2026-10-08): was ~378px, which pushed a
+    // page with a full multi-paragraph recap past 11in.
+    _pdTopSellersChart: 230, _bssTopSellersChart: 230, _pbddTopSellersChart: 230, _bfcmTopSellersChart: 230,
   };
   let PDFX_CHART_CACHE = null; // populated once per export by pdfxCaptureAllChartImages() — now {varName: {img, width, height}}
 
@@ -19716,10 +19721,32 @@ async function loadAuditResultsFromSheet() {
     }
     window.pdfxCaptureOneChart = pdfxCaptureOneChart; // kept on window for console debugging
 
+    // FIXED 2026-10-08: a chart can still be hidden at this point — e.g. an
+    // event tab that was never opened, whose chart finished building after
+    // the bulk force-visible pass above. Captured hidden, it came out as a
+    // blank image in the PDF (intermittently, depending on timing). Each
+    // chart is now checked right before its capture; a hidden one gets its
+    // ancestors unhidden and two frames for Chart.js to re-measure and
+    // redraw. Restored with everything else below.
     const images = {};
-    varNames.forEach(function (varName) {
+    for (const varName of varNames) {
+      const cv = document.getElementById(PDFX_CHART_CANVAS_IDS[varName]);
+      if (cv && window[varName]) {
+        const r0 = cv.getBoundingClientRect();
+        if (!(r0.width > 0 && r0.height > 0)) {
+          let n = cv.parentElement, k = 0;
+          while (n && n !== document.body) {
+            if (window.getComputedStyle(n).display === 'none') { restore.push({ el: n, prop: 'display', prevValue: n.style.display }); n.style.display = 'block'; k++; }
+            n = n.parentElement;
+          }
+          await new Promise(function (r) { requestAnimationFrame(r); });
+          await new Promise(function (r) { requestAnimationFrame(r); });
+          await new Promise(function (r) { setTimeout(r, 60); });
+          console.log('[pdf-export][qa]', varName, '— still hidden at capture time; unhid', k, 'ancestor(s) and waited for a redraw');
+        }
+      }
       images[varName] = pdfxCaptureOneChart(varName);
-    });
+    }
 
     // Nothing but hidden-ancestor visibility to restore now — the live
     // chart's own scales were already swapped back inside
@@ -20315,6 +20342,7 @@ async function loadAuditResultsFromSheet() {
       pdfxHeaderBand(monthYear, 'Events', eventLabel, eventDates) +
       '<div class="pdfx-chlabel">Event Strategy</div>' +
       leadUp + during + leadOut +
+      pdfxFooter(monthYear, true) + // footer moved here from the event pages (2026-10-08)
       '</div></div>';
     return page1;
   }
@@ -20325,6 +20353,16 @@ async function loadAuditResultsFromSheet() {
   // automatically pick up their KPIs+chart the moment those get built,
   // with no changes needed here. Until then they're exec-summary-only.
   function buildEventPage(prefix, eventLabel, monthYear) {
+    // Header band styled like the Strategy page (2026-10-08 per Jaclyn): the
+    // event's own fixed title in place of the month, with that event's most
+    // recent dates from the Events tab underneath. No footer on event pages —
+    // it moved to the Strategy page.
+    const EVENT_TITLES = { bss: 'Amazon Big Spring Sale', pd: 'Amazon Prime Day', pbdd: 'Amazon Prime Big Deal Days', bfcm: 'Amazon Black Friday & Cyber Monday' };
+    const evTitle = EVENT_TITLES[prefix] || eventLabel;
+    const cur = (window._eventCurrentDates || {})[prefix];
+    const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const fmtD = iso => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${MON[+m[2] - 1]} ${+m[3]}, ${m[1]}` : ''; };
+    const evDates = cur && fmtD(cur.start_date) ? `${fmtD(cur.start_date)} – ${fmtD(cur.end_date) || fmtD(cur.start_date)}` : '';
     const headline = pdfxText('#' + prefix + '-exec-summary-headline') || eventLabel;
     const body = pdfxHTML('#' + prefix + '-exec-summary-body') || '<span style="color:var(--muted);font-style:italic;">No summary added yet.</span>';
     const dates = pdfxById(prefix + '-event-dates') ? pdfxHTML('#' + prefix + '-event-dates') : '';
@@ -20353,12 +20391,11 @@ async function loadAuditResultsFromSheet() {
     return '' +
       '<div class="pdfx-page">' +
         '<div class="pdfx-inner">' +
-          pdfxHeaderBand(monthYear, 'Events') +
+          pdfxHeaderBand(monthYear, 'Events', evTitle, evDates) +
           '<div class="pdfx-chlabel">' + pdfxEscape(eventLabel) + '</div>' +
           datesHtml +
           '<div class="pdfx-card"><div class="pdfx-card-title">' + pdfxEscape(headline) + '</div><div style="font-size:11.5px;color:#48557a;line-height:1.6;">' + body + '</div></div>' +
           kpisHtml + chartHtml +
-          pdfxFooter(monthYear) +
         '</div>' +
       '</div>';
   }
