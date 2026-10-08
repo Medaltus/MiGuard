@@ -10704,18 +10704,30 @@ async function initSnsExternal() {
     out.push(cur);
     return out;
   }
+  // FIXED 2026-10-08 per Jaclyn: was a naive split on '\n', so any saved
+  // insight / event recap with a line break inside the cell was cut off at
+  // the first line (the sheet had the full text; only the dashboard lost
+  // it). Quote-aware now, so newlines inside a quoted cell stay in the cell.
   function parseCsv(text) {
-    const lines = text.trim().split('\n');
-    const headers = parseCsvLine(lines[0]).map(h => h.replace(/^"|"$/g,'').trim());
-    const rows = [];
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-      const cols = parseCsvLine(lines[i]);
-      const row = {};
-      headers.forEach((h, idx) => { row[h] = (cols[idx] || '').replace(/^"|"$/g,'').trim(); });
-      rows.push(row);
+    text = (text || '').replace(/^\uFEFF/, '');
+    const raw = []; let row = [], field = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; } else field += ch; continue; }
+      if (ch === '"') q = true;
+      else if (ch === ',') { row.push(field); field = ''; }
+      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(field); raw.push(row); row = []; field = ''; }
+      else field += ch;
     }
-    return rows;
+    if (field || row.length) { row.push(field); raw.push(row); }
+    const data = raw.filter(r => r.some(v => String(v).trim()));
+    if (data.length < 1) return [];
+    const headers = data[0].map(h => String(h).trim());
+    return data.slice(1).map(cols => {
+      const obj = {};
+      headers.forEach((h, idx) => { obj[h] = String(cols[idx] || '').trim(); });
+      return obj;
+    });
   }
   function getLastFullMonth() {
     const now = new Date();
