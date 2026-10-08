@@ -1334,6 +1334,9 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     <div class="topbar-right">
       <div class="pdf-events-picker" id="pdf-events-picker" style="display:none;font-size:10.5px;color:var(--muted);align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;overflow-x:auto;max-width:60vw;">
         <span style="flex-shrink:0;">Include in PDF:</span>
+        <!-- Overview (cover + executive summary) — added 2026-10-08 per Jaclyn
+             so an event page can be exported on its own. Default CHECKED. -->
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;"><input type="checkbox" id="pdf-include-overview" checked style="margin:0;"> Overview</label>
         <!-- Sales pages — added 2026-08-05 per Jaclyn. Default CHECKED so
              anyone who doesn't touch these gets today's existing behavior
              (all three Sales channels always included). -->
@@ -20688,6 +20691,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
       // doesn't touch the picker gets today's existing "always included"
       // behavior; Events keys still default unchecked, unchanged.
       const includeSections = {
+        overview:      !document.getElementById('pdf-include-overview') || document.getElementById('pdf-include-overview').checked,
         amazon:        !!document.getElementById('pdf-include-amazon')        && document.getElementById('pdf-include-amazon').checked,
         website:       !!document.getElementById('pdf-include-website')       && document.getElementById('pdf-include-website').checked,
         walmart:       !!document.getElementById('pdf-include-walmart')       && document.getElementById('pdf-include-walmart').checked,
@@ -20812,15 +20816,27 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
         includeSections.opportunities ? buildOpportunitiesPage(monthYear) : '',
       ].join('');
 
+      // Strategy moved to AFTER the event pages (2026-10-08 per Jaclyn) — with
+      // only an event + Strategy checked, the event is page 1, Strategy page 2.
       const eventPages = [
-        includeSections.strategy ? buildStrategyPage(monthYear) : '',
         includeSections.bss  ? buildEventPage('bss',  'Big Spring Sale',             monthYear) : '',
         includeSections.pd   ? buildEventPage('pd',   'Prime Day',                   monthYear) : '',
         includeSections.pbdd ? buildEventPage('pbdd', pdfxText('#pbdd-event-title') || 'Prime Big Deal Days', monthYear) : '',
         includeSections.bfcm ? buildEventPage('bfcm', 'Black Friday & Cyber Monday', monthYear) : '',
+        includeSections.strategy ? buildStrategyPage(monthYear) : '',
       ].join('');
 
-      root.innerHTML = buildCoverPage(monthYear) + salesMarketingPages + eventPages;
+      // Cover/executive summary is now optional too (Overview checkbox).
+      const allPages = (includeSections.overview ? buildCoverPage(monthYear) : '') + salesMarketingPages + eventPages;
+      if (!allPages.trim()) {
+        if (btn) { btn.disabled = false; btn.classList.remove('pdfx-loading'); }
+        if (_amazonPeriodKeyBeforeExport && _amazonPeriodKeyBeforeExport !== 'lastFull' && typeof window.__amazonSelectPeriod === 'function') {
+          window.__amazonSelectPeriod(_amazonPeriodKeyBeforeExport);
+        }
+        alert('Nothing selected — check at least one "Include in PDF" box.');
+        return;
+      }
+      root.innerHTML = allPages;
 
       // Positioned off-screen (not display:none, so it still has real layout
       // for html2canvas to measure/paint) rather than visible on top of
