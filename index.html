@@ -1109,6 +1109,10 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 .pdfx-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-bottom:18px;}
 .pdfx-kpis.n3{grid-template-columns:repeat(3,1fr);}
 .pdfx-kpis.n2{grid-template-columns:repeat(2,1fr);}
+/* Fulfillment row (2026-10-13): equal columns that can't be pushed wider by a
+   long label — labels wrap onto 2 lines instead of running off the page. */
+.pdfx-kpis.pdfx-kpis-wrap{grid-template-columns:repeat(5,minmax(0,1fr));}
+.pdfx-kpis-wrap .pdfx-kpi-lbl{white-space:normal;line-height:1.3;}
 .pdfx-kpi{border:1px solid var(--border);border-radius:0;padding:20px 16px;background:#fbfbfd;margin-left:-1px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;}
 .pdfx-kpi:first-child{margin-left:0;}
 .pdfx-kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.02em;margin-bottom:9px;white-space:nowrap;}
@@ -1735,7 +1739,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;">
       <div class="kpi-card">
-        <div class="kpi-label">Shipped Amazon Orders • Last 30 Days</div>
+        <div class="kpi-label">Shipped Website Orders • Last 30 Days</div>
         <div class="kpi-value" id="ff-kpi-shipped30">—</div>
       </div>
       <div class="kpi-card">
@@ -1760,14 +1764,14 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     </div>
 
     <div class="ppc-card">
-      <div class="ppc-card-title">Amazon Orders Shipped by Date · Last 30 Days</div>
+      <div class="ppc-card-title">Website Orders Shipped by Date · Last 30 Days</div>
       <div style="position:relative;height:320px;"><canvas id="ff-shipped-chart"></canvas></div>
       <div class="ppc-note" id="ff-chart-footer">Loading…</div>
     </div>
 
     <div class="ppc-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div class="ppc-card-title" style="margin-bottom:0;">Amazon Orders by State · Last 30 Days</div>
+        <div class="ppc-card-title" style="margin-bottom:0;">Website Orders by State · Last 30 Days</div>
         <div style="display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);">
           <span>Fewer</span>
           <div style="width:80px;height:7px;border-radius:4px;background:linear-gradient(to right,#dce6f5,#001F60);"></div>
@@ -2196,7 +2200,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;">
         <div class="kpi-card">
-          <div class="kpi-label" id="mfc-lbl-shipped">Shipped Amazon Orders</div>
+          <div class="kpi-label" id="mfc-lbl-shipped">Shipped Website Orders</div>
           <div class="kpi-value" id="mfc-kpi-shipped30">—</div>
         </div>
         <div class="kpi-card">
@@ -2221,7 +2225,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       </div>
 
       <div class="ppc-card">
-        <div class="ppc-card-title" id="mfc-lbl-chart">Amazon Orders Shipped by Date</div>
+        <div class="ppc-card-title" id="mfc-lbl-chart">Website Orders Shipped by Date</div>
         <div style="position:relative;height:170px;"><canvas id="mfc-shipped-chart"></canvas></div>
         <div class="ppc-note" id="mfc-chart-footer">Loading…</div>
       </div>
@@ -2247,7 +2251,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
       <div class="ppc-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div class="ppc-card-title" style="margin-bottom:0;">Amazon Orders by State · Last 30 Days</div>
+          <div class="ppc-card-title" style="margin-bottom:0;">Website Orders by State · Last 30 Days</div>
           <div style="display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);">
             <span>Fewer</span>
             <div style="width:80px;height:7px;border-radius:4px;background:linear-gradient(to right,#dce6f5,#001F60);"></div>
@@ -2473,7 +2477,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;">
         <div class="kpi-card">
-          <div class="kpi-label">Shipped Orders · Last 30 Days</div>
+          <div class="kpi-label">Shipped Website Orders · Last 30 Days</div>
           <div class="kpi-value" id="mx-mfc-kpi-shipped30">—</div>
         </div>
         <div class="kpi-card">
@@ -2498,7 +2502,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       </div>
 
       <div class="ppc-card">
-        <div class="ppc-card-title">Orders Shipped by Date · Last 30 Days</div>
+        <div class="ppc-card-title">Website Orders Shipped by Date · Last 30 Days</div>
         <div style="position:relative;height:170px;"><canvas id="mx-mfc-shipped-chart"></canvas></div>
         <div class="ppc-note" id="mx-mfc-chart-footer">Loading…</div>
       </div>
@@ -2524,7 +2528,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
 
       <div class="ppc-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div class="ppc-card-title" style="margin-bottom:0;">Orders by State · Last 30 Days</div>
+          <div class="ppc-card-title" style="margin-bottom:0;">Website Orders by State · Last 30 Days</div>
           <div style="display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);">
             <span>Fewer</span>
             <div style="width:80px;height:7px;border-radius:4px;background:linear-gradient(to right,#dce6f5,#001F60);"></div>
@@ -17394,7 +17398,7 @@ async function mfcLoadKpis() {
     const { year, month, } = mfcGetLastFullMonth();
     const monthLabel = mfcMonthLabel(year, month);
     const lblShipped = document.getElementById('mfc-lbl-shipped');
-    if (lblShipped) lblShipped.textContent = `Shipped Amazon Orders • ${monthLabel}`;
+    if (lblShipped) lblShipped.textContent = `Shipped Website Orders • ${monthLabel}`;
 
     // Date-range subtitle, same format as the Sales page's own page-sub
     // ("Jun 1 – Jun 30, 2026 · Last full month").
@@ -17447,7 +17451,7 @@ async function mfcLoadShippedChart() {
     const { year, month } = mfcGetLastFullMonth();
     const monthLabel = mfcMonthLabel(year, month);
     const lblChart = document.getElementById('mfc-lbl-chart');
-    if (lblChart) lblChart.textContent = `Amazon Orders Shipped by Date • ${monthLabel}`;
+    if (lblChart) lblChart.textContent = `Website Orders Shipped by Date • ${monthLabel}`;
 
     const csv = await fetch(ovCsvUrl(OV_FULFILLMENT_DAILY_SHEET_ID, '636720419')).then(r => r.ok ? r.text() : '').catch(() => '');
     const rows = parseCsvToRows(csv).filter(r => {
@@ -20086,7 +20090,7 @@ async function loadAuditResultsFromSheet() {
     // reason. Confirmed 2026-07-21 as the actual cause of KPI text getting
     // cut off at the page's right edge.
     const topKpis = [
-      { label: 'Shipped Orders (30d)', value: pdfxText('#mfc-kpi-shipped30') },
+      { label: 'Shipped Website Orders (30d)', value: pdfxText('#mfc-kpi-shipped30') },
       { label: 'Fulfillment Promise (7d)', value: '100%' },
       { label: 'Avg Processing Time (7d)', value: pdfxText('#mfc-kpi-proctime') },
       { label: 'Avg Shipping Cost (7d)', value: pdfxText('#mfc-kpi-shipcost') },
@@ -20166,9 +20170,9 @@ async function loadAuditResultsFromSheet() {
         '<div class="pdfx-inner">' +
           pdfxHeaderBand(monthYear, 'Fulfillment & Customer Service') +
           '<div class="pdfx-chlabel">Fulfillment Performance</div>' +
-          '<div class="pdfx-kpis" style="margin-top:6px;">' + topKpis.map(kpiCardPlain).join('') + '</div>' +
+          '<div class="pdfx-kpis pdfx-kpis-wrap" style="margin-top:6px;">' + topKpis.map(kpiCardPlain).join('') + '</div>' +
           '<div class="pdfx-card" style="margin-top:14px;margin-bottom:0;">' +
-            '<div class="pdfx-card-title">Orders Shipped by Date · Last 30 Days</div>' +
+            '<div class="pdfx-card-title">Website Orders Shipped by Date · Last 30 Days</div>' +
             pdfxChartBlock('mfcShippedChartInstance', 'Chart not yet loaded — open this tab once on the dashboard, then re-export.') +
           '</div>' +
           '<div class="pdfx-chlabel" style="margin-top:16px;">Customer Service</div>' +
@@ -20177,7 +20181,7 @@ async function loadAuditResultsFromSheet() {
             // Legend added 2026-10-08 per Jaclyn — same Fewer → More scale as
             // the dashboard's map card (light blue → navy).
             '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
-              '<div class="pdfx-card-title" style="margin-bottom:0;">Orders by State · Last 30 Days</div>' +
+              '<div class="pdfx-card-title" style="margin-bottom:0;">Website Orders by State · Last 30 Days</div>' +
               '<div style="display:flex;align-items:center;gap:6px;font-size:9.5px;color:#6B7BA2;">' +
                 '<span>Fewer</span>' +
                 '<div style="width:70px;height:7px;border-radius:4px;background:linear-gradient(to right,#dce6f5,#001F60);-webkit-print-color-adjust:exact;print-color-adjust:exact;"></div>' +
