@@ -179,6 +179,27 @@ nav > .nav-btn:not(.active):hover{color:#fff;}
 .kpi-value.sm{font-size:30px;}
 .kpi-mom{font-size:14px;margin-top:5px;}
 .kpi-sub{font-size:11px;color:var(--muted);margin-top:5px;}
+/* Traffic page (2026-10-27) — VBC's Insights → Traffic styles */
+.trf-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.trf-seg{display:inline-flex;background:var(--bg);border:1px solid var(--border2);border-radius:999px;padding:3px;gap:2px;}
+.trf-seg button{border:0;background:transparent;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;}
+.trf-seg button.active{background:var(--navy);color:#fff;}
+.trf-seg-lg button{padding:8px 18px;font-size:12.5px;}
+.trf-source{font-size:11px;color:var(--muted);flex:1;min-width:220px;text-align:right;}
+.trf-card{margin-bottom:18px;}
+.trf-card-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+.trf-card-ctrls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.trf-note{font-size:12px;color:var(--muted);}
+.trf-media{margin-top:12px;display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--navy);}
+.trf-media:empty{display:none;}
+.trf-media-hd{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.trf-media-item{display:flex;gap:8px;align-items:flex-start;line-height:1.45;}
+.trf-ev-swatch{flex:0 0 18px;height:12px;border-radius:3px;margin-top:3px;}
+/* Goal Tracker LIVE line (2026-10-27) */
+.gt-live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--navy);margin-top:4px;}
+.gt-live strong{font-weight:700;}
+.gt-live-dot{width:7px;height:7px;border-radius:50%;background:#1db88a;box-shadow:0 0 0 0 rgba(29,184,138,.6);animation:gtLivePulse 1.8s ease-out infinite;}
+@keyframes gtLivePulse{0%{box-shadow:0 0 0 0 rgba(29,184,138,.55);}70%{box-shadow:0 0 0 7px rgba(29,184,138,0);}100%{box-shadow:0 0 0 0 rgba(29,184,138,0);}}
 /* Brand Manager KPIs tab (Overview) — added 2026-10-05 */
 #ov-bm-kpis .kpi-card.bmk-pending .kpi-value{color:var(--muted);font-size:18px;}
 #ov-bm-kpis .bmk-needs{display:inline-block;font-size:11px;color:var(--warn);background:rgba(244,223,208,.55);border:1px solid rgba(200,125,47,.25);border-radius:4px;padding:2px 8px;}
@@ -1315,6 +1336,9 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
     <button class="nav-btn" onclick="showPage('insights',this)">
       <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 5.5v.5"/></svg>Insights
       <span class="nav-badge">3</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('traffic',this)">
+      <svg viewBox="0 0 16 16"><path d="M1 13l4-5 3 3 6-8"/><path d="M1 15h14"/></svg>Traffic
     </button>
     <button class="nav-btn" onclick="showPage('listing',this)">
       <svg viewBox="0 0 16 16"><path d="M2 2h12v12H2z"/><path d="M5 6h6M5 9h4"/></svg>Listing Audit
@@ -3604,6 +3628,34 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
   </div><!-- /page-ppc -->
 
   <!-- ══ ORGANIC (internal only) ══ -->
+  <!-- ══ TRAFFIC ══ — added 2026-10-27 per Jaclyn. VBC's Insights → Traffic
+       tab (Dazzle Dry), as its own page here. MiGuard has one product, so
+       it's a single chart (VBC's Overall card) — no category or product
+       cards. Daily = NewDerm Daily Business Report (miguard tab); Monthly =
+       MiGuard's Business Report sheet; event shading = MiGuard's Events tab.
+       No media-mentions markers (MiGuard has no media features sheet). -->
+  <div class="page" id="page-traffic">
+    <div class="page-hd">
+      <div><div class="page-title">Traffic</div><div class="page-sub">Amazon sessions, conversion rate and units over time</div></div>
+    </div>
+    <div class="trf-toolbar">
+      <div class="trf-seg trf-seg-lg" id="trf-view"><button onclick="trfSetView('daily')">Daily</button><button onclick="trfSetView('monthly')">Monthly</button></div>
+      <div class="trf-seg" id="trf-window"><button data-days="7" onclick="trfSetWindow(7)">7 days</button><button data-days="30" onclick="trfSetWindow(30)">30 days</button><button data-days="60" onclick="trfSetWindow(60)">60 days</button><button data-days="90" onclick="trfSetWindow(90)">90 days</button><button data-days="120" onclick="trfSetWindow(120)">120 days</button><button data-days="365" onclick="trfSetWindow(365)">1 year</button></div>
+      <div class="trf-source" id="trf-source"></div>
+    </div>
+    <div class="card trf-card">
+      <div class="trf-card-hd">
+        <div><div class="card-title" style="margin-bottom:2px;" id="trf-overall-title">MiGuard Supplements</div><div class="trf-note" id="trf-overall-note">Loading…</div></div>
+        <div class="trf-card-ctrls">
+          <div class="trf-seg" id="trf-overall-metric"><button class="active" data-metric="sessions" onclick="trfSetMetric('sessions')">Sessions</button><button data-metric="conv" onclick="trfSetMetric('conv')">Conv Rate</button><button data-metric="units" onclick="trfSetMetric('units')">Units</button></div>
+          <div id="trf-legend-overall" style="display:flex;align-items:center;"></div>
+        </div>
+      </div>
+      <div style="position:relative;height:340px;"><canvas id="trf-overall-chart"></canvas></div>
+      <div class="trf-media" id="trf-overall-media"></div>
+    </div>
+  </div>
+
   <div class="page" id="page-organic">
     <div class="sheet-link-menu">
       <button class="sheet-link-btn" onclick="document.getElementById('organic-sheet-dropdown').classList.toggle('open')">🔗 Source Sheets <span style="font-size:9px;">▾</span></button>
@@ -3773,7 +3825,7 @@ const pageTitles = {
   home:'Home — MiGuard',
   overview:'Overview — MiGuard',sales:'Sales — MiGuard','sales-external':'Sales — MiGuard',marketing:'Marketing — MiGuard','marketing-external':'Marketing — MiGuard',
   events:'Events — MiGuard',inventory:'Inventory — MiGuard','inventory-external':'Inventory — MiGuard',fulfillment:'Fulfillment — MiGuard',
-  insights:'Insights — MiGuard',listing:'Listing Audit — MiGuard',ppc:'PPC — MiGuard',organic:'Organic — MiGuard'
+  insights:'Insights — MiGuard',traffic:'Traffic — MiGuard',listing:'Listing Audit — MiGuard',ppc:'PPC — MiGuard',organic:'Organic — MiGuard'
 };
 
 function showPage(id, btn) {
@@ -3790,6 +3842,7 @@ function showPage(id, btn) {
   // click into Rank Tracker first. initRankTracker caches internally, so
   // this is a no-op on subsequent visits to the page.
   if (id === 'organic' && typeof window.initRankTracker === 'function') window.initRankTracker('miguard');
+  if (id === 'traffic' && typeof window.loadTraffic === 'function') window.loadTraffic();
 
   // Export PDF Report button — only shown on the three "performance" pages
   // (Sales, Marketing, Events). Hidden everywhere else (Overview, Inventory,
@@ -14903,6 +14956,249 @@ window.getAmazonMonthlySales = function () {
 };
 
 // ═══════════════════════════════════════════════════════════════════
+// TRAFFIC PAGE — added 2026-10-27 per Jaclyn, ported from VBC's Insights →
+// Traffic (trfLoad / loadDDTraffic / trfRender / TRF_MEDIA_PLUGIN). MiGuard
+// is one product, so only VBC's "Overall" card is kept. Same behaviour:
+//  • Daily: last 7–365 days (window buttons) from the NewDerm Daily Business
+//    Report, miguard tab, with the same calendar days a year earlier as a
+//    second line once that history exists. The newest few days are drawn
+//    dashed while Amazon is still settling them (TRF_FINAL_AFTER).
+//  • Monthly: Jan–Dec, one line per year, from MiGuard's Business Report
+//    sheet; the current year runs through the last full month.
+//  • Sessions / Conv Rate / Units. Conversion is always units ÷ sessions
+//    for the period, never an average of daily rates.
+//  • Events from MiGuard's Events tab shade their days (MiGuard's tab has no
+//    "Amazon Featured Event" column, so every event is shown as an Amazon
+//    event). VBC's media-mention pins are left out — no MiGuard sheet.
+// ═══════════════════════════════════════════════════════════════════
+const TRF_DAILY = { fileId: '1QLjUvYg-JR6jQmdFlykypkNarqsZvTCOgA3bFagDlVg', gid: '512457694' }; // NewDerm Daily Business Report → miguard
+const TRF_EVENT_COLORS = { amazon: '#FF9900', ours: '#A66DFF' };
+const TRF_FINAL_AFTER = 4; // days still settling — matches the daily report cron
+const TRF_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const TRF_YOY = {
+  0: { border: '#24e9a3', bg: 'rgba(36,233,163,0.08)', fill: true },
+  1: { border: '#001f60', bg: 'transparent', fill: false },
+  2: { border: '#f4dfd0', bg: 'transparent', fill: false },
+  3: { border: '#ccd3d5', bg: 'transparent', fill: false },
+};
+const _trf = { loading: null, view: null, win: 90, metric: 'sessions', chart: null };
+
+function trfNormDate(v) {
+  v = String(v || '').trim();
+  let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) return `${m[3].length === 2 ? '20' + m[3] : m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+  return '';
+}
+const trfYm = (y, m) => `${y}-${String(m).padStart(2, '0')}`;
+function trfAddDays(iso, n) { const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+function trfShiftYear(iso, n) { // same month/day in another year; Feb 29 → Feb 28
+  const [y, m, d] = iso.split('-').map(Number), yy = y + n;
+  const last = new Date(Date.UTC(yy, m, 0)).getUTCDate();
+  return `${yy}-${String(m).padStart(2, '0')}-${String(Math.min(d, last)).padStart(2, '0')}`;
+}
+function trfTodayPT() { return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()); }
+function trfLastFullMonth() { const n = new Date(); const d = new Date(n.getFullYear(), n.getMonth() - 1, 1); return { year: d.getFullYear(), month: d.getMonth() + 1 }; }
+
+function trfLoad() {
+  if (_trf.loading) return _trf.loading;
+  _trf.loading = (async () => {
+    const cfgOf = k => window.SHEET_CFG[k] || {};
+    const get = (fid, gid, what) => fetch(ovCsvUrl(fid || '', gid || '') + `&_cb=${Date.now()}`)
+      .then(r => r.ok ? r.text() : '').catch(e => { console.warn('[Traffic]', what, e.message); return ''; });
+    const [dailyCsv, bizCsv, evCsv] = await Promise.all([
+      get(TRF_DAILY.fileId, TRF_DAILY.gid, 'daily business report'),
+      get(cfgOf('SHEET_BUSINESS_REPORT').fileId, cfgOf('SHEET_BUSINESS_REPORT').gid, 'business report'),
+      get(cfgOf('SHEET_MASTER_SKU_LIST').fileId, '347530381', 'events tab'),
+    ]);
+    const num = v => parseFloat(String(v || '0').replace(/[^0-9.-]/g, '')) || 0;
+    // daily: date -> { s, u } (summed across MiGuard's ASINs — one today)
+    const byDate = {};
+    parseCsvToRows(dailyCsv).forEach(r => {
+      const d = trfNormDate(r.date); if (!d) return;
+      const e = byDate[d] = byDate[d] || { s: 0, u: 0 };
+      e.s += num(r.sessions); e.u += num(r.units_ordered);
+    });
+    // monthly: 'YYYY-MM' -> { s, u }
+    const br = {};
+    parseCsvToRows(bizCsv).forEach(r => {
+      const y = Math.round(num(r.year)), m = Math.round(num(r.month));
+      if (!y || !m) return;
+      const e = br[trfYm(y, m)] = br[trfYm(y, m)] || { s: 0, u: 0 };
+      e.s += num(r.sessions); e.u += num(r.units_ordered);
+    });
+    const col = (r, ...names) => { const k = Object.keys(r).find(h => names.includes(h.trim().toLowerCase())); return k ? String(r[k] || '').trim() : ''; };
+    _trf.events = parseCsvToRows(evCsv).map(r => {
+      const start = trfNormDate(col(r, 'start_date', 'start date')), end0 = trfNormDate(col(r, 'end_date', 'end date')) || start;
+      const flag = col(r, 'amazon featured event', 'amazon event').toUpperCase();
+      return { name: col(r, 'event name', 'event'), start, end: end0 < start ? start : end0, amazon: flag ? flag.startsWith('Y') : true };
+    }).filter(e => e.name && e.start).sort((a, b) => a.start.localeCompare(b.start));
+    _trf.daily = { byDate, dates: Object.keys(byDate).sort() };
+    _trf.br = br;
+    return _trf;
+  })();
+  _trf.loading.catch(() => { _trf.loading = null; });
+  return _trf.loading;
+}
+
+window.loadTraffic = async function () {
+  try { await trfLoad(); }
+  catch (err) { const n = document.getElementById('trf-overall-note'); if (n) n.textContent = 'Error loading traffic data: ' + err.message; return; }
+  if (!_trf.view) _trf.view = _trf.daily.dates.length >= 7 ? 'daily' : 'monthly';
+  trfRenderControls();
+  trfRender();
+};
+function trfRenderControls() {
+  if (!_trf.daily) return;
+  document.querySelectorAll('#trf-view button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase() === _trf.view));
+  const win = document.getElementById('trf-window');
+  win.style.display = _trf.view === 'daily' ? '' : 'none';
+  win.querySelectorAll('button').forEach(b => b.classList.toggle('active', Number(b.dataset.days) === _trf.win));
+  const dd = _trf.daily.dates;
+  document.getElementById('trf-source').textContent = _trf.view === 'daily'
+    ? (dd.length ? `Daily: NewDerm Daily Business Report · ${dd.length} day${dd.length === 1 ? '' : 's'} available (${dd[0]} → ${dd[dd.length - 1]}) · dashed = still settling` : 'Daily: no data in the Daily Business Report yet')
+    : 'Monthly: MiGuard Business Report · current year runs through the last full month';
+  document.querySelectorAll('#trf-overall-metric button').forEach(b => b.classList.toggle('active', b.dataset.metric === _trf.metric));
+}
+window.trfSetView = v => { _trf.view = v; trfRenderControls(); trfRender(); };
+window.trfSetWindow = n => { _trf.win = n; trfRenderControls(); trfRender(); };
+window.trfSetMetric = m => { _trf.metric = m; trfRenderControls(); trfRender(); };
+
+const trfVal = (t, metric) => !t ? null : metric === 'sessions' ? t.s : metric === 'units' ? t.u : (t.s ? t.u / t.s * 100 : null);
+const TRF_METRIC_LABEL = { sessions: 'Sessions', conv: 'Conv Rate', units: 'Units' };
+const trfFmtNum = v => v == null ? '' : Math.abs(v) >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k' : Math.round(v).toLocaleString();
+const trfFmtPct = v => v == null ? '' : v.toFixed(1) + '%';
+function trfPctChg(a, b, metric) {
+  if (a == null || b == null || !b) return '';
+  if (metric === 'conv') { const d = a - b; return `<b style="color:${d > 0 ? '#1db88a' : d < 0 ? '#db372d' : 'var(--muted)'};">${d > 0 ? '▲ +' : d < 0 ? '▼ ' : ''}${d.toFixed(1)} pts</b>`; }
+  const v = Math.round((a - b) / b * 100); return `<b style="color:${v > 0 ? '#1db88a' : v < 0 ? '#db372d' : 'var(--muted)'};">${v > 0 ? '▲ +' : v < 0 ? '▼ ' : ''}${v}%</b>`;
+}
+function trfEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function trfRender() {
+  if (!_trf.daily) return;
+  const metric = _trf.metric;
+  const fmt = metric === 'conv' ? trfFmtPct : trfFmtNum;
+  const fmtBig = v => metric === 'conv' ? fmt(v) : Math.round(v).toLocaleString() + (metric === 'units' ? ' units' : ' sessions');
+  document.getElementById('trf-overall-title').textContent = `MiGuard Supplements — ${TRF_METRIC_LABEL[metric]}`;
+  const noteEl = document.getElementById('trf-overall-note');
+  let labels = [], datasets = [], note = '', bands = [];
+  if (_trf.view === 'monthly') {
+    const now = new Date(), cy = now.getFullYear(), stop = now.getMonth();
+    for (let off = 0; off <= 3; off++) {
+      const yr = cy - off, c = TRF_YOY[off];
+      const arr = TRF_MONTHS.map((_, i) => { if (yr === cy && i + 1 > stop) return null; const t = _trf.br[trfYm(yr, i + 1)]; return t && t.s ? trfVal(t, metric) : null; });
+      if (arr.every(v => v == null)) continue;
+      datasets.push({ label: String(yr), data: arr, borderColor: c.border, backgroundColor: c.bg, fill: c.fill, pointRadius: 2, tension: 0.3, borderWidth: 2.5, spanGaps: false });
+    }
+    labels = TRF_MONTHS;
+    (_trf.events || []).forEach(e => {
+      const [y, m0] = e.start.split('-').map(Number), [y1, m1] = e.end.split('-').map(Number);
+      const ds = datasets.find(x => x.label === String(y)); if (!ds) return;
+      const i0 = m0 - 1, i1 = y1 === y ? m1 - 1 : 11;
+      if (ds.data.slice(i0, i1 + 1).every(v => v == null)) return;
+      bands.push({ i0, i1, e, ly: y !== cy, yr: y });
+    });
+    const { year, month } = trfLastFullMonth();
+    const pm = month === 1 ? { year: year - 1, month: 12 } : { year, month: month - 1 };
+    const v = trfVal(_trf.br[trfYm(year, month)], metric), vp = trfVal(_trf.br[trfYm(pm.year, pm.month)], metric), vy = trfVal(_trf.br[trfYm(year - 1, month)], metric);
+    const ab = TRF_MONTHS[month - 1];
+    if (v != null) note = [`${ab} ${year}: <b>${fmtBig(v)}</b>`, vp != null ? `${trfPctChg(v, vp, metric)} vs ${TRF_MONTHS[pm.month - 1]}` : '', vy != null ? `${trfPctChg(v, vy, metric)} vs ${ab} ${year - 1}` : ''].filter(Boolean).join(' &nbsp;·&nbsp; ');
+  } else {
+    const all = _trf.daily.dates, byDate = _trf.daily.byDate;
+    if (!all.length) { note = 'No daily data yet — the Daily Business Report is still filling in.'; }
+    else {
+      const end = all[all.length - 1];
+      const start = [trfAddDays(end, -(_trf.win - 1)), all[0]].sort()[1]; // never before the first synced day
+      const days = []; for (let d = start; d <= end; d = trfAddDays(d, 1)) days.push(d);
+      const cur = days.map(d => trfVal(byDate[d], metric));
+      const ly = days.map(d => trfVal(byDate[trfShiftYear(d, -1)], metric));
+      const finalCut = trfAddDays(trfTodayPT(), -TRF_FINAL_AFTER);
+      const firstProv = days.findIndex(d => d > finalCut);
+      labels = days.map(d => { const [y, m, dd] = d.split('-').map(Number); return `${TRF_MONTHS[m - 1]} ${dd}` + (days.length > 120 ? ` '${String(y).slice(2)}` : ''); });
+      datasets = [{ label: 'This year', data: cur, borderColor: TRF_YOY[0].border, backgroundColor: TRF_YOY[0].bg, fill: TRF_YOY[0].fill,
+        pointRadius: days.length > 60 ? 0 : days.length > 30 ? 1.5 : 2.5, tension: 0.25, borderWidth: 2.5, spanGaps: false,
+        segment: { borderDash: ctx => (firstProv >= 0 && ctx.p1DataIndex >= firstProv) ? [5, 4] : undefined } }];
+      const hasLy = ly.some(v => v != null);
+      const span = (a, b) => { const i0 = days.findIndex(d => d >= a), last = days.length - 1 - [...days].reverse().findIndex(d => d <= b);
+        return (i0 < 0 || last >= days.length || last < i0) ? null : [i0, last]; };
+      (_trf.events || []).forEach(e => {
+        const t = span(e.start, e.end); if (t) bands.push({ i0: t[0], i1: t[1], e });
+        if (hasLy) { const l = span(trfShiftYear(e.start, 1), trfShiftYear(e.end, 1)); if (l) bands.push({ i0: l[0], i1: l[1], e, ly: true }); }
+      });
+      if (hasLy) datasets.push({ label: 'Same days last year', data: ly, borderColor: TRF_YOY[1].border, backgroundColor: 'transparent', fill: false, pointRadius: 0, tension: 0.25, borderWidth: 2, spanGaps: false });
+      // This window vs the same number of days just before it (sessions summed; conversion pooled)
+      const pool = arr => { let s = 0, u = 0, n = 0; arr.forEach(d => { const t = byDate[d]; if (t) { s += t.s; u += t.u; n++; } }); return n ? { s, u, n } : null; };
+      const N = days.length;
+      const prevDays = []; for (let i = N; i >= 1; i--) prevDays.push(trfAddDays(days[0], -i));
+      const lw = pool(days), pw = pool(prevDays);
+      const a = trfVal(lw, metric), b = trfVal(pw, metric);
+      const synced = lw ? lw.n : 0;
+      const short = synced < _trf.win ? ` <span style="color:var(--muted);">(${synced} of ${_trf.win} days synced so far)</span>` : '';
+      if (a != null) note = [`Last ${N} days: <b>${fmtBig(a)}</b>${short}`, (b != null && pw.n === N) ? `${trfPctChg(a, b, metric)} vs the ${N} days before` : ''].filter(Boolean).join(' &nbsp;·&nbsp; ');
+    }
+  }
+  noteEl.innerHTML = note || 'No data for this selection yet.';
+
+  const canvas = document.getElementById('trf-overall-chart');
+  if (!canvas || typeof Chart === 'undefined') return;
+  const opts = {
+    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+    layout: { padding: { top: 4 } },
+    plugins: {
+      legend: { display: false },
+      trfBands: { bands },
+      tooltip: {
+        backgroundColor: '#fff', borderColor: 'rgba(0,31,96,0.1)', borderWidth: 1, titleColor: '#001F60', bodyColor: '#6B7BA2', footerColor: '#001F60',
+        titleFont: { family: 'DM Sans, sans-serif', size: 11, weight: '600' }, bodyFont: { family: 'DM Sans, sans-serif', size: 11 }, padding: 12, boxWidth: 8, boxHeight: 8,
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`,
+          footer: items => { const i = items.length ? items[0].dataIndex : -1;
+            return bands.filter(b => i >= b.i0 && i <= b.i1).map(b => `🛒 ${b.e.name}${b.yr ? ' ' + b.yr : (b.ly ? ' (last year)' : '')} — ${b.e.amazon ? 'Amazon event' : 'our sale'}`); },
+        },
+      },
+    },
+    scales: {
+      x: { border: { display: false }, grid: { display: false }, ticks: { font: { family: 'DM Sans, sans-serif', size: 10 }, color: '#6B7BA2', autoSkip: true, maxTicksLimit: 12 } },
+      y: { beginAtZero: metric !== 'conv', border: { display: false }, grid: { color: 'rgba(0,31,96,0.05)' }, ticks: { font: { family: 'DM Sans, sans-serif', size: 10 }, color: '#6B7BA2', callback: fmt } },
+    },
+  };
+  if (_trf.chart) { _trf.chart.data.labels = labels; _trf.chart.data.datasets = datasets; _trf.chart.options = opts; _trf.chart.update(); }
+  else _trf.chart = new Chart(canvas, { type: 'line', data: { labels, datasets }, options: opts, plugins: [TRF_BANDS_PLUGIN] });
+  window._trafficChart = _trf.chart;
+  // Legend (same look as VBC's renderYoyLegend)
+  const lg = document.getElementById('trf-legend-overall');
+  if (lg) lg.innerHTML = datasets.map(ds => '<span style="display:inline-flex;align-items:center;gap:6px;margin-left:16px;font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap;"><span style="width:16px;height:3px;border-radius:2px;background:' + ds.borderColor + ';display:inline-block;flex-shrink:0;"></span>' + trfEsc(ds.label) + '</span>').join('');
+  // Events list under the chart
+  const mediaEl = document.getElementById('trf-overall-media');
+  if (mediaEl) {
+    const fmtD = iso => { const [y, m, d] = iso.split('-').map(Number); return `${TRF_MONTHS[m - 1]} ${d}, ${y}`; };
+    const fmtR = e => e.start === e.end ? fmtD(e.start) : `${fmtD(e.start).replace(/, \d{4}$/, '')} – ${fmtD(e.end)}`;
+    const seen = new Set(), evs = bands.slice().sort((x, y) => x.i0 - y.i0 || (x.yr || 0) - (y.yr || 0)).filter(b => { const k = b.e.name + b.e.start + (b.ly ? 'L' : ''); if (seen.has(k)) return false; seen.add(k); return true; });
+    mediaEl.innerHTML = evs.length ? `<div class="trf-media-hd">Amazon events &amp; sales</div>` + evs.map(b => `<div class="trf-media-item"><span class="trf-ev-swatch" style="background:${b.e.amazon ? TRF_EVENT_COLORS.amazon : TRF_EVENT_COLORS.ours};opacity:${b.ly ? 0.45 : 0.75};"></span><span><b>${trfEsc(b.e.name)}</b> · ${fmtR(b.e)}${b.ly ? ' <span style="color:var(--muted);">(last year, shown on the same dates)</span>' : ''}</span></div>`).join('') : '';
+  }
+}
+// Shades each event's days (VBC's TRF_MEDIA_PLUGIN band half).
+const TRF_BANDS_PLUGIN = {
+  id: 'trfBands',
+  beforeDatasetsDraw(chart, _args, opts) {
+    const bands = (opts && opts.bands) || [];
+    if (!bands.length) return;
+    const { ctx, chartArea: { top, bottom, left, right }, scales: { x } } = chart;
+    const step = x.getPixelForValue(1) - x.getPixelForValue(0) || 0;
+    bands.forEach(b => {
+      const x0 = Math.max(left, x.getPixelForValue(b.i0) - step / 2), x1 = Math.min(right, x.getPixelForValue(b.i1) + step / 2);
+      const colr = b.e.amazon ? TRF_EVENT_COLORS.amazon : TRF_EVENT_COLORS.ours;
+      ctx.save();
+      ctx.globalAlpha = b.ly ? 0.08 : 0.16; ctx.fillStyle = colr; ctx.fillRect(x0, top, Math.max(2, x1 - x0), bottom - top);
+      if (b.ly) { ctx.globalAlpha = 0.5; ctx.strokeStyle = colr; ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.strokeRect(x0, top, Math.max(2, x1 - x0), bottom - top); }
+      ctx.restore();
+    });
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════
 // OVERVIEW > PROJECTIONS & GOALS — added 2026-10-05 per Jaclyn.
 //  1) Ad vs. Organic share of sales, last 12 full months (2-line chart).
 //     Ad sales = Stewardship Summary ad_sales (col O). Total sales = Amazon
@@ -22110,7 +22406,18 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           // highlight = true only for Total Sales (per Jaclyn 2026-10-06): white
           // track + shaded center. Organic/Ad keep the original grey track and
           // no center fill, at the same large size.
-          function bigGauge(label, actual, goal, highlight) {
+          // LIVE line (2026-10-27 per Jaclyn, matching the Medaltus Hub cards):
+          // dollar sales booked so far this month — pending included, as in
+          // the rest of the Goal Tracker. Total and Organic are discounted by
+          // the cancel rate (same adjustment as the projection); Ad Sales is
+          // shown as booked. Month to Date only — in Last Month the line
+          // above already shows the final number.
+          function liveLine(actual, applyCancel) {
+            if (!cfg.isPartial) return '';
+            const v = actual == null ? null : (applyCancel && cancelRate != null ? actual * (1 - cancelRate) : actual);
+            return `<div class="gt-live"><span class="gt-live-dot"></span>LIVE: <strong>${v == null ? '—' : fmtD(v)}</strong></div>`;
+          }
+          function bigGauge(label, actual, goal, highlight, applyCancel) {
             const track = highlight ? '#ffffff' : 'var(--border)';
             const st = gaugeState(actual, goal);
             const size = 170, stroke = 16;
@@ -22122,6 +22429,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
                   <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);font-weight:600;">${goal == null ? 'No goal set' : 'Not available yet'}</div>
                 </div>
                 <div style="font-size:14px;color:var(--navy);margin-top:12px;">Goal <strong>${goal == null ? '—' : fmtD(goal)}</strong></div>
+                ${liveLine(actual, applyCancel)}
               </div>`;
             }
             // Opaque tints (not transparent) so they read clearly against the sand panel:
@@ -22135,6 +22443,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
               </div>
               <div style="font-size:15px;font-weight:600;color:${st.color};margin-top:12px;">${st.statusText}</div>
               <div style="font-size:15px;color:var(--navy);margin-top:2px;">Goal <strong>${fmtD(goal)}</strong></div>
+              ${liveLine(actual, applyCancel)}
               ${cancelLine()}
             </div>`;
           }
@@ -22143,9 +22452,9 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           // width. Only Total Sales gets the white track + shaded center (light
           // red = projecting to miss, light green = on pace).
           return `<div style="display:flex;align-items:flex-start;justify-content:space-around;gap:24px;flex:1;flex-wrap:wrap;width:100%;">
-            ${bigGauge('Total Sales', actualOverall, overallGoal, true)}
-            ${bigGauge('Organic Sales', actualOrganic, organicGoal)}
-            ${bigGauge('Ad Sales', actualAds, adsGoal)}
+            ${bigGauge('Total Sales', actualOverall, overallGoal, true, true)}
+            ${bigGauge('Organic Sales', actualOrganic, organicGoal, false, true)}
+            ${bigGauge('Ad Sales', actualAds, adsGoal, false, false)}
           </div>`;
         }
 
@@ -22200,10 +22509,26 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           const daysInLastMonth = new Date(ly, lm, 0).getDate();
           const daysInTwoMonthsAgo = new Date(ly2, lm2, 0).getDate();
 
-          proratedSpend = lastMonthSpend * (daysElapsed / daysInLastMonth);
-          proratedSales = lastMonthSales * (daysElapsed / daysInLastMonth);
-          proratedSpendPrev = twoMonthsAgoSpend * (daysElapsed / daysInTwoMonthsAgo);
-          proratedSalesPrev = twoMonthsAgoSales * (daysElapsed / daysInTwoMonthsAgo);
+          // FIXED 2026-10-19 per Jaclyn: the ad orders sheet now carries a
+          // live row for the CURRENT month (e.g. Oct: 2 ad units, $71.91 ad
+          // sales), so use that real month-to-date figure when it exists.
+          // Before, MTD Ad Sales/Spend was always last month's total scaled
+          // by days elapsed (Sep $279.65 × 19/30 = $177), which disagreed
+          // with MTD Ad-Driven Units (read from that same current-month
+          // row) and with the Goal Tracker's Ad Sales ring. The day-fraction
+          // estimate stays only as a fallback for a month with no row yet.
+          // The comparison stays "vs last month prorated to the same day"
+          // — the sheet is monthly, so last month has no day-level MTD.
+          const curMonthAdRows = adRows.filter(r => parseInt(r.year, 10) === refYear && parseInt(r.month, 10) === refMonth);
+          if (curMonthAdRows.length) {
+            proratedSpend = curMonthAdRows.reduce((s, r) => s + parseAmt(r.spend), 0);
+            proratedSales = curMonthAdRows.reduce((s, r) => s + parseAmt(r.sales), 0);
+          } else {
+            proratedSpend = lastMonthSpend * (daysElapsed / daysInLastMonth);
+            proratedSales = lastMonthSales * (daysElapsed / daysInLastMonth);
+          }
+          proratedSpendPrev = lastMonthSpend * (daysElapsed / daysInLastMonth);
+          proratedSalesPrev = lastMonthSales * (daysElapsed / daysInLastMonth);
         } else {
           // ADDED 2026-08-28 per Jaclyn/Skinuva parity — Last Month: both
           // the reference month and the one before it are already fully
