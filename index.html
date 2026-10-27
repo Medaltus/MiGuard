@@ -21654,6 +21654,21 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
         // ad summary sheets).
         fetch(sheetCsvUrl(AD_SUMMARY_SHEET_ID, AD_SUMMARY_GID) + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => ''),
       ]);
+      // ADDED 2026-10-27 per Jaclyn (same fix as Skinuva's Overview): the
+      // Amazon ad numbers on this page now come from the ADVERTISING cache
+      // (SHEET_ADVERTISING — one row per month: spend, sales, ad_units, with
+      // Sponsored Products + Sponsored Brands + Sponsored Display), not the
+      // Ad Orders cache, which is Sponsored Products only. Used below for
+      // MTD Ad-Driven Units, Ad Spend, Blended ACOS, MTD Ad Sales, MTD Organic
+      // Sales and the Goal Tracker's Ad Sales / Organic Sales rings. (Oct
+      // 2026: $271.66 ad sales incl. $79.90 Sponsored Brands, vs $191.76
+      // SP-only.) This tab is MiGuard-only, so rows aren't filtered by brand
+      // (the May/Jun 2026 rows have a shifted brand column).
+      const adCacheCfg = window.SHEET_CFG.SHEET_ADVERTISING || {};
+      const adCacheCsv = await fetch(sheetCsvUrl(adCacheCfg.fileId || '', adCacheCfg.gid || '') + `&_cb=${Date.now()}`).then(r => r.ok ? r.text() : '').catch(() => '');
+      const adCacheRows = isCsv(adCacheCsv) ? parseCsv(adCacheCsv) : [];
+      if (!adCacheRows.length) console.warn('[MiGuard][overview] Advertising cache did not load — Amazon ad figures will show as 0.');
+      const adCacheMonth = (y, m) => adCacheRows.filter(r => parseInt(r.year, 10) === y && parseInt(r.month, 10) === m);
       const bizRows = parseCsvToRows(bizCsv);
 
       // Ad Spend by Type (SP/SB/SD) — separate fetch from this page's own
@@ -21935,19 +21950,11 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
       // other place in this file that reads this exact sheet already
       // sums ad_units per row — this was the one place still treating it
       // as one-row-per-order.
-      if (isCsv(adOrdersCsv)) {
-        const adRowsForOrders = parseCsv(adOrdersCsv);
+      if (adCacheRows.length) {
+        // Advertising cache (SP + SB + SD), 2026-10-27 — was the Ad Orders cache.
         const sumAdUnits = rows => rows.reduce((s, r) => s + (parseInt(String(r.ad_units || '').replace(/^'/, ''), 10) || 0), 0);
-        adDrivenOrders = sumAdUnits(adRowsForOrders.filter(r =>
-          parseInt(r.year, 10) === refYear &&
-          parseInt(r.month, 10) === refMonth &&
-          (r.brand || '').trim().toLowerCase() === 'miguard'
-        ));
-        adDrivenOrdersLastMonthFull = sumAdUnits(adRowsForOrders.filter(r =>
-          parseInt(r.year, 10) === lastMonthYear &&
-          parseInt(r.month, 10) === lastMonthNum &&
-          (r.brand || '').trim().toLowerCase() === 'miguard'
-        ));
+        adDrivenOrders = sumAdUnits(adCacheMonth(refYear, refMonth));
+        adDrivenOrdersLastMonthFull = sumAdUnits(adCacheMonth(lastMonthYear, lastMonthNum));
       }
 
       // Walmart — added 2026-08-06 per Jaclyn, explicit choice: sum
@@ -22061,6 +22068,18 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
             });
         }
       } catch (e) { console.warn('[MiGuard][overview] ad units lookup failed:', e.message); }
+      // 2026-10-27: the Ad Orders cache above is Sponsored Products only. The
+      // Advertising cache has the full ad_units (SP + SB + SD) but no ASIN
+      // column — MiGuard sells one ASIN, so its monthly total belongs to that
+      // ASIN. Keeps Top Selling Products' Ads/Organic split matching the
+      // MTD Ad-Driven Units card.
+      {
+        const MIGUARD_ASIN = 'B0B9187Q4P';
+        const cacheUnits = (y, m) => { const rows = adCacheMonth(y, m); return rows.length ? rows.reduce((s, r) => s + (parseInt(String(r.ad_units || '').replace(/^'/, ''), 10) || 0), 0) : null; };
+        const cur = cacheUnits(refYear, refMonth), prv = cacheUnits(lastMonthYear, lastMonthNum);
+        if (cur != null && Object.keys(adUnitsByAsin).every(a => a === MIGUARD_ASIN)) adUnitsByAsin = { [MIGUARD_ASIN]: cur };
+        if (prv != null && Object.keys(adUnitsByAsinPrev).every(a => a === MIGUARD_ASIN)) adUnitsByAsinPrev = { [MIGUARD_ASIN]: prv };
+      }
 
       // Walmart per-ASIN ad units — added 2026-08-06 per Jaclyn. Joined
       // via item_id -> asin (walmartItemIdToAsinMap, built earlier from
@@ -22330,9 +22349,9 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
         // $ isn't separately available from wmtAdvRows at this point;
         // flagged below rather than silently guessed).
         let amzAdActual = null;
-        if (isCsv(adOrdersCsv)) {
-          const adRowsForGoals = parseCsv(adOrdersCsv).filter(r => parseInt(r.year, 10) === cfg.year && parseInt(r.month, 10) === cfg.month);
-          amzAdActual = adRowsForGoals.reduce((s, r) => s + parseAmt(r.sales), 0);
+        if (adCacheRows.length) {
+          // Advertising cache (SP + SB + SD), 2026-10-27 — was the Ad Orders cache.
+          amzAdActual = adCacheMonth(cfg.year, cfg.month).reduce((s, r) => s + parseAmt(r.sales), 0);
         }
         const amzOrganicActual = amzAdActual != null ? Math.max(0, amzWmtActual - amzAdActual) : null;
 
@@ -22485,8 +22504,9 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
       // day-aligned MTD and prior-MTD sums. They're added directly to
       // Amazon's prorated figures for one blended Ad Spend / ACOS number.
       let proratedSpend = 0, proratedSales = 0, proratedSpendPrev = 0, proratedSalesPrev = 0;
-      if (isCsv(adOrdersCsv)) {
-        const adRows = parseCsv(adOrdersCsv);
+      if (adCacheRows.length) {
+        // Advertising cache (SP + SB + SD), 2026-10-27 — was the Ad Orders cache.
+        const adRows = adCacheRows;
         if (cfg.isPartial) {
           // MTD — unchanged from the original (only) behavior: estimate
           // "this month so far" by prorating the LAST FULL month's real
@@ -22545,7 +22565,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           proratedSalesPrev = prevAdRows.reduce((s, r) => s + parseAmt(r.sales), 0);
         }
       } else {
-        console.warn('[MiGuard][overview] ad orders sheet did not return CSV — Ad Spend/ACOS will reflect Website only.');
+        console.warn('[MiGuard][overview] Advertising cache did not return CSV — Ad Spend/ACOS will reflect Website only.');
       }
 
       // Walmart — added 2026-08-06 per Jaclyn. Reads SHEET_WALMART_ADVERTISING
