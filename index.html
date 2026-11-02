@@ -1591,6 +1591,7 @@ details.inci-toggle[open] summary::before{content:'▾ ';}
       <div class="kpi-card" id="ov-kpi-ad-orders"><div class="kpi-label">MTD Ad-Driven Units</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
       <div class="kpi-card" id="ov-kpi-ad-sales"><div class="kpi-label">MTD Ad Sales</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
       <div class="kpi-card" id="ov-kpi-pending"><div class="kpi-label">Pending Orders</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
+      <div class="kpi-card" id="ov-kpi-cancel"><div class="kpi-label">Cancellation Rate</div><div class="kpi-value">—</div><div class="kpi-mom flat">Loading…</div></div>
     </div>
 
     <div class="ppc-card">
@@ -21668,11 +21669,41 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
     'ov-kpi-organic-orders': 'Organic Units',
     'ov-kpi-organic-sales': 'Organic Sales',
   };
+  // Same rules as the Goal Tracker's goalsIsValidAmazonRow / computeAmzCancelRate
+  // (2026-11-02) — duplicated at this scope because those two live inside the
+  // Goal Tracker's own try block and aren't reachable from the KPI cards.
+  function ovPendingInclValid(r) {
+    const status = (r.status || '').toLowerCase().trim();
+    if (status === 'cancelled') return false; // pending IS kept
+    if ((r.promotion_ids || '').toLowerCase().includes('vine')) return false;
+    return true;
+  }
+  // Orders (unique order_id, Vine excluded) cancelled ÷ all orders. With
+  // onlyYear/onlyMonth: that month only. With excludeYear/excludeMonth: every
+  // OTHER month pooled — the historical rate the projections use (an
+  // in-progress month's own rate runs low because its orders haven't had
+  // time to cancel yet).
+  function ovCancelRate(rows, y, m, onlyThatMonth) {
+    const byOrder = new Map();
+    rows.forEach(r => {
+      if ((r.promotion_ids || '').toLowerCase().includes('vine')) return;
+      const d = normalizeDate(r.date);
+      if (!d || !r.order_id) return;
+      const isThat = parseInt(d.substring(0, 4), 10) === y && parseInt(d.substring(5, 7), 10) === m;
+      if (onlyThatMonth ? !isThat : isThat) return;
+      const cancelled = (r.status || '').toLowerCase().trim() === 'cancelled';
+      byOrder.set(r.order_id, cancelled || byOrder.get(r.order_id) === true);
+    });
+    if (!byOrder.size) return null;
+    let c = 0; byOrder.forEach(v => { if (v) c++; });
+    return { rate: c / byOrder.size, orders: byOrder.size, cancelled: c };
+  }
+
   function setKpiLiveLabel(cardId, text) {
     const lbl = document.querySelector('#' + cardId + ' .kpi-label');
     if (lbl) lbl.innerHTML = `${text} &bull; <span class="kpi-live-tag"><span class="gt-live-dot"></span>LIVE</span>`;
   }
-  function setKpiProjection(cardId, html) {
+  function setKpiProjection(cardId, html, title) {
     const card = document.getElementById(cardId);
     if (!card) return;
     let el = card.querySelector('.kpi-proj');
@@ -21684,6 +21715,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
       if (momEl) momEl.insertAdjacentElement('afterend', el); else card.appendChild(el);
     }
     el.innerHTML = html;
+    el.title = title || '';
   }
 
   function setKpiPlain(cardId, value, label) {
@@ -22217,6 +22249,18 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
       );
       setKpiPlain('ov-kpi-pending', pendingOrderIds.size.toLocaleString(), cfg.isPartial ? 'Current month' : 'Last month');
 
+      // Cancellation Rate (2026-11-02 per Jaclyn). Big number = the
+      // historical rate every projection on this page is discounted by
+      // (all other months pooled, same as the Goal Tracker). Line under it =
+      // the selected month's own rate so far.
+      const ovCrHist = ovCancelRate(amzRows, cfg.year, cfg.month, false);
+      const ovCrMonth = ovCancelRate(amzRows, cfg.year, cfg.month, true);
+      const ovCrPct = v => (v * 100).toFixed(1) + '%';
+      setKpiPlain('ov-kpi-cancel', ovCrHist ? ovCrPct(ovCrHist.rate) : '\u2014',
+        `${monthNames[cfg.month - 1]}${cfg.isPartial ? ' so far' : ''}: ${ovCrMonth ? ovCrPct(ovCrMonth.rate) + ` (${ovCrMonth.cancelled} of ${ovCrMonth.orders})` : '\u2014'}`);
+      const ovCrCard = document.getElementById('ov-kpi-cancel');
+      if (ovCrCard) ovCrCard.title = ovCrHist ? `Historical: ${ovCrHist.cancelled} of ${ovCrHist.orders} orders cancelled across all other months — used to discount the projections` : 'No cancellation history yet';
+
       const heroRevEl = document.getElementById('ov-hero-revenue');
       if (heroRevEl) heroRevEl.textContent = mtd.revenue >= 1000 ? '$' + (mtd.revenue / 1000).toFixed(1) + 'K' : '$' + mtd.revenue.toFixed(0);
 
@@ -22568,6 +22612,12 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           amzAdActual = adCacheMonth(cfg.year, cfg.month).reduce((s, r) => s + parseAmt(r.sales), 0);
         }
         const amzOrganicActual = amzAdActual != null ? Math.max(0, amzWmtActual - amzAdActual) : null;
+        // Units alongside the dollars (2026-11-02 per Jaclyn) — same order
+        // population as the dollars (pending kept, cancelled/Vine out, net of
+        // returns); ad units from the Advertising cache; organic = total − ad.
+        const amzGoalsUnits = Math.max(0, aggregateRange(amzRows, mtdStartStr, mtdEndStr, goalsIsValidAmazonRow).totalUnits - amzReturnsMtd.totalQty);
+        const amzAdUnitsGT = adCacheRows.length ? adCacheMonth(cfg.year, cfg.month).reduce((s, r) => s + (parseInt(String(r.ad_units || '').replace(/^'/, ''), 10) || 0), 0) : null;
+        const amzOrganicUnitsGT = amzAdUnitsGT != null ? Math.max(0, amzGoalsUnits - amzAdUnitsGT) : null;
 
         // Real, MiGuard-specific rate — computed once here, reused by all
         // three gauges below (Total/Organic/Ad all pace off the same
@@ -22601,7 +22651,9 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           </svg>`;
         }
 
-        function renderGoalsGroup(actualOverall, actualAds, actualOrganic, goalRow, cancelRate) {
+        function renderGoalsGroup(actualOverall, actualAds, actualOrganic, goalRow, cancelRate, units) {
+          units = units || {};
+          const fmtU = u => u == null ? '' : ` (${Math.round(u).toLocaleString()} unit${Math.round(u) === 1 ? '' : 's'})`;
           if (!goalRow) return `<div style="color:var(--muted);font-size:13px;flex:1;text-align:center;padding:20px;">No goals row found for this month.</div>`;
           // MiGuard's own goals tab: Total Sales Goal = col N (13), Organic
           // Sales Goal = col Q (16), Ad Sales Goal = col X (23) — per Jaclyn.
@@ -22612,7 +22664,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           const GREEN = '#1db88a', RED = '#db372d';
 
           // Shared math for one gauge — unchanged rules from the previous version.
-          function gaugeState(actual, goal) {
+          function gaugeState(actual, goal, u) {
             if (goal == null || actual == null) return null;
             const actualPct = goal > 0 ? Math.round((actual / goal) * 100) : 0;
             let projected = actual, onPace, statusText;
@@ -22622,13 +22674,15 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
               const rawProjected = cfg.day > 0 ? (actual / cfg.day) * daysInMonth : actual;
               projected = cancelRate != null ? rawProjected * (1 - cancelRate) : rawProjected;
               onPace = goal > 0 && projected >= goal;
-              statusText = `Projecting ${fmtD(projected)}`;
+              // Units get the same run-rate × (1 − cancel rate) factor as the dollars.
+              const uProj = u == null ? null : (cfg.day > 0 ? (u / cfg.day) * daysInMonth : u) * (cancelRate != null ? 1 - cancelRate : 1);
+              statusText = `Projecting ${fmtD(projected)}${fmtU(uProj)}`;
             } else {
               onPace = actualPct >= 100;
               // Per Jaclyn 2026-10-06: show the actual total reached (colored
               // green if the goal was hit, red if missed) instead of the words
               // "Hit goal" / "Missed goal".
-              statusText = fmtD(actual);
+              statusText = fmtD(actual) + fmtU(u);
             }
             return { actualPct, onPace, statusText, color: onPace ? GREEN : RED };
           }
@@ -22645,14 +22699,15 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           // the cancel rate (same adjustment as the projection); Ad Sales is
           // shown as booked. Month to Date only — in Last Month the line
           // above already shows the final number.
-          function liveLine(actual, applyCancel) {
+          function liveLine(actual, applyCancel, u) {
             if (!cfg.isPartial) return '';
-            const v = actual == null ? null : (applyCancel && cancelRate != null ? actual * (1 - cancelRate) : actual);
-            return `<div class="gt-live"><span class="gt-live-dot"></span>LIVE: <strong>${v == null ? '—' : fmtD(v)}</strong></div>`;
+            const adj = applyCancel && cancelRate != null ? 1 - cancelRate : 1;
+            const v = actual == null ? null : actual * adj;
+            return `<div class="gt-live"><span class="gt-live-dot"></span>LIVE: <strong>${v == null ? '—' : fmtD(v)}</strong>${v == null || u == null ? '' : fmtU(u * adj)}</div>`;
           }
-          function bigGauge(label, actual, goal, highlight, applyCancel) {
+          function bigGauge(label, actual, goal, highlight, applyCancel, u) {
             const track = highlight ? '#ffffff' : 'var(--border)';
-            const st = gaugeState(actual, goal);
+            const st = gaugeState(actual, goal, u);
             const size = 170, stroke = 16;
             if (!st) {
               return `<div style="text-align:center;flex:0 0 auto;min-width:220px;">
@@ -22662,7 +22717,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
                   <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);font-weight:600;">${goal == null ? 'No goal set' : 'Not available yet'}</div>
                 </div>
                 <div style="font-size:14px;color:var(--navy);margin-top:12px;">Goal <strong>${goal == null ? '—' : fmtD(goal)}</strong></div>
-                ${liveLine(actual, applyCancel)}
+                ${liveLine(actual, applyCancel, u)}
               </div>`;
             }
             // Opaque tints (not transparent) so they read clearly against the sand panel:
@@ -22676,7 +22731,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
               </div>
               <div style="font-size:15px;font-weight:600;color:${st.color};margin-top:12px;">${st.statusText}</div>
               <div style="font-size:15px;color:var(--navy);margin-top:2px;">Goal <strong>${fmtD(goal)}</strong></div>
-              ${liveLine(actual, applyCancel)}
+              ${liveLine(actual, applyCancel, u)}
               ${cancelLine()}
             </div>`;
           }
@@ -22685,15 +22740,15 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           // width. Only Total Sales gets the white track + shaded center (light
           // red = projecting to miss, light green = on pace).
           return `<div style="display:flex;align-items:flex-start;justify-content:space-around;gap:24px;flex:1;flex-wrap:wrap;width:100%;">
-            ${bigGauge('Total Sales', actualOverall, overallGoal, true, true)}
-            ${bigGauge('Organic Sales', actualOrganic, organicGoal, false, true)}
-            ${bigGauge('Ad Sales', actualAds, adsGoal, false, false)}
+            ${bigGauge('Total Sales', actualOverall, overallGoal, true, true, units.overall)}
+            ${bigGauge('Organic Sales', actualOrganic, organicGoal, false, true, units.organic)}
+            ${bigGauge('Ad Sales', actualAds, adsGoal, false, false, units.ads)}
           </div>`;
         }
 
         const goalsBodyAmzEl = document.getElementById('ov-goals-body-amz');
         const goalsBodyWebEl = document.getElementById('ov-goals-body-web');
-        if (goalsBodyAmzEl) goalsBodyAmzEl.innerHTML = renderGoalsGroup(amzWmtActual, amzAdActual, amzOrganicActual, goalsRowAmz, amzCancelRate);
+        if (goalsBodyAmzEl) goalsBodyAmzEl.innerHTML = renderGoalsGroup(amzWmtActual, amzAdActual, amzOrganicActual, goalsRowAmz, amzCancelRate, { overall: amzGoalsUnits, ads: amzAdUnitsGT, organic: amzOrganicUnitsGT });
         if (goalsBodyWebEl) goalsBodyWebEl.innerHTML = renderGoalsGroup(webGoalsActual, null, webGoalsActual, goalsRowWeb);
       } catch (err) {
         console.warn('[GoalsTracker] failed:', err.message);
@@ -22820,17 +22875,37 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
       setKpi('ov-kpi-ad-sales', '$' + blendedSales.toLocaleString(undefined, { maximumFractionDigits: 0 }), pctChange(blendedSales, blendedSalesPrev), ovMomSuffix);
       setKpi('ov-kpi-organic-sales', '$' + organicSales.toLocaleString(undefined, { maximumFractionDigits: 0 }), pctChange(organicSales, organicSalesPrev), ovMomSuffix);
 
-      // -- Projecting line (2026-11-02 per Jaclyn) — Month to Date only --
-      // Straight run-rate: month-to-date ÷ days elapsed × days in the month,
-      // the same pace math as the Goal Tracker. The % in brackets compares
-      // that projection to LAST MONTH'S FULL TOTAL (not last month to the
-      // same day, which is what the change line above it uses), built by the
-      // same rules as each card: settled Amazon orders, net of returns;
-      // organic = total minus the Advertising cache's whole-month ad units /
-      // ad sales. In Last Month view the month is closed, so no projection.
-      if (cfg.isPartial) {
+      // -- Projecting line (2026-11-02 per Jaclyn, revised same day) --
+      // Shown whenever the selected month still has pending orders (either
+      // period); drops off once pending hits 0, since then the settled number
+      // on the card IS the final number. Same math as the Goal Tracker:
+      //   base     = pending-inclusive (cancelled + Vine excluded), net of returns
+      //   MTD      = base ÷ days elapsed × days in month × (1 − historical cancel rate)
+      //   Last Mo. = base × (1 − historical cancel rate)  (month is over, no run-rate)
+      // Organic = base minus the Advertising cache's ad units / ad sales for
+      // the month (same as the Goal Tracker's Organic ring). AOV = projected
+      // revenue ÷ projected orders. The % in brackets compares the projection
+      // to the PRIOR month's full settled total.
+      if (pendingOrderIds.size > 0) {
+        const crHist = ovCancelRate(amzRows, cfg.year, cfg.month, false);
+        const keep = crHist ? 1 - crHist.rate : 1;
         const dim = new Date(cfg.year, cfg.month, 0).getDate();
-        const proj = v => (cfg.day > 0 ? (v / cfg.day) * dim : v);
+        const runRate = cfg.isPartial && cfg.day > 0 ? dim / cfg.day : 1;
+        const f = runRate * keep;
+
+        const pi = aggregateRange(amzRows, mtdStartStr, mtdEndStr, ovPendingInclValid);
+        const piRevenue = pi.totalRevenue - amzReturnsMtd.totalAmt;
+        const piUnits = Math.max(0, pi.totalUnits - amzReturnsMtd.totalQty);
+        const piOrders = pi.totalOrders;
+        const curAdRows = adCacheMonth(cfg.year, cfg.month);
+        const curAdUnits = curAdRows.reduce((s, r) => s + (parseInt(String(r.ad_units || '').replace(/^'/, ''), 10) || 0), 0);
+        const curAdSales = curAdRows.reduce((s, r) => s + parseAmt(r.sales), 0);
+
+        const projRevenue = piRevenue * f, projUnits = piUnits * f, projOrders = piOrders * f;
+        const projOrgUnits = Math.max(0, piUnits - curAdUnits) * f;
+        const projOrgSales = Math.max(0, piRevenue - curAdSales) * f;
+
+        // Prior month, full and settled (pending/cancelled excluded), net of returns.
         const prevFullEndStr = fmtDateStr(new Date(cfg.prevYear, cfg.prevMonth, 0));
         const amzPF = aggregateRange(amzRows, prevStartStr, prevFullEndStr, isValidAmazonRow);
         const amzRetPF = aggregateReturnsRange(amzReturnsCsv, prevStartStr, prevFullEndStr, 'return_date', { useAsinPrice: true });
@@ -22838,10 +22913,10 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
         const pfUnits = Math.max(0, amzPF.totalUnits - amzRetPF.totalQty);
         const pfOrders = amzPF.totalOrders;
         const pfAov = pfOrders ? pfRevenue / pfOrders : 0;
-        const pfUnitsByAsin = netByAsin(unitsByAsin(amzPF.filteredRows, skuToAsinMap), amzRetPF.byAsin);
-        const pfAdUnits = Object.keys(pfUnitsByAsin).reduce((s, a) => s + Math.min(adUnitsByAsinPrev[a] || 0, pfUnitsByAsin[a] || 0), 0);
+        const pfAdRows = adCacheMonth(lastMonthYear, lastMonthNum);
+        const pfAdUnits = pfAdRows.reduce((s, r) => s + (parseInt(String(r.ad_units || '').replace(/^'/, ''), 10) || 0), 0);
+        const pfAdSales = pfAdRows.reduce((s, r) => s + parseAmt(r.sales), 0);
         const pfOrganicUnits = Math.max(0, pfUnits - pfAdUnits);
-        const pfAdSales = adCacheMonth(lastMonthYear, lastMonthNum).reduce((s, r) => s + parseAmt(r.sales), 0);
         const pfOrganicSales = Math.max(0, pfRevenue - pfAdSales);
 
         const pmAbbr = monthNames[cfg.prevMonth - 1];
@@ -22857,14 +22932,15 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           })();
           return `Projecting ${fmt(projVal)}${chg}`;
         };
-        const projRevenue = proj(mtd.revenue), projOrders = proj(mtd.orders);
-        setKpiProjection('ov-kpi-total-sales', projHtml(projRevenue, pfRevenue, fmtUsd0));
-        setKpiProjection('ov-kpi-units', projHtml(proj(mtd.units), pfUnits, fmtCount));
-        setKpiProjection('ov-kpi-orders', projHtml(projOrders, pfOrders, fmtCount));
-        // AOV is a ratio, so the projection is projected revenue ÷ projected orders (= today's AOV).
-        setKpiProjection('ov-kpi-aov', projHtml(projOrders ? projRevenue / projOrders : 0, pfAov, fmtUsd2, (a, b) => pctChange(Math.round(a * 100), Math.round(b * 100))));
-        setKpiProjection('ov-kpi-organic-orders', projHtml(proj(organicUnits), pfOrganicUnits, fmtCount));
-        setKpiProjection('ov-kpi-organic-sales', projHtml(proj(organicSales), pfOrganicSales, fmtUsd0));
+        const projTitle = `Includes ${pendingOrderIds.size} pending order${pendingOrderIds.size === 1 ? '' : 's'}`
+          + (cfg.isPartial ? `, run-rate to ${dim} days` : '')
+          + (crHist ? `, less ${(crHist.rate * 100).toFixed(1)}% historical cancel rate` : ', no cancel-rate history yet');
+        setKpiProjection('ov-kpi-total-sales', projHtml(projRevenue, pfRevenue, fmtUsd0), projTitle);
+        setKpiProjection('ov-kpi-units', projHtml(projUnits, pfUnits, fmtCount), projTitle);
+        setKpiProjection('ov-kpi-orders', projHtml(projOrders, pfOrders, fmtCount), projTitle);
+        setKpiProjection('ov-kpi-aov', projHtml(projOrders ? projRevenue / projOrders : 0, pfAov, fmtUsd2, (a, b) => pctChange(Math.round(a * 100), Math.round(b * 100))), projTitle);
+        setKpiProjection('ov-kpi-organic-orders', projHtml(projOrgUnits, pfOrganicUnits, fmtCount), projTitle);
+        setKpiProjection('ov-kpi-organic-sales', projHtml(projOrgSales, pfOrganicSales, fmtUsd0), projTitle);
       }
 
     } catch (err) {
