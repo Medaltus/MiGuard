@@ -22672,10 +22672,13 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
               // MTD — run-rate projection, discounted by the historical cancel rate.
               const daysInMonth = new Date(cfg.year, cfg.month, 0).getDate();
               const rawProjected = cfg.day > 0 ? (actual / cfg.day) * daysInMonth : actual;
-              projected = cancelRate != null ? rawProjected * (1 - cancelRate) : rawProjected;
+              // 2026-11-02: `actual` is already cancel-adjusted (only the pending
+              // orders are discounted — see adjusted actuals below), so the
+              // projection is a plain run-rate with no second discount.
+              projected = rawProjected;
               onPace = goal > 0 && projected >= goal;
               // Units get the same run-rate × (1 − cancel rate) factor as the dollars.
-              const uProj = u == null ? null : (cfg.day > 0 ? (u / cfg.day) * daysInMonth : u) * (cancelRate != null ? 1 - cancelRate : 1);
+              const uProj = u == null ? null : (cfg.day > 0 ? (u / cfg.day) * daysInMonth : u);
               statusText = `Projecting ${fmtD(projected)}${fmtU(uProj)}`;
             } else {
               onPace = actualPct >= 100;
@@ -22686,8 +22689,9 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
             }
             return { actualPct, onPace, statusText, color: onPace ? GREEN : RED };
           }
-          const cancelLine = () => cfg.isPartial
-            ? `<div style="font-size:10.5px;color:var(--muted);margin-top:3px;">${cancelRate != null ? `adj. ${Math.round(cancelRate * 100)}% cancel rate` : 'no cancel-rate history yet'}</div>` : '';
+          // Shown in both periods while anything is still pending (matches the Medaltus Hub card).
+          const cancelLine = () => (units.pendingOrders > 0)
+            ? `<div style="font-size:10.5px;color:var(--muted);margin-top:3px;">${units.pendingOrders} pending · ${cancelRate != null ? `adj. ${(cancelRate * 100).toFixed(1)}%` : 'no cancel-rate history yet'}</div>` : '';
 
           // Hero: Total Sales
           // highlight = true only for Total Sales (per Jaclyn 2026-10-06): white
@@ -22701,7 +22705,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
           // above already shows the final number.
           function liveLine(actual, applyCancel, u) {
             if (!cfg.isPartial) return '';
-            const adj = applyCancel && cancelRate != null ? 1 - cancelRate : 1;
+            const adj = 1; // amounts are already cancel-adjusted (pending-only) before they get here
             const v = actual == null ? null : actual * adj;
             return `<div class="gt-live"><span class="gt-live-dot"></span>LIVE: <strong>${v == null ? '—' : fmtD(v)}</strong>${v == null || u == null ? '' : fmtU(u * adj)}</div>`;
           }
@@ -22748,7 +22752,23 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
 
         const goalsBodyAmzEl = document.getElementById('ov-goals-body-amz');
         const goalsBodyWebEl = document.getElementById('ov-goals-body-web');
-        if (goalsBodyAmzEl) goalsBodyAmzEl.innerHTML = renderGoalsGroup(amzWmtActual, amzAdActual, amzOrganicActual, goalsRowAmz, amzCancelRate, { overall: amzGoalsUnits, ads: amzAdUnitsGT, organic: amzOrganicUnitsGT });
+        // Cancel-adjusted actuals (2026-11-02 per Jaclyn, matches the Medaltus
+        // Hub card): settled orders count in full; only PENDING orders are
+        // discounted by the historical cancel rate, since shipped orders can't
+        // cancel anymore. Ad Sales/ad units stay as booked; organic = adjusted
+        // total − ad. Rings, LIVE line, Last Month total and the MTD run-rate
+        // projection all use these.
+        const gtKeep = amzCancelRate != null ? 1 - amzCancelRate : 1;
+        const gtSettled = aggregateRange(amzRows, mtdStartStr, mtdEndStr, isValidAmazonRow);
+        const gtBooked = aggregateRange(amzRows, mtdStartStr, mtdEndStr, goalsIsValidAmazonRow);
+        const gtPendRev = Math.max(0, gtBooked.totalRevenue - gtSettled.totalRevenue);
+        const gtPendUnits = Math.max(0, gtBooked.totalUnits - gtSettled.totalUnits);
+        const gtPendOrders = new Set(gtBooked.filteredRows.filter(r => (r.status || '').toLowerCase().trim() === 'pending').map(r => r.order_id).filter(Boolean)).size;
+        const gtAdjTotal = (gtSettled.totalRevenue - amzReturnsMtd.totalAmt) + gtPendRev * gtKeep + wmtGoalsActual;
+        const gtAdjOrganic = amzAdActual != null ? Math.max(0, gtAdjTotal - amzAdActual) : null;
+        const gtAdjUnits = Math.max(0, gtSettled.totalUnits - amzReturnsMtd.totalQty) + gtPendUnits * gtKeep;
+        const gtAdjOrgUnits = amzAdUnitsGT != null ? Math.max(0, gtAdjUnits - amzAdUnitsGT) : null;
+        if (goalsBodyAmzEl) goalsBodyAmzEl.innerHTML = renderGoalsGroup(gtAdjTotal, amzAdActual, gtAdjOrganic, goalsRowAmz, amzCancelRate, { overall: gtAdjUnits, ads: amzAdUnitsGT, organic: gtAdjOrgUnits, pendingOrders: gtPendOrders });
         if (goalsBodyWebEl) goalsBodyWebEl.innerHTML = renderGoalsGroup(webGoalsActual, null, webGoalsActual, goalsRowWeb);
       } catch (err) {
         console.warn('[GoalsTracker] failed:', err.message);
@@ -22891,17 +22911,21 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
         const keep = crHist ? 1 - crHist.rate : 1;
         const dim = new Date(cfg.year, cfg.month, 0).getDate();
         const runRate = cfg.isPartial && cfg.day > 0 ? dim / cfg.day : 1;
-        const f = runRate * keep;
+        const f = runRate; // cancel discount already applied to the pending part only
 
+        // Settled orders in full + pending orders × (1 − cancel rate) — the
+        // Goal Tracker / Medaltus Hub rule (revised 2026-11-02).
         const pi = aggregateRange(amzRows, mtdStartStr, mtdEndStr, ovPendingInclValid);
-        const piRevenue = pi.totalRevenue - amzReturnsMtd.totalAmt;
-        const piUnits = Math.max(0, pi.totalUnits - amzReturnsMtd.totalQty);
-        const piOrders = pi.totalOrders;
+        const st = aggregateRange(amzRows, mtdStartStr, mtdEndStr, isValidAmazonRow);
+        const piRevenue = (st.totalRevenue - amzReturnsMtd.totalAmt) + Math.max(0, pi.totalRevenue - st.totalRevenue) * keep;
+        const piUnits = Math.max(0, st.totalUnits - amzReturnsMtd.totalQty) + Math.max(0, pi.totalUnits - st.totalUnits) * keep;
+        const piOrders = st.totalOrders + Math.max(0, pi.totalOrders - st.totalOrders) * keep;
         const curAdRows = adCacheMonth(cfg.year, cfg.month);
         const curAdUnits = curAdRows.reduce((s, r) => s + (parseInt(String(r.ad_units || '').replace(/^'/, ''), 10) || 0), 0);
         const curAdSales = curAdRows.reduce((s, r) => s + parseAmt(r.sales), 0);
 
         const projRevenue = piRevenue * f, projUnits = piUnits * f, projOrders = piOrders * f;
+        // Organic = adjusted total − ad (ad numbers as booked, never discounted).
         const projOrgUnits = Math.max(0, piUnits - curAdUnits) * f;
         const projOrgSales = Math.max(0, piRevenue - curAdSales) * f;
 
@@ -22934,7 +22958,7 @@ html,body{height:auto!important;margin:0!important;padding:0!important;backgroun
         };
         const projTitle = `Includes ${pendingOrderIds.size} pending order${pendingOrderIds.size === 1 ? '' : 's'}`
           + (cfg.isPartial ? `, run-rate to ${dim} days` : '')
-          + (crHist ? `, less ${(crHist.rate * 100).toFixed(1)}% historical cancel rate` : ', no cancel-rate history yet');
+          + (crHist ? `, pending orders discounted by ${(crHist.rate * 100).toFixed(1)}% historical cancel rate` : ', no cancel-rate history yet');
         setKpiProjection('ov-kpi-total-sales', projHtml(projRevenue, pfRevenue, fmtUsd0), projTitle);
         setKpiProjection('ov-kpi-units', projHtml(projUnits, pfUnits, fmtCount), projTitle);
         setKpiProjection('ov-kpi-orders', projHtml(projOrders, pfOrders, fmtCount), projTitle);
